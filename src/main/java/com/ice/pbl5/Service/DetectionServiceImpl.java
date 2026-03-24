@@ -6,13 +6,19 @@ import com.ice.pbl5.Entity.System;
 import com.ice.pbl5.Enum.DetectionStatus;
 import com.ice.pbl5.Exception.ResourceNotFoundException;
 import com.ice.pbl5.Repository.DetectionRepo;
+import com.ice.pbl5.Repository.SystemRepo;
 import com.ice.pbl5.Util.DetectionSpecification;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -25,11 +31,15 @@ public class DetectionServiceImpl implements DetectionService{
     private final DetectionRepo detectionRepo;
     private final ImgUrlService imgUrlService;
     private final SystemAccessService systemAccessService;
+    private final SystemRepo systemRepo;
+    private final DetectionAsyncService detectionAsyncService;
 
-    public DetectionServiceImpl(DetectionRepo detectionRepo, ImgUrlService imgUrlService, SystemAccessService systemAccessService) {
+    public DetectionServiceImpl(DetectionRepo detectionRepo, ImgUrlService imgUrlService, SystemAccessService systemAccessService, SystemRepo systemRepo, DetectionAsyncService detectionAsyncService) {
         this.detectionRepo = detectionRepo;
         this.imgUrlService = imgUrlService;
         this.systemAccessService = systemAccessService;
+        this.systemRepo = systemRepo;
+        this.detectionAsyncService = detectionAsyncService;
     }
 
     @Override
@@ -222,4 +232,26 @@ public class DetectionServiceImpl implements DetectionService{
                 detection.getCompletedAt()
         );
     }
+
+    @Override
+    @Transactional
+    public Detection createDetection(UUID systemId, String deviceId, String imagePath) {
+        System system = systemRepo.findById(systemId)
+                .orElseThrow(() -> new ResourceNotFoundException("System not found"));
+
+        Detection detection = new Detection();
+        detection.setSystem(system);
+        detection.setDeviceId(deviceId);
+        detection.setImageUrl(imagePath);
+
+        detection.setStatus(DetectionStatus.RECEIVED);
+        detection.setCreatedAt(LocalDateTime.now());
+
+        Detection detectionSave = detectionRepo.save(detection);
+
+        detectionAsyncService.processDetection(detection.getId());
+
+        return detectionSave;
+    }
+
 }
