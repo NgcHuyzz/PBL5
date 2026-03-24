@@ -8,17 +8,12 @@ import com.ice.pbl5.Exception.ResourceNotFoundException;
 import com.ice.pbl5.Repository.DetectionRepo;
 import com.ice.pbl5.Repository.SystemRepo;
 import com.ice.pbl5.Util.DetectionSpecification;
-import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -234,7 +229,6 @@ public class DetectionServiceImpl implements DetectionService{
     }
 
     @Override
-    @Transactional
     public Detection createDetection(UUID systemId, String deviceId, String imagePath) {
         System system = systemRepo.findById(systemId)
                 .orElseThrow(() -> new ResourceNotFoundException("System not found"));

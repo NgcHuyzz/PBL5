@@ -5,7 +5,7 @@ import com.ice.pbl5.Entity.Detection;
 import com.ice.pbl5.Enum.DetectionStatus;
 import com.ice.pbl5.Exception.ResourceNotFoundException;
 import com.ice.pbl5.Repository.DetectionRepo;
-import jakarta.transaction.Transactional;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -26,7 +26,7 @@ public class DetectionAsyncService {
         this.aiTCPClientService = aiTCPClientService;
     }
 
-    @Transactional
+    @Async("ai-worker")
     public void processDetection(UUID detectionId) {
         Detection detection = detectionRepo.findById(detectionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Detection not found"));
@@ -46,6 +46,8 @@ public class DetectionAsyncService {
                 detection.setStatus(DetectionStatus.FAILED);
                 detection.setErrorMessage(aiTCPResponse.getMessage());
                 detection.setCompletedAt(LocalDateTime.now());
+                detectionRepo.save(detection);
+                return;
             }
 
             detection.setFruitType(aiTCPResponse.getFruitType());
@@ -58,11 +60,13 @@ public class DetectionAsyncService {
             // sau khi gửi thành công
             detection.setStatus(DetectionStatus.COMPLETED);
             detection.setCompletedAt(LocalDateTime.now());
+            detectionRepo.save(detection);
         }
         catch (Exception e) {
             detection.setStatus(DetectionStatus.FAILED);
             detection.setErrorMessage(e.getMessage());
             detection.setCompletedAt(LocalDateTime.now());
+            detectionRepo.save(detection);
         }
 
     }
