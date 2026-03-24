@@ -1,5 +1,7 @@
 package com.ice.pbl5.Entity;
 
+import com.ice.pbl5.Enum.CommandStatus;
+import com.ice.pbl5.Enum.CommandType;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -11,8 +13,9 @@ public class CommandHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "command_type", nullable = false)
-    private String commandType;
+    private CommandType commandType;
 
     @Column(name = "target_bin")
     private String targetBin;
@@ -23,8 +26,9 @@ public class CommandHistory {
     @Column(name = "sent_at", nullable = false)
     private LocalDateTime sentAt;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "response_status")
-    private String responseStatus;
+    private CommandStatus responseStatus;
 
     @Column(name = "response_message")
     private String responseMessage;
@@ -48,11 +52,11 @@ public class CommandHistory {
         this.id = id;
     }
 
-    public String getCommandType() {
+    public CommandType getCommandType() {
         return commandType;
     }
 
-    public void setCommandType(String commandType) {
+    public void setCommandType(CommandType commandType) {
         this.commandType = commandType;
     }
 
@@ -80,11 +84,11 @@ public class CommandHistory {
         this.sentAt = sentAt;
     }
 
-    public String getResponseStatus() {
+    public CommandStatus getResponseStatus() {
         return responseStatus;
     }
 
-    public void setResponseStatus(String responseStatus) {
+    public void setResponseStatus(CommandStatus responseStatus) {
         this.responseStatus = responseStatus;
     }
 

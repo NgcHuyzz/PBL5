@@ -8,6 +8,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
@@ -46,7 +47,7 @@ public class AiTCPClientService {
                 }
 
                 String fruitType = dis.readUTF();
-                double confidence = dis.readDouble();
+                BigDecimal confidence = BigDecimal.valueOf(dis.readDouble());
 
                 return new AiTCPResponse(true, fruitType, confidence, null);
             }

@@ -1,15 +1,17 @@
 package com.ice.pbl5.DTO.Response;
 
+import java.math.BigDecimal;
+
 public class AiTCPResponse {
     private boolean success;
     private String fruitType;
-    private Double confidence;
+    private BigDecimal confidence;
     private String message;
 
     public AiTCPResponse() {
     }
 
-    public AiTCPResponse(boolean success, String fruitType, Double confidence, String message) {
+    public AiTCPResponse(boolean success, String fruitType, BigDecimal confidence, String message) {
         this.success = success;
         this.fruitType = fruitType;
         this.confidence = confidence;
@@ -32,11 +34,11 @@ public class AiTCPResponse {
         this.fruitType = fruitType;
     }
 
-    public Double getConfidence() {
+    public BigDecimal getConfidence() {
         return confidence;
     }
 
-    public void setConfidence(Double confidence) {
+    public void setConfidence(BigDecimal confidence) {
         this.confidence = confidence;
     }
 

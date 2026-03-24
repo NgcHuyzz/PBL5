@@ -4,6 +4,7 @@ import com.ice.pbl5.DTO.Response.MarkReadResponse;
 import com.ice.pbl5.DTO.Response.NotificationResponse;
 import com.ice.pbl5.DTO.Response.PageResponse;
 import com.ice.pbl5.DTO.Response.ReadAllResponse;
+import com.ice.pbl5.Entity.Detection;
 import com.ice.pbl5.Entity.Notification;
 import com.ice.pbl5.Entity.System;
 import com.ice.pbl5.Enum.NotificationLevel;
@@ -102,5 +103,18 @@ public class NotificationServiceImpl implements NotificationService{
     public long getUnreadCount(UUID systemId, String username) {
         System system = systemAccessService.getOwnedSystem(systemId, username);
         return notificationRepo.countBySystem_IdAndSystem_User_UsernameAndIsReadFalse(system.getId(), username);
+    }
+
+    @Override
+    public void createNotification(Detection detection, NotificationLevel level, String title, String message) {
+        Notification notification = new Notification();
+        notification.setSystem(detection.getSystem());
+        notification.setDetection(detection);
+        notification.setLevel(level);
+        notification.setTitle(title);
+        notification.setMessage(message);
+        notification.setCreatedAt(LocalDateTime.now());
+
+        notificationRepo.save(notification);
     }
 }
