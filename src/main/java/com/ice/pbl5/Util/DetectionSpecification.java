@@ -42,4 +42,11 @@ public class DetectionSpecification {
                         ? null
                         : cb.lessThanOrEqualTo(root.get("createdAt"), to);
     }
+
+    public static Specification<Detection> hasOwnerUsername(String username) {
+        return (root, query, cb) ->
+                (username == null || username.isBlank())
+                        ? null
+                        : cb.equal(root.get("system").get("user").get("username"), username);
+    }
 }

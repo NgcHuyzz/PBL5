@@ -171,6 +171,7 @@ public class DetectionServiceImpl implements DetectionService{
 
         Specification<Detection> spec = Specification
                 .where(DetectionSpecification.hasSystemId(system.getId()))
+                .and(DetectionSpecification.hasOwnerUsername(username))
                 .and(DetectionSpecification.hasFruitType(fruitType))
                 .and(DetectionSpecification.hasStatus(status))
                 .and(DetectionSpecification.createdFrom(from))
