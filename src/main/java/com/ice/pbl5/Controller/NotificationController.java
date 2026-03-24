@@ -3,6 +3,7 @@ package com.ice.pbl5.Controller;
 import com.ice.pbl5.DTO.Response.*;
 import com.ice.pbl5.Enum.NotificationLevel;
 import com.ice.pbl5.Service.NotificationService;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -21,37 +22,42 @@ public class NotificationController {
             @RequestParam(required = false) NotificationLevel level,
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size,
-            @RequestParam UUID systemId
+            @RequestParam UUID systemId,
+            Authentication authentication
             )
     {
+        String username = authentication.getName();
         return ApiResponse.success(
                 "Notifications fetched successfully",
-                notificationService.getNotification(systemId,level, page, size)
+                notificationService.getNotification(systemId,level, page, size, username)
         );
     }
 
     @PatchMapping("/{id}/read")
-    public ApiResponse<MarkReadResponse> markAsRead(@PathVariable UUID id, @RequestParam UUID systemId)
+    public ApiResponse<MarkReadResponse> markAsRead(@PathVariable UUID id, @RequestParam UUID systemId, Authentication authentication)
     {
+        String username = authentication.getName();
         return ApiResponse.success(
                 "Notification marked as read successfully",
-                notificationService.markAsRead(id, systemId)
+                notificationService.markAsRead(id, systemId, username)
         );
     }
 
     @PatchMapping("/read-all")
-    public ApiResponse<ReadAllResponse> markAllAsRead(@RequestParam UUID systemId) {
+    public ApiResponse<ReadAllResponse> markAllAsRead(@RequestParam UUID systemId, Authentication authentication) {
+        String username = authentication.getName();
         return ApiResponse.success(
                 "All notifications marked as read successfully",
-                notificationService.markAllAsRead(systemId)
+                notificationService.markAllAsRead(systemId,username)
         );
     }
 
     @GetMapping("/unread-count")
-    public ApiResponse<Long> getUnreadCount(@RequestParam UUID systemId) {
+    public ApiResponse<Long> getUnreadCount(@RequestParam UUID systemId, Authentication authentication) {
+        String username = authentication.getName();
         return ApiResponse.success(
                 "Unread notification count fetched successfully",
-                notificationService.getUnreadCount(systemId)
+                notificationService.getUnreadCount(systemId,username)
         );
     }
 }

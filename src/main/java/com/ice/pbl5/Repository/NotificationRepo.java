@@ -11,13 +11,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface NotificationRepo extends JpaRepository<Notification, UUID> {
-    Page<Notification> findAllBySystem_IdOrderByCreatedAtDesc(UUID systemId ,Pageable pageable);
+    Page<Notification> findAllBySystem_IdAndSystem_User_UsernameOrderByCreatedAtDesc(UUID systemId, String username ,Pageable pageable);
 
-    Page<Notification> findBySystem_IdAndLevelOrderByCreatedAtDesc(UUID systemId,NotificationLevel level, Pageable pageable);
+    Page<Notification> findBySystem_IdAndSystem_User_UsernameAndLevelOrderByCreatedAtDesc(UUID systemId,String username,NotificationLevel level, Pageable pageable);
 
-    long countBySystem_IdAndIsReadFalse(UUID systemId);
+    long countBySystem_IdAndSystem_User_UsernameAndIsReadFalse(UUID systemId, String username);
 
-    Optional<Notification> findByIdAndSystem_Id(UUID id, UUID systemId);
+    Optional<Notification> findByIdAndSystem_IdAndSystem_User_Username(UUID id, UUID systemId, String username);
 
-    List<Notification> findBySystem_IdAndIsReadFalse(UUID systemId);
+    List<Notification> findBySystem_IdAndSystem_User_UsernameAndIsReadFalse(UUID systemId, String username);
 }

@@ -6,6 +6,7 @@ import com.ice.pbl5.Service.DetectionService;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,11 +25,12 @@ public class DetectionController {
     }
 
     @GetMapping("/latest")
-    public ApiResponse<DetectionResponse> getLatestDetection(@RequestParam UUID systemId)
+    public ApiResponse<DetectionResponse> getLatestDetection(@RequestParam UUID systemId, Authentication authentication)
     {
+        String username = authentication.getName();
         return ApiResponse.success(
                 "Latest detection fetched successfully",
-                detectionService.getLatestDetection(systemId)
+                detectionService.getLatestDetection(systemId, username)
         );
     }
 
@@ -38,29 +40,33 @@ public class DetectionController {
             @RequestParam(defaultValue = "10")
             @Min(value = 1, message = "limit must be >= 1")
             @Max(value = 100, message = "limit must be <= 100")
-            Integer limit
+            Integer limit,
+            Authentication authentication
     )
     {
+        String username = authentication.getName();
         return ApiResponse.success(
             "Recent detections fetched successfully",
-            detectionService.getRecentDetections(systemId, limit)
+            detectionService.getRecentDetections(systemId, limit, username)
         );
     }
 
     @GetMapping("/count-by-fruit")
     public ApiResponse<List<FruitCountResponse>> countByFruit(
-            @RequestParam(required = false) UUID systemId,
+            @RequestParam UUID systemId,
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
             LocalDateTime from,
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-            LocalDateTime to
+            LocalDateTime to,
+            Authentication authentication
             )
     {
+        String username = authentication.getName();
         return ApiResponse.success(
             "Fruit counts fetched successfully",
-                detectionService.countByFruit(systemId, from, to)
+                detectionService.countByFruit(systemId, from, to,username)
         );
     }
 
@@ -72,12 +78,14 @@ public class DetectionController {
             LocalDateTime from,
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-            LocalDateTime to
+            LocalDateTime to,
+            Authentication authentication
     )
     {
+        String username = authentication.getName();
         return ApiResponse.success(
                 "Summary statistics fetched successfully",
-                detectionService.getSummary(systemId, from, to)
+                detectionService.getSummary(systemId, from, to, username)
         );
     }
 
@@ -89,16 +97,18 @@ public class DetectionController {
             LocalDateTime from,
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-            LocalDateTime to
+            LocalDateTime to,
+            Authentication authentication
     )
     {
+        String username = authentication.getName();
         return ApiResponse.success(
                 "Daily statistics fetched successfully",
-                detectionService.getDaily(systemId, from, to)
+                detectionService.getDaily(systemId, from, to, username)
         );
     }
 
-    @GetMapping("/")
+    @GetMapping()
     public ApiResponse<PageResponse<DetectionDetailResponse>> getHistory(
             @RequestParam UUID systemId,
             @RequestParam(defaultValue = "0") int page,
@@ -110,24 +120,28 @@ public class DetectionController {
             LocalDateTime from,
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-            LocalDateTime to
+            LocalDateTime to,
+            Authentication authentication
     )
     {
+        String username = authentication.getName();
         return ApiResponse.success(
                 "Detection history fetched successfully",
-                detectionService.getDetectionHistory(systemId,page, size, fruitType, status, from, to)
+                detectionService.getDetectionHistory(systemId,page, size, fruitType, status, from, to, username)
         );
     }
 
     @GetMapping("/{id}")
     public ApiResponse<DetectionDetailResponse> getDetail(
             @PathVariable UUID id,
-            @RequestParam UUID systemId
+            @RequestParam UUID systemId,
+            Authentication authentication
     )
     {
+        String username = authentication.getName();
         return ApiResponse.success(
                 "Detection detail fetched successfully",
-                detectionService.getDetectionDetail(id, systemId)
+                detectionService.getDetectionDetail(id, systemId, username)
         );
     }
 }

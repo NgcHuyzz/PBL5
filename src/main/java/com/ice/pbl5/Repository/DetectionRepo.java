@@ -16,28 +16,16 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface DetectionRepo extends JpaRepository<Detection, UUID>, JpaSpecificationExecutor<Detection> {
-    Optional<Detection> findTopBySystem_IdOrderByCreatedAtDesc(UUID systemId);
-    Optional<Detection> findByIdAndSystem_Id(UUID id, UUID systemId);
+    Optional<Detection> findTopBySystem_IdAndSystem_User_UsernameOrderByCreatedAtDesc(UUID systemId, String Username);
+    Optional<Detection> findByIdAndSystem_IdAndSystem_User_Username(UUID id, UUID systemId, String Username);
 
-    List<Detection> findBySystem_IdOrderByCreatedAtDesc(UUID systemId, Pageable pageable);
-
-    @Query("""
-        SELECT new com.ice.pbl5.DTO.Response.FruitCountResponse(d.fruitType, count(d))
-        FROM Detection d
-        WHERE d.createdAt >= :from
-        AND d.createdAt <= :to
-        GROUP BY d.fruitType
-        ORDER BY COUNT(d) DESC
-""")
-    List<FruitCountResponse> countByFruitTypeBetween(
-            @Param("from") LocalDateTime from,
-            @Param("to") LocalDateTime to
-    );
+    List<Detection> findBySystem_IdAndSystem_User_UsernameOrderByCreatedAtDesc(UUID systemId, String Username, Pageable pageable);
 
     @Query("""
         SELECT new com.ice.pbl5.DTO.Response.FruitCountResponse(d.fruitType, count(d))
         FROM Detection d
         WHERE d.system.id = :systemId
+        AND d.system.user.username = :username
         AND d.createdAt >= :from
         AND d.createdAt <= :to
         GROUP BY d.fruitType
@@ -45,6 +33,7 @@ public interface DetectionRepo extends JpaRepository<Detection, UUID>, JpaSpecif
 """)
     List<FruitCountResponse> countByFruitTypeBetweenAndSystemId(
             @Param("systemId") UUID systemId,
+            @Param("username") String username,
             @Param("from") LocalDateTime from,
             @Param("to") LocalDateTime to
     );
@@ -53,6 +42,7 @@ public interface DetectionRepo extends JpaRepository<Detection, UUID>, JpaSpecif
         SELECT count(d)
         FROM Detection d
         WHERE d.system.id = :systemId
+        AND d.system.user.username = :username
         AND d.createdAt >= :from
         AND d.createdAt <= :to
         AND d.status = :status
@@ -60,6 +50,7 @@ public interface DetectionRepo extends JpaRepository<Detection, UUID>, JpaSpecif
     )
     long countByStatusAndCreatedAtBetweenAndSystemId(
             @Param("systemId") UUID systemId,
+            @Param("username") String username,
             @Param("status") DetectionStatus status,
             @Param("from") LocalDateTime from,
             @Param("to") LocalDateTime to
@@ -69,6 +60,8 @@ public interface DetectionRepo extends JpaRepository<Detection, UUID>, JpaSpecif
         SELECT avg(d.aiProcessingTimeMs)
         FROM Detection d
         WHERE d.system.id = :systemId
+        AND d.system.user.username = :username
+        
         AND d.createdAt >= :from
         AND d.createdAt <= :to
         AND d.status = com.ice.pbl5.Enum.DetectionStatus.COMPLETED
@@ -77,6 +70,7 @@ public interface DetectionRepo extends JpaRepository<Detection, UUID>, JpaSpecif
     )
     Double averageProcessingTimeBetween(
             @Param("systemId") UUID systemId,
+            @Param("username") String username,
             @Param("from") LocalDateTime from,
             @Param("to") LocalDateTime to
     );
@@ -88,6 +82,7 @@ public interface DetectionRepo extends JpaRepository<Detection, UUID>, JpaSpecif
         )
         FROM Detection d
         WHERE d.system.id = :systemId
+        AND d.system.user.username = :username
         AND d.createdAt >= :from
         AND d.createdAt <= :to
         AND d.status = com.ice.pbl5.Enum.DetectionStatus.COMPLETED
@@ -97,6 +92,7 @@ public interface DetectionRepo extends JpaRepository<Detection, UUID>, JpaSpecif
     )
     List<DailyStatisticsResponse> countDailyBetween(
             @Param("systemId") UUID systemId,
+            @Param("username") String username,
             @Param("from") LocalDateTime from,
             @Param("to") LocalDateTime to
     );

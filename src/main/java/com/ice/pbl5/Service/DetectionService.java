@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.UUID;
 
 public interface DetectionService {
-    DetectionResponse getLatestDetection(UUID systemId);
-    List<DetectionResponse> getRecentDetections(UUID systemId, Integer limit);
-    List<FruitCountResponse> countByFruit(UUID systemId, LocalDateTime from, LocalDateTime to);
-    SummaryStatisticsResponse getSummary(UUID systemId, LocalDateTime from, LocalDateTime to);
-    List<DailyStatisticsResponse> getDaily(UUID systemId, LocalDateTime from, LocalDateTime to);
-    PageResponse<DetectionDetailResponse> getDetectionHistory(UUID systemId, Integer page, Integer size, String fruitType, DetectionStatus status, LocalDateTime from, LocalDateTime to);
-    DetectionDetailResponse getDetectionDetail(UUID id, UUID systemId);
+    DetectionResponse getLatestDetection(UUID systemId, String username);
+    List<DetectionResponse> getRecentDetections(UUID systemId, Integer limit, String username);
+    List<FruitCountResponse> countByFruit(UUID systemId, LocalDateTime from, LocalDateTime to, String username);
+    SummaryStatisticsResponse getSummary(UUID systemId, LocalDateTime from, LocalDateTime to, String username);
+    List<DailyStatisticsResponse> getDaily(UUID systemId, LocalDateTime from, LocalDateTime to, String username);
+    PageResponse<DetectionDetailResponse> getDetectionHistory(UUID systemId, Integer page, Integer size, String fruitType, DetectionStatus status, LocalDateTime from, LocalDateTime to, String username);
+    DetectionDetailResponse getDetectionDetail(UUID id, UUID systemId, String username);
 }

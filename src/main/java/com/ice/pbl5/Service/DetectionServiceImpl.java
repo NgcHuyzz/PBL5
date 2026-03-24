@@ -2,6 +2,7 @@ package com.ice.pbl5.Service;
 
 import com.ice.pbl5.DTO.Response.*;
 import com.ice.pbl5.Entity.Detection;
+import com.ice.pbl5.Entity.System;
 import com.ice.pbl5.Enum.DetectionStatus;
 import com.ice.pbl5.Exception.ResourceNotFoundException;
 import com.ice.pbl5.Repository.DetectionRepo;
@@ -23,15 +24,18 @@ public class DetectionServiceImpl implements DetectionService{
 
     private final DetectionRepo detectionRepo;
     private final ImgUrlService imgUrlService;
+    private final SystemAccessService systemAccessService;
 
-    public DetectionServiceImpl(DetectionRepo detectionRepo, ImgUrlService imgUrlService) {
+    public DetectionServiceImpl(DetectionRepo detectionRepo, ImgUrlService imgUrlService, SystemAccessService systemAccessService) {
         this.detectionRepo = detectionRepo;
         this.imgUrlService = imgUrlService;
+        this.systemAccessService = systemAccessService;
     }
 
     @Override
-    public DetectionResponse getLatestDetection(UUID systemId) {
-        Detection detection = detectionRepo.findTopBySystem_IdOrderByCreatedAtDesc(systemId)
+    public DetectionResponse getLatestDetection(UUID systemId, String username) {
+        System system = systemAccessService.getOwnedSystem(systemId, username);
+        Detection detection = detectionRepo.findTopBySystem_IdAndSystem_User_UsernameOrderByCreatedAtDesc(system.getId(), username)
                 .orElseThrow(() -> new ResourceNotFoundException("No detection found for systemId: " + systemId));
 
         return new DetectionResponse(
@@ -46,10 +50,11 @@ public class DetectionServiceImpl implements DetectionService{
     }
 
     @Override
-    public List<DetectionResponse> getRecentDetections(UUID systemId, Integer limit) {
+    public List<DetectionResponse> getRecentDetections(UUID systemId, Integer limit, String username) {
+        System system = systemAccessService.getOwnedSystem(systemId, username);
         int actualLimit = (limit == null || limit <= 0) ? 10 : limit;
 
-        return detectionRepo.findBySystem_IdOrderByCreatedAtDesc(systemId, PageRequest.of(0, actualLimit)).stream()
+        return detectionRepo.findBySystem_IdAndSystem_User_UsernameOrderByCreatedAtDesc(system.getId(), username, PageRequest.of(0, actualLimit)).stream()
                 .map(d -> new DetectionResponse(
                         d.getId(),
                         d.getFruitType(),
@@ -61,7 +66,8 @@ public class DetectionServiceImpl implements DetectionService{
     }
 
     @Override
-    public List<FruitCountResponse> countByFruit(UUID systemId, LocalDateTime from, LocalDateTime to) {
+    public List<FruitCountResponse> countByFruit(UUID systemId, LocalDateTime from, LocalDateTime to, String username) {
+        System system = systemAccessService.getOwnedSystem(systemId, username);
         if ((from == null) != (to == null)) {
             throw new IllegalArgumentException("Both 'from' and 'to' must be provided together");
         }
@@ -82,16 +88,13 @@ public class DetectionServiceImpl implements DetectionService{
             throw new IllegalArgumentException("'from' must be before or equal to 'to'");
         }
 
-        if(systemId != null)
-        {
-            return detectionRepo.countByFruitTypeBetweenAndSystemId(systemId,actualFrom, actualTo);
-        }
+        return detectionRepo.countByFruitTypeBetweenAndSystemId(system.getId(), username,actualFrom, actualTo);
 
-        return detectionRepo.countByFruitTypeBetween(actualFrom, actualTo);
     }
 
     @Override
-    public SummaryStatisticsResponse getSummary(UUID systemId, LocalDateTime from, LocalDateTime to) {
+    public SummaryStatisticsResponse getSummary(UUID systemId, LocalDateTime from, LocalDateTime to, String username) {
+        System system = systemAccessService.getOwnedSystem(systemId, username);
         if ((from == null) != (to == null)) {
             throw new IllegalArgumentException("Both 'from' and 'to' must be provided together");
         }
@@ -115,15 +118,15 @@ public class DetectionServiceImpl implements DetectionService{
             throw new IllegalArgumentException("'from' must be before or equal to 'to'");
         }
 
-        long totalProcessing = detectionRepo.countByStatusAndCreatedAtBetweenAndSystemId(systemId ,DetectionStatus.PROCESSING, actualFrom, actualTo);
+        long totalProcessing = detectionRepo.countByStatusAndCreatedAtBetweenAndSystemId(system.getId(), username,DetectionStatus.PROCESSING, actualFrom, actualTo);
 
-        long totalCompleted = detectionRepo.countByStatusAndCreatedAtBetweenAndSystemId(systemId ,DetectionStatus.COMPLETED, actualFrom, actualTo);
+        long totalCompleted = detectionRepo.countByStatusAndCreatedAtBetweenAndSystemId(system.getId(), username,DetectionStatus.COMPLETED, actualFrom, actualTo);
 
-        long totalFailed = detectionRepo.countByStatusAndCreatedAtBetweenAndSystemId(systemId, DetectionStatus.FAILED, actualFrom, actualTo);
+        long totalFailed = detectionRepo.countByStatusAndCreatedAtBetweenAndSystemId(system.getId(), username, DetectionStatus.FAILED, actualFrom, actualTo);
 
         long totalRecived = totalProcessing + totalCompleted + totalFailed;
 
-        Double averageProcessingTimeMs = detectionRepo.averageProcessingTimeBetween(systemId, actualFrom, actualTo);
+        Double averageProcessingTimeMs = detectionRepo.averageProcessingTimeBetween(system.getId(), username, actualFrom, actualTo);
         if (averageProcessingTimeMs == null) {
             averageProcessingTimeMs = 0.0;
         }
@@ -132,7 +135,8 @@ public class DetectionServiceImpl implements DetectionService{
     }
 
     @Override
-    public List<DailyStatisticsResponse> getDaily(UUID systemId, LocalDateTime from, LocalDateTime to) {
+    public List<DailyStatisticsResponse> getDaily(UUID systemId, LocalDateTime from, LocalDateTime to, String username) {
+        System system = systemAccessService.getOwnedSystem(systemId, username);
         if ((from == null) != (to == null)) {
             throw new IllegalArgumentException("Both 'from' and 'to' must be provided together");
         }
@@ -156,16 +160,17 @@ public class DetectionServiceImpl implements DetectionService{
             throw new IllegalArgumentException("'from' must be before or equal to 'to'");
         }
 
-        return detectionRepo.countDailyBetween(systemId, actualFrom, actualTo);
+        return detectionRepo.countDailyBetween(system.getId(), username, actualFrom, actualTo);
     }
 
     @Override
-    public PageResponse<DetectionDetailResponse> getDetectionHistory(UUID systemId, Integer page, Integer size, String fruitType, DetectionStatus status, LocalDateTime from, LocalDateTime to) {
+    public PageResponse<DetectionDetailResponse> getDetectionHistory(UUID systemId, Integer page, Integer size, String fruitType, DetectionStatus status, LocalDateTime from, LocalDateTime to, String username) {
+        System system = systemAccessService.getOwnedSystem(systemId, username);
         int actualPage = Math.max(page, 0);
         int actualSize = (size <= 0) ? 10 : size;
 
         Specification<Detection> spec = Specification
-                .where(DetectionSpecification.hasSystemId(systemId))
+                .where(DetectionSpecification.hasSystemId(system.getId()))
                 .and(DetectionSpecification.hasFruitType(fruitType))
                 .and(DetectionSpecification.hasStatus(status))
                 .and(DetectionSpecification.createdFrom(from))
@@ -198,8 +203,9 @@ public class DetectionServiceImpl implements DetectionService{
     }
 
     @Override
-    public DetectionDetailResponse getDetectionDetail(UUID id, UUID systemId) {
-        Detection detection = detectionRepo.findByIdAndSystem_Id(id, systemId)
+    public DetectionDetailResponse getDetectionDetail(UUID id, UUID systemId, String username) {
+        System system = systemAccessService.getOwnedSystem(systemId, username);
+        Detection detection = detectionRepo.findByIdAndSystem_IdAndSystem_User_Username(id, system.getId(), username)
                 .orElseThrow(() -> new ResourceNotFoundException("No detection found for id: " + id + " and systemId: " + systemId));
         return new DetectionDetailResponse(
                 detection.getId(),

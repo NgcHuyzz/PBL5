@@ -20,10 +20,12 @@ public class SystemServiceImpl implements SystemService {
 
     private final SystemRepo systemRepo;
     private final UserRepo userRepo;
+    private final SystemAccessService systemAccessService;
 
-    public SystemServiceImpl(SystemRepo systemRepo, UserRepo userRepo) {
+    public SystemServiceImpl(SystemRepo systemRepo, UserRepo userRepo, SystemAccessService systemAccessService) {
         this.systemRepo = systemRepo;
         this.userRepo = userRepo;
+        this.systemAccessService = systemAccessService;
     }
 
     @Override
@@ -45,7 +47,7 @@ public class SystemServiceImpl implements SystemService {
 
     @Override
     public SystemStatus controlSystem(UUID systemId, SystemControlRequest request, String username) {
-        System system = getOwnedSystem(systemId, username);
+        System system = systemAccessService.getOwnedSystem(systemId, username);
 
         SystemAction action = request.getAction();
 
@@ -80,11 +82,6 @@ public class SystemServiceImpl implements SystemService {
 
     @Override
     public SystemStatus getControlState(UUID systemId, String username) {
-        return getOwnedSystem(systemId, username).getStatus();
-    }
-
-    private System getOwnedSystem(UUID systemId, String username) {
-        return systemRepo.findByIdAndUser_Username(systemId, username)
-                .orElseThrow(() -> new ResourceNotFoundException("System not found"));
+        return systemAccessService.getOwnedSystem(systemId, username).getStatus();
     }
 }

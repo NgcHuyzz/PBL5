@@ -5,6 +5,7 @@ import com.ice.pbl5.DTO.Response.NotificationResponse;
 import com.ice.pbl5.DTO.Response.PageResponse;
 import com.ice.pbl5.DTO.Response.ReadAllResponse;
 import com.ice.pbl5.Entity.Notification;
+import com.ice.pbl5.Entity.System;
 import com.ice.pbl5.Enum.NotificationLevel;
 import com.ice.pbl5.Repository.NotificationRepo;
 import org.springframework.data.domain.Page;
@@ -19,22 +20,25 @@ import java.util.UUID;
 public class NotificationServiceImpl implements NotificationService{
 
     private final NotificationRepo notificationRepo;
+    private final SystemAccessService systemAccessService;
 
-    public NotificationServiceImpl(NotificationRepo notificationRepo) {
+    public NotificationServiceImpl(NotificationRepo notificationRepo, SystemAccessService systemAccessService) {
         this.notificationRepo = notificationRepo;
+        this.systemAccessService = systemAccessService;
     }
 
     @Override
-    public PageResponse<NotificationResponse> getNotification(UUID systemId,NotificationLevel level, Integer page, Integer size) {
+    public PageResponse<NotificationResponse> getNotification(UUID systemId,NotificationLevel level, Integer page, Integer size, String username) {
+        System system = systemAccessService.getOwnedSystem(systemId, username);
         int actualPage = (page == null || page < 0) ? 0 : page;
         int actualSize = (size == null || size <= 0) ? 10 : size;
 
         Page<Notification> pageNotifications;
 
         if(level == null)
-            pageNotifications = notificationRepo.findAllBySystem_IdOrderByCreatedAtDesc(systemId,PageRequest.of(actualPage, actualSize));
+            pageNotifications = notificationRepo.findAllBySystem_IdAndSystem_User_UsernameOrderByCreatedAtDesc(system.getId(), username,PageRequest.of(actualPage, actualSize));
         else
-            pageNotifications = notificationRepo.findBySystem_IdAndLevelOrderByCreatedAtDesc(systemId,level, PageRequest.of(actualPage, actualSize));
+            pageNotifications = notificationRepo.findBySystem_IdAndSystem_User_UsernameAndLevelOrderByCreatedAtDesc(system.getId(), username,level, PageRequest.of(actualPage, actualSize));
 
         List<NotificationResponse> content = pageNotifications.getContent().stream()
                 .map(notification -> new NotificationResponse(
@@ -58,8 +62,9 @@ public class NotificationServiceImpl implements NotificationService{
     }
 
     @Override
-    public MarkReadResponse markAsRead(UUID id, UUID systemId) {
-        Notification notification = notificationRepo.findByIdAndSystem_Id(id, systemId)
+    public MarkReadResponse markAsRead(UUID id, UUID systemId, String username) {
+        System system = systemAccessService.getOwnedSystem(systemId, username);
+        Notification notification = notificationRepo.findByIdAndSystem_IdAndSystem_User_Username(id, system.getId(), username)
                 .orElseThrow(() -> new IllegalArgumentException("Notification not found"));
 
         if(Boolean.FALSE.equals(notification.getRead()))
@@ -77,8 +82,9 @@ public class NotificationServiceImpl implements NotificationService{
     }
 
     @Override
-    public ReadAllResponse markAllAsRead(UUID systemId) {
-        List<Notification> notifications = notificationRepo.findBySystem_IdAndIsReadFalse(systemId);
+    public ReadAllResponse markAllAsRead(UUID systemId, String username) {
+        System system = systemAccessService.getOwnedSystem(systemId, username);
+        List<Notification> notifications = notificationRepo.findBySystem_IdAndSystem_User_UsernameAndIsReadFalse(system.getId(), username);
 
         LocalDateTime now = LocalDateTime.now();
 
@@ -93,7 +99,8 @@ public class NotificationServiceImpl implements NotificationService{
     }
 
     @Override
-    public long getUnreadCount(UUID systemId) {
-        return notificationRepo.countBySystem_IdAndIsReadFalse(systemId);
+    public long getUnreadCount(UUID systemId, String username) {
+        System system = systemAccessService.getOwnedSystem(systemId, username);
+        return notificationRepo.countBySystem_IdAndSystem_User_UsernameAndIsReadFalse(system.getId(), username);
     }
 }

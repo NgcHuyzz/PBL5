@@ -9,8 +9,8 @@ import com.ice.pbl5.Enum.NotificationLevel;
 import java.util.UUID;
 
 public interface NotificationService {
-    PageResponse<NotificationResponse> getNotification(UUID systemId,NotificationLevel level, Integer page, Integer size);
-    MarkReadResponse markAsRead(UUID id, UUID systemId);
-    ReadAllResponse markAllAsRead(UUID systemId);
-    long getUnreadCount(UUID systemId);
+    PageResponse<NotificationResponse> getNotification(UUID systemId,NotificationLevel level, Integer page, Integer size, String username);
+    MarkReadResponse markAsRead(UUID id, UUID systemId, String username);
+    ReadAllResponse markAllAsRead(UUID systemId, String username);
+    long getUnreadCount(UUID systemId, String username);
 }
