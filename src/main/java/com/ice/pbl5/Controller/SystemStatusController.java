@@ -8,6 +8,7 @@ import com.ice.pbl5.Enum.SystemStatus;
 import com.ice.pbl5.Service.SystemService;
 import com.ice.pbl5.Service.SystemStatusService;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,54 +27,54 @@ public class SystemStatusController {
     }
 
     @GetMapping("/status")
-    public ApiResponse<SystemStatusResponse> getSystemStatus(
+    public ResponseEntity<ApiResponse<SystemStatusResponse>> getSystemStatus(
             @RequestParam UUID systemId,
             Authentication authentication
     )
     {
         String username = authentication.getName();
-        return ApiResponse.success(
+        return ResponseEntity.ok(ApiResponse.success(
                 "System status fetched successfully",
                 systemStatusService.getSystemStatus(systemId, username)
-        );
+        ));
     }
 
     @GetMapping("/devices")
-    public ApiResponse<List<DeviceStatusResponse>> getDevices(
+    public ResponseEntity<ApiResponse<List<DeviceStatusResponse>>> getDevices(
             @RequestParam UUID systemId,
             Authentication authentication
     ) {
         String username = authentication.getName();
-        return ApiResponse.success(
+        return ResponseEntity.ok(ApiResponse.success(
                 "Device statuses fetched successfully",
                 systemStatusService.getDeviceStatuses(systemId, username)
-        );
+        ));
     }
 
     @PostMapping("/control")
-    public ApiResponse<SystemStatus> controlSystem(
+    public ResponseEntity<ApiResponse<SystemStatus>> controlSystem(
             @RequestParam UUID systemId,
             @Valid @RequestBody SystemControlRequest request,
             Authentication authentication
     )
     {
         String username = authentication.getName();
-        return ApiResponse.success(
+        return ResponseEntity.ok(ApiResponse.success(
                 "System control executed successfully",
                 systemService.controlSystem(systemId, request, username)
-        );
+        ));
     }
 
     @GetMapping("/control-state")
-    public ApiResponse<SystemStatus> getControlState(
+    public ResponseEntity<ApiResponse<SystemStatus>> getControlState(
             @RequestParam UUID systemId,
             Authentication authentication
     )
     {
         String username = authentication.getName();
-        return ApiResponse.success(
+        return ResponseEntity.ok(ApiResponse.success(
                 "Control state fetched successfully",
                 systemService.getControlState(systemId, username)
-        );
+        ));
     }
 }

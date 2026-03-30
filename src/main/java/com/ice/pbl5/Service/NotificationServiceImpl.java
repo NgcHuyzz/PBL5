@@ -11,6 +11,7 @@ import com.ice.pbl5.Enum.NotificationLevel;
 import com.ice.pbl5.Repository.NotificationRepo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -37,9 +38,9 @@ public class NotificationServiceImpl implements NotificationService{
         Page<Notification> pageNotifications;
 
         if(level == null)
-            pageNotifications = notificationRepo.findAllBySystem_IdAndSystem_User_UsernameOrderByCreatedAtDesc(system.getId(), username,PageRequest.of(actualPage, actualSize));
+            pageNotifications = notificationRepo.findAllBySystem_IdAndSystem_User_Username(system.getId(), username,PageRequest.of(actualPage, actualSize, Sort.by(Sort.Direction.DESC, "createdAt")));
         else
-            pageNotifications = notificationRepo.findBySystem_IdAndSystem_User_UsernameAndLevelOrderByCreatedAtDesc(system.getId(), username,level, PageRequest.of(actualPage, actualSize));
+            pageNotifications = notificationRepo.findBySystem_IdAndSystem_User_UsernameAndLevel(system.getId(), username,level, PageRequest.of(actualPage, actualSize, Sort.by(Sort.Direction.DESC, "createdAt")));
 
         List<NotificationResponse> content = pageNotifications.getContent().stream()
                 .map(notification -> new NotificationResponse(

@@ -19,7 +19,7 @@ public interface DetectionRepo extends JpaRepository<Detection, UUID>, JpaSpecif
     Optional<Detection> findTopBySystem_IdAndSystem_User_UsernameOrderByCreatedAtDesc(UUID systemId, String Username);
     Optional<Detection> findByIdAndSystem_IdAndSystem_User_Username(UUID id, UUID systemId, String Username);
 
-    List<Detection> findBySystem_IdAndSystem_User_UsernameOrderByCreatedAtDesc(UUID systemId, String Username, Pageable pageable);
+    List<Detection> findBySystem_IdAndSystem_User_Username(UUID systemId, String Username, Pageable pageable);
 
     @Query("""
         SELECT new com.ice.pbl5.DTO.Response.FruitCountResponse(d.fruitType, count(d))

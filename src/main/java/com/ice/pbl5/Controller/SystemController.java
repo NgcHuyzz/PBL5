@@ -3,6 +3,7 @@ package com.ice.pbl5.Controller;
 import com.ice.pbl5.DTO.Response.ApiResponse;
 import com.ice.pbl5.DTO.Response.SystemResponse;
 import com.ice.pbl5.Service.SystemService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,13 +22,13 @@ public class SystemController {
     }
 
     @GetMapping
-    public ApiResponse<List<SystemResponse>> getMySystems(Authentication authentication)
+    public ResponseEntity<ApiResponse<List<SystemResponse>>> getMySystems(Authentication authentication)
     {
         String username = authentication.getName();
 
-        return ApiResponse.success(
+        return ResponseEntity.ok(ApiResponse.success(
                 "Systems fetched successfully",
                 systemService.getMySystems(username)
-        );
+        ));
     }
 }

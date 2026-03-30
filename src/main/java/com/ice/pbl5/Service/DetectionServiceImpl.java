@@ -59,7 +59,7 @@ public class DetectionServiceImpl implements DetectionService{
         System system = systemAccessService.getOwnedSystem(systemId, username);
         int actualLimit = (limit == null || limit <= 0) ? 10 : limit;
 
-        return detectionRepo.findBySystem_IdAndSystem_User_UsernameOrderByCreatedAtDesc(system.getId(), username, PageRequest.of(0, actualLimit)).stream()
+        return detectionRepo.findBySystem_IdAndSystem_User_Username(system.getId(), username, PageRequest.of(0, actualLimit, Sort.by(Sort.Direction.DESC, "createdAt"))).stream()
                 .map(d -> new DetectionResponse(
                         d.getId(),
                         d.getFruitType(),
