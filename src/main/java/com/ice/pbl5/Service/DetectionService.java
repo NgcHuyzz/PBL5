@@ -16,5 +16,5 @@ public interface DetectionService {
     List<DailyStatisticsResponse> getDaily(UUID systemId, LocalDateTime from, LocalDateTime to, String username);
     PageResponse<DetectionDetailResponse> getDetectionHistory(UUID systemId, Integer page, Integer size, String fruitType, DetectionStatus status, LocalDateTime from, LocalDateTime to, String username);
     DetectionDetailResponse getDetectionDetail(UUID id, UUID systemId, String username);
-    public Detection createDetection(UUID systemId, String deviceId, String imagePath);
+    public Detection createDetection(String requestId, UUID systemId, String deviceId, String imagePath);
 }

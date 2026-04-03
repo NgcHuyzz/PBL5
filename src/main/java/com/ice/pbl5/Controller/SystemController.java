@@ -5,11 +5,10 @@ import com.ice.pbl5.DTO.Response.SystemResponse;
 import com.ice.pbl5.Service.SystemService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/systems")
@@ -30,5 +29,15 @@ public class SystemController {
                 "Systems fetched successfully",
                 systemService.getMySystems(username)
         ));
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<UUID> register(
+            @RequestParam String name,
+            @RequestParam String description,
+            @RequestParam String location
+    )
+    {
+        return ResponseEntity.ok(systemService.register(name, description, location));
     }
 }

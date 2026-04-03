@@ -39,7 +39,7 @@ public class DetectionAsyncService {
     }
 
     @Async("ai-worker")
-    public void processDetection(UUID detectionId) {
+    public void processDetection(UUID detectionId, String requestId) {
         Detection detection = detectionRepo.findById(detectionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Detection not found"));
         LocalDateTime startTime = LocalDateTime.now();
@@ -54,8 +54,29 @@ public class DetectionAsyncService {
             detection.setAiProcessingTimeMs(processingTime);
 
             if (!aiTCPResponse.isSuccess()) {
-                detection.setStatus(DetectionStatus.FAILED);
+                detection.setFruitType("UNKNOWN");
+                detection.setConfidence(BigDecimal.ZERO);
+                detection.setTargetBin("REJECT_BIN");
+                detection.setClassifiedAt(LocalDateTime.now());
                 detection.setErrorMessage(aiTCPResponse.getMessage());
+
+                DeviceCommandResponse fallbackResponse = commandService.executeSortCommand(detection, requestId);
+                if (!fallbackResponse.isSuccess()) {
+                    detection.setStatus(DetectionStatus.FAILED);
+                    detection.setCompletedAt(LocalDateTime.now());
+                    detection.setErrorMessage("AI failed and cannot send fallback result: " + fallbackResponse.getMessage());
+                    detectionRepo.save(detection);
+
+                    notificationService.createNotification(
+                            detection,
+                            NotificationLevel.ERROR,
+                            "AI classification failed",
+                            aiTCPResponse.getMessage()
+                    );
+                    return;
+                }
+
+                detection.setStatus(DetectionStatus.COMPLETED);
                 detection.setCompletedAt(LocalDateTime.now());
                 detectionRepo.save(detection);
 
@@ -72,24 +93,18 @@ public class DetectionAsyncService {
             detection.setFruitType(aiTCPResponse.getFruitType());
             detection.setClassifiedAt(LocalDateTime.now());
             detection.setTargetBin(mapTargetBin(detection.getFruitType(), confidence));
+            detection.setConfidence(confidence == null ? BigDecimal.ZERO : confidence);
 
             if (confidence == null || confidence.compareTo(CONFIDENCE_THRESHOLD) < 0) {
-                detection.setStatus(DetectionStatus.FAILED);
-                detection.setCompletedAt(LocalDateTime.now());
-                detectionRepo.save(detection);
-
                 notificationService.createNotification(
                         detection,
                         NotificationLevel.WARNING,
                         "Low confidence detection",
                         "Fruit classified with low confidence: " + confidence
                 );
-                return;
             }
 
-            detection.setConfidence(confidence);
-
-            DeviceCommandResponse response = commandService.executeSortCommand(detection);
+            DeviceCommandResponse response = commandService.executeSortCommand(detection, requestId);
             if (!response.isSuccess()) {
                 detection.setStatus(DetectionStatus.FAILED);
                 detection.setCompletedAt(LocalDateTime.now());

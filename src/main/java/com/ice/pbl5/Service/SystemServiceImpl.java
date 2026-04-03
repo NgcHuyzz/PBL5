@@ -1,11 +1,11 @@
 package com.ice.pbl5.Service;
 
 import com.ice.pbl5.DTO.Request.SystemControlRequest;
+import com.ice.pbl5.DTO.Response.DeviceCommandResponse;
 import com.ice.pbl5.DTO.Response.SystemResponse;
 import com.ice.pbl5.Entity.System;
 import com.ice.pbl5.Entity.User;
-import com.ice.pbl5.Enum.SystemAction;
-import com.ice.pbl5.Enum.SystemStatus;
+import com.ice.pbl5.Enum.*;
 import com.ice.pbl5.Exception.ResourceNotFoundException;
 import com.ice.pbl5.Repository.SystemRepo;
 import com.ice.pbl5.Repository.UserRepo;
@@ -21,11 +21,13 @@ public class SystemServiceImpl implements SystemService {
     private final SystemRepo systemRepo;
     private final UserRepo userRepo;
     private final SystemAccessService systemAccessService;
+    private final CommandService commandService;
 
-    public SystemServiceImpl(SystemRepo systemRepo, UserRepo userRepo, SystemAccessService systemAccessService) {
+    public SystemServiceImpl(SystemRepo systemRepo, UserRepo userRepo, SystemAccessService systemAccessService, CommandService commandService) {
         this.systemRepo = systemRepo;
         this.userRepo = userRepo;
         this.systemAccessService = systemAccessService;
+        this.commandService = commandService;
     }
 
     @Override
@@ -50,13 +52,15 @@ public class SystemServiceImpl implements SystemService {
         System system = systemAccessService.getOwnedSystem(systemId, username);
 
         SystemAction action = request.getAction();
-
+        CommandType type;
+        SystemStatus targetStatus;
         switch (action) {
             case START -> {
                 if (system.getStatus() == SystemStatus.RUNNING) {
                     throw new IllegalArgumentException("System is already running");
                 }
-                system.setStatus(SystemStatus.RUNNING);
+                targetStatus = SystemStatus.RUNNING;
+                type = CommandType.START_CONVEYOR;
             }
             case PAUSE -> {
                 if (system.getStatus() == SystemStatus.STOPPED) {
@@ -65,16 +69,25 @@ public class SystemServiceImpl implements SystemService {
                 if (system.getStatus() == SystemStatus.PAUSED) {
                     throw new IllegalArgumentException("System is already paused");
                 }
-                system.setStatus(SystemStatus.PAUSED);
+                targetStatus = SystemStatus.PAUSED;
+                type = CommandType.PAUSE_CONVEYOR;
             }
             case STOP -> {
                 if (system.getStatus() == SystemStatus.STOPPED) {
                     throw new IllegalArgumentException("System is already stopped");
                 }
-                system.setStatus(SystemStatus.STOPPED);
+                targetStatus = SystemStatus.STOPPED;
+                type = CommandType.STOP_CONVEYOR;
             }
+            default -> throw new IllegalStateException("Unexpected value: " + action);
         }
 
+        DeviceCommandResponse response = commandService.executeControlCommand(system, type);
+        if (!response.isSuccess()) {
+            throw new IllegalArgumentException("Cannot control system: " + response.getMessage());
+        }
+
+        system.setStatus(targetStatus);
         system.setUpdatedAt(LocalDateTime.now());
         systemRepo.save(system);
         return system.getStatus();
@@ -84,4 +97,20 @@ public class SystemServiceImpl implements SystemService {
     public SystemStatus getControlState(UUID systemId, String username) {
         return systemAccessService.getOwnedSystem(systemId, username).getStatus();
     }
+
+    @Override
+    public UUID register(String name, String description, String location) {
+        System system = new System();
+        system.setSystemName(name);
+        system.setDescription(description);
+        system.setStatus(SystemStatus.IDLE);
+        system.setCreatedAt(LocalDateTime.now());
+        system.setUpdatedAt(LocalDateTime.now());
+
+        System s = systemRepo.save(system);
+
+        return s.getId();
+    }
+
+
 }

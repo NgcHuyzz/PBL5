@@ -41,7 +41,7 @@ public class CommandHistory {
     private System system;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "detection_id", nullable = false)
+    @JoinColumn(name = "detection_id")
     private Detection detection;
 
     public Long getId() {

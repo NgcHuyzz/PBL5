@@ -229,7 +229,7 @@ public class DetectionServiceImpl implements DetectionService{
     }
 
     @Override
-    public Detection createDetection(UUID systemId, String deviceId, String imagePath) {
+    public Detection createDetection(String requestId, UUID systemId, String deviceId, String imagePath) {
         System system = systemRepo.findById(systemId)
                 .orElseThrow(() -> new ResourceNotFoundException("System not found"));
 
@@ -243,7 +243,7 @@ public class DetectionServiceImpl implements DetectionService{
 
         Detection detectionSave = detectionRepo.save(detection);
 
-        detectionAsyncService.processDetection(detection.getId());
+        detectionAsyncService.processDetection(detection.getId(), requestId);
 
         return detectionSave;
     }
