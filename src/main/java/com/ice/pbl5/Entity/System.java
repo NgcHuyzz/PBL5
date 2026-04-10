@@ -45,16 +45,7 @@ public class System {
     private List<CommandHistory> commandHistories = new ArrayList<>();
 
     @OneToMany(mappedBy = "system")
-    private List<DeviceStatus> deviceStatuses = new ArrayList<>();
-
-    @OneToMany(mappedBy = "system")
-    private List<SystemLog> systemLogs = new ArrayList<>();
-
-    @OneToMany(mappedBy = "system")
     private List<Notification> notifications = new ArrayList<>();
-
-    @OneToMany(mappedBy = "system")
-    private List<SystemControlHistory> systemControlHistories = new ArrayList<>();
 
     public UUID getId() {
         return id;
@@ -143,35 +134,11 @@ public class System {
         this.commandHistories = commandHistories;
     }
 
-    public List<DeviceStatus> getDeviceStatuses() {
-        return deviceStatuses;
-    }
-
-    public void setDeviceStatuses(List<DeviceStatus> deviceStatuses) {
-        this.deviceStatuses = deviceStatuses;
-    }
-
-    public List<SystemLog> getSystemLogs() {
-        return systemLogs;
-    }
-
-    public void setSystemLogs(List<SystemLog> systemLogs) {
-        this.systemLogs = systemLogs;
-    }
-
     public List<Notification> getNotifications() {
         return notifications;
     }
 
     public void setNotifications(List<Notification> notifications) {
         this.notifications = notifications;
-    }
-
-    public List<SystemControlHistory> getSystemControlHistories() {
-        return systemControlHistories;
-    }
-
-    public void setSystemControlHistories(List<SystemControlHistory> systemControlHistories) {
-        this.systemControlHistories = systemControlHistories;
     }
 }

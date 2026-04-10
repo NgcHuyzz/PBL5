@@ -1,72 +1,50 @@
 # PBL5 Backend (Spring Boot)
 
-Backend API cho hệ thống phân loại trái cây bằng AI, gồm:
-- Xác thực người dùng bằng JWT
-- Quản lý hệ thống/máy phân loại
-- Nhận ảnh từ thiết bị qua WebSocket
-- Gọi AI service qua TCP để phân loại
-- Điều khiển thiết bị qua WebSocket
-- Thống kê detections và quản lý notifications
+Backend cho he thong phan loai trai cay bang AI.
 
-## 1) Công nghệ sử dụng
+## 1) Cong nghe
 
 - Java 21
 - Spring Boot 4.0.3
 - Spring Web MVC
-- Spring Security (JWT)
+- Spring Security + JWT
 - Spring Data JPA (Hibernate)
 - PostgreSQL
 - WebSocket
 - Maven Wrapper (`mvnw`, `mvnw.cmd`)
 
-## 2) Cấu trúc project
+## 2) Cau truc thu muc
 
 ```text
 src/main/java/com/ice/pbl5
-├─ Config/                  # Security, JWT filter, async, websocket, static resource
-├─ Controller/              # REST endpoints
-├─ DTO/Request, DTO/Response
-├─ Entity/                  # JPA entities
-├─ Enum/
-├─ Exception/
-├─ Mapper/
-├─ Repository/
-├─ Service/                 # Business logic + AI/WebSocket orchestration
-└─ Util/
+|- Config/
+|- Controller/
+|- DTO/
+|- Entity/
+|- Enum/
+|- Exception/
+|- Mapper/
+|- Repository/
+|- Service/
+`- Util/
+
 src/main/resources
-└─ application.properties
+`- application.properties
 ```
 
-## 3) Luồng xử lý chính
+## 3) Chuc nang chinh
 
-### 3.1 Luồng nhận ảnh và phân loại
-1. Thiết bị kết nối `ws://<host>:8080/ws/device`
-2. Thiết bị gửi message `type=register` kèm `systemId`
-3. Thiết bị gửi message `type=predict` kèm `requestId`, `systemId`, `imageBase64`
-4. Backend:
-   - Decode ảnh base64
-   - Lưu vào `uploads/images/ws/<systemId>/...`
-   - Tạo bản ghi detection trạng thái `RECEIVED`
-   - Trả ACK WebSocket: `type=accepted`, `status=processing`
-5. Async worker:
-   - Đọc ảnh từ disk
-   - Gửi bytes sang AI service qua TCP (`ai.tcp.host`, `ai.tcp.port`)
-   - Nhận kết quả phân loại, cập nhật detection
-   - Gửi kết quả về thiết bị qua WebSocket (`type=result`)
-   - Ghi lịch sử lệnh (`command_history`)
-   - Tạo notification nếu lỗi/độ tin cậy thấp
+- Dang ky / dang nhap / lay thong tin user (`/api/auth/**`)
+- Quan ly system (`/api/systems/**`)
+- Dieu khien conveyor (`/api/system/control`)
+- Nhan anh tu hardware qua WebSocket (`/ws/device`)
+- Goi AI service qua TCP de phan loai
+- Luu lich su detection + thong ke
+- Quan ly notification
 
-### 3.2 Luồng điều khiển hệ thống
-- API `POST /api/system/control` nhận `action: START | PAUSE | STOP`
-- Backend map sang lệnh thiết bị:
-  - `START` -> `START_CONVEYOR`
-  - `PAUSE` -> `PAUSE_CONVEYOR`
-  - `STOP` -> `STOP_CONVEYOR`
-- Lệnh được gửi qua WebSocket tới Raspberry Pi (`type=command`)
+## 4) Cau hinh
 
-## 4) Cấu hình
-
-File mặc định: `src/main/resources/application.properties`
+File: `src/main/resources/application.properties`
 
 ```properties
 spring.datasource.url=jdbc:postgresql://localhost:5432/pbl5
@@ -87,78 +65,58 @@ ai.tcp.connect-timeout-ms=3000
 ai.tcp.read-timeout-ms=10000
 ```
 
-Khuyến nghị:
-- Không commit secret/password thật
-- Override bằng biến môi trường hoặc profile riêng (`application-dev.properties`)
+## 5) Chay local
 
-## 5) Chạy local
-
-### 5.1 Yêu cầu
+Yeu cau:
 - JDK 21
-- PostgreSQL đang chạy
-- Database `pbl5` tồn tại
+- PostgreSQL dang chay
+- Co database `pbl5`
 
-Ví dụ tạo DB:
+Tao DB:
 
 ```sql
 CREATE DATABASE pbl5;
 ```
 
-### 5.2 Chạy ứng dụng
-
-Windows:
+Chay app (Windows):
 
 ```bash
 .\mvnw.cmd spring-boot:run
 ```
 
-Linux/macOS:
+App mac dinh:
+- HTTP API: `http://localhost:8080`
+- WebSocket: `ws://localhost:8080/ws/device`
 
-```bash
-./mvnw spring-boot:run
-```
-
-Ứng dụng chạy tại:
-- API: `http://localhost:8080`
-- WebSocket device: `ws://localhost:8080/ws/device`
-
-## 6) Authentication và Security
+## 6) Security
 
 - Public endpoints:
   - `POST /api/auth/register`
   - `POST /api/auth/login`
   - `/ws/**`
-- Tất cả endpoint còn lại yêu cầu JWT Bearer token
-- Header:
+- Cac endpoint con lai yeu cau JWT Bearer token
+
+Header:
 
 ```http
 Authorization: Bearer <access_token>
 ```
 
-Response chuẩn REST dùng `ApiResponse<T>`:
-
-```json
-{
-  "success": true,
-  "message": "....",
-  "data": {}
-}
-```
-
-## 7) API chính
+## 7) API hien tai
 
 ### 7.1 Auth
+
 - `POST /api/auth/register`
 - `POST /api/auth/login`
 - `GET /api/auth/me`
 
 ### 7.2 Systems
+
 - `GET /api/systems`
 - `POST /api/systems/register?name=...&description=...&location=...`
 
-### 7.3 System status/control
-- `GET /api/system/status?systemId=<uuid>`
-- `GET /api/system/devices?systemId=<uuid>`
+### 7.3 Control
+
 - `POST /api/system/control?systemId=<uuid>`
   - body:
   ```json
@@ -167,6 +125,7 @@ Response chuẩn REST dùng `ApiResponse<T>`:
 - `GET /api/system/control-state?systemId=<uuid>`
 
 ### 7.4 Detections
+
 - `GET /api/detections/latest?systemId=<uuid>`
 - `GET /api/detections/recent?systemId=<uuid>&limit=10`
 - `GET /api/detections/count-by-fruit?systemId=<uuid>&from=<iso>&to=<iso>`
@@ -176,6 +135,7 @@ Response chuẩn REST dùng `ApiResponse<T>`:
 - `GET /api/detections/{id}?systemId=<uuid>`
 
 ### 7.5 Notifications
+
 - `GET /api/notifications?systemId=<uuid>&level=WARNING&page=0&size=10`
 - `PATCH /api/notifications/{id}/read?systemId=<uuid>`
 - `PATCH /api/notifications/read-all?systemId=<uuid>`
@@ -183,7 +143,7 @@ Response chuẩn REST dùng `ApiResponse<T>`:
 
 ## 8) WebSocket protocol (`/ws/device`)
 
-### 8.1 Thiết bị -> Backend
+### 8.1 Hardware -> Backend
 
 Register:
 
@@ -205,7 +165,17 @@ Predict:
 }
 ```
 
-### 8.2 Backend -> Thiết bị
+### 8.2 Backend -> Hardware
+
+Register ACK:
+
+```json
+{
+  "type": "register",
+  "systemId": "11111111-1111-1111-1111-111111111111",
+  "status": "success"
+}
+```
 
 Accepted:
 
@@ -218,7 +188,7 @@ Accepted:
 }
 ```
 
-Result:
+Result (sort command):
 
 ```json
 {
@@ -255,27 +225,16 @@ Error:
 
 ## 9) AI TCP protocol
 
-Backend gửi cho AI:
-1. `int` 4 byte: kích thước ảnh
-2. `byte[]`: dữ liệu ảnh
+Backend gui sang AI:
+1. `int` 4 byte: kich thuoc anh
+2. `byte[]`: du lieu anh
 
-AI trả về:
+AI tra ve:
 - `boolean success`
-- Nếu `false`: `UTF errorMessage`
-- Nếu `true`: `UTF fruitType` + `double confidence`
+- Neu `false`: `UTF errorMessage`
+- Neu `true`: `UTF fruitType` + `double confidence`
 
-## 10) Mô hình dữ liệu (bảng chính)
-
-- `users`
-- `systems`
-- `detections`
-- `command_history`
-- `notifications`
-- `device_status`
-- `system_logs`
-- `system_control_history`
-
-## 11) Trạng thái/enum
+## 10) Enum chinh
 
 - `DetectionStatus`: `RECEIVED`, `PROCESSING`, `COMPLETED`, `FAILED`
 - `SystemStatus`: `RUNNING`, `PAUSED`, `STOPPED`, `ERROR`, `IDLE`
@@ -283,17 +242,12 @@ AI trả về:
 - `NotificationLevel`: `INFO`, `WARNING`, `ERROR`
 - `CommandType`: `SORT`, `START_CONVEYOR`, `PAUSE_CONVEYOR`, `STOP_CONVEYOR`
 - `CommandStatus`: `SENT`, `ACK_SUCCESS`, `ACK_FAILED`, `ERROR`
-- `DeviceState`: `ONLINE`, `OFFLINE`, `ERROR`
 - `UserStatus`: `ACTIVE`, `INACTIVE`
 
-## 12) Testing
-
-Hiện tại có 1 test `contextLoads`.
-
-Khi chạy:
+## 11) Test
 
 ```bash
 .\mvnw.cmd test
 ```
 
-test fail nếu PostgreSQL chưa có database `pbl5` (lỗi thực tế: `FATAL: database "pbl5" does not exist`).
+Neu database `pbl5` chua ton tai, test co the fail.

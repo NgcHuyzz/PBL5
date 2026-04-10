@@ -58,9 +58,6 @@ public class Detection {
     private List<CommandHistory> commandHistories = new ArrayList<>();
 
     @OneToMany(mappedBy = "detection")
-    private List<SystemLog> systemLogs = new ArrayList<>();
-
-    @OneToMany(mappedBy = "detection")
     private List<Notification> notifications = new ArrayList<>();
 
     public UUID getId() {
@@ -180,14 +177,6 @@ public class Detection {
 
     public void setCommandHistories(List<CommandHistory> commandHistories) {
         this.commandHistories = commandHistories;
-    }
-
-    public List<SystemLog> getSystemLogs() {
-        return systemLogs;
-    }
-
-    public void setSystemLogs(List<SystemLog> systemLogs) {
-        this.systemLogs = systemLogs;
     }
 
     public List<Notification> getNotifications() {
