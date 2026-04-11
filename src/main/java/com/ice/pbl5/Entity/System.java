@@ -47,6 +47,9 @@ public class System {
     @OneToMany(mappedBy = "system")
     private List<Notification> notifications = new ArrayList<>();
 
+    @OneToMany(mappedBy = "system")
+    private List<SystemFruitConfig> systemFruitConfigs =  new ArrayList<>();
+
     public UUID getId() {
         return id;
     }
@@ -140,5 +143,13 @@ public class System {
 
     public void setNotifications(List<Notification> notifications) {
         this.notifications = notifications;
+    }
+
+    public List<SystemFruitConfig> getSystemFruitConfigs() {
+        return systemFruitConfigs;
+    }
+
+    public void setSystemFruitConfigs(List<SystemFruitConfig> systemFruitConfigs) {
+        this.systemFruitConfigs = systemFruitConfigs;
     }
 }

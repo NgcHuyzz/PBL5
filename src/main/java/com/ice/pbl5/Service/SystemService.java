@@ -1,6 +1,7 @@
 package com.ice.pbl5.Service;
 
 import com.ice.pbl5.DTO.Request.SystemControlRequest;
+import com.ice.pbl5.DTO.Request.SystemCreateRequest;
 import com.ice.pbl5.DTO.Response.SystemResponse;
 import com.ice.pbl5.Enum.SystemStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,5 +14,6 @@ public interface SystemService {
     SystemStatus controlSystem(UUID systemId, SystemControlRequest request, String username);
     SystemStatus getControlState(UUID systemId, String username);
 
-    UUID register(String name, String description, String location);
+    UUID register();
+    SystemResponse addSystemInUser(SystemCreateRequest request, String username);
 }

@@ -1,6 +1,7 @@
 package com.ice.pbl5.Service;
 
 import com.ice.pbl5.DTO.Request.SystemControlRequest;
+import com.ice.pbl5.DTO.Request.SystemCreateRequest;
 import com.ice.pbl5.DTO.Response.DeviceCommandResponse;
 import com.ice.pbl5.DTO.Response.SystemResponse;
 import com.ice.pbl5.Entity.System;
@@ -99,10 +100,9 @@ public class SystemServiceImpl implements SystemService {
     }
 
     @Override
-    public UUID register(String name, String description, String location) {
+    public UUID register() {
         System system = new System();
-        system.setSystemName(name);
-        system.setDescription(description);
+        system.setSystemName("UNASSIGNED_SYSTEM");
         system.setStatus(SystemStatus.IDLE);
         system.setCreatedAt(LocalDateTime.now());
         system.setUpdatedAt(LocalDateTime.now());
@@ -110,6 +110,36 @@ public class SystemServiceImpl implements SystemService {
         System s = systemRepo.save(system);
 
         return s.getId();
+    }
+
+    @Override
+    public SystemResponse addSystemInUser(SystemCreateRequest request, String username) {
+        System system = systemRepo.findById(request.getSystemId())
+                .orElseThrow(() -> new IllegalArgumentException("System ID not registered from device"));
+
+        if(system.getUser() != null)
+            throw new IllegalArgumentException("System already assigned to another user");
+
+        User user = userRepo.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        system.setSystemName(request.getSystemName());
+        system.setDescription(request.getDescription());
+        system.setLocation(request.getLocation());
+        system.setUser(user);
+        system.setUpdatedAt(LocalDateTime.now());
+
+        systemRepo.save(system);
+
+        return new SystemResponse(
+                system.getId(),
+                system.getSystemName(),
+                system.getDescription(),
+                system.getLocation(),
+                system.getStatus(),
+                system.getCreatedAt(),
+                system.getUpdatedAt()
+        );
     }
 
 
