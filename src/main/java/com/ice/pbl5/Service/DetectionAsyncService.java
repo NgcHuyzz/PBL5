@@ -3,10 +3,12 @@ package com.ice.pbl5.Service;
 import com.ice.pbl5.DTO.Response.AiTCPResponse;
 import com.ice.pbl5.DTO.Response.DeviceCommandResponse;
 import com.ice.pbl5.Entity.Detection;
+import com.ice.pbl5.Entity.FruitCatalog;
 import com.ice.pbl5.Enum.DetectionStatus;
 import com.ice.pbl5.Enum.NotificationLevel;
 import com.ice.pbl5.Exception.ResourceNotFoundException;
 import com.ice.pbl5.Repository.DetectionRepo;
+import com.ice.pbl5.Repository.FruitCatalogRepo;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -25,17 +28,14 @@ public class DetectionAsyncService {
     private final AiTCPClientService aiTCPClientService;
     private final CommandService commandService;
     private final NotificationService notificationService;
+    private final FruitCatalogRepo fruitCatalogRepo;
 
-    public DetectionAsyncService(
-            DetectionRepo detectionRepo,
-            AiTCPClientService aiTCPClientService,
-            CommandService commandService,
-            NotificationService notificationService
-    ) {
+    public DetectionAsyncService(DetectionRepo detectionRepo, AiTCPClientService aiTCPClientService, CommandService commandService, NotificationService notificationService, FruitCatalogRepo fruitCatalogRepo) {
         this.detectionRepo = detectionRepo;
         this.aiTCPClientService = aiTCPClientService;
         this.commandService = commandService;
         this.notificationService = notificationService;
+        this.fruitCatalogRepo = fruitCatalogRepo;
     }
 
     @Async("ai-worker")
@@ -139,11 +139,15 @@ public class DetectionAsyncService {
             return "REJECT_BIN";
         }
 
-        return switch (fruitType.toUpperCase()) {
-            case ".." -> "BIN_1";
-            case "..." -> "BIN_2";
-            case "...." -> "BIN_3";
-            default -> "REJECT_BIN";
-        };
+        String normalizedFruitType = fruitType.trim();
+        List<FruitCatalog> fruitCatalogs = fruitCatalogRepo.findAll();
+        for (int i = 0; i < fruitCatalogs.size(); i++) {
+            FruitCatalog fruitCatalog = fruitCatalogs.get(i);
+            if (fruitCatalog.getName() != null && fruitCatalog.getName().trim().equalsIgnoreCase(normalizedFruitType)) {
+                return "BIN_" + (i + 1);
+            }
+        }
+
+        return "REJECT_BIN";
     }
 }

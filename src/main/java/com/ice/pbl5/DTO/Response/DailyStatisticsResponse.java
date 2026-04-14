@@ -1,5 +1,7 @@
 package com.ice.pbl5.DTO.Response;
 
+import java.sql.Date;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 
 public class DailyStatisticsResponse {
@@ -12,6 +14,14 @@ public class DailyStatisticsResponse {
     public DailyStatisticsResponse(LocalDate date, long totalClassified) {
         this.totalClassified = totalClassified;
         this.date = date;
+    }
+
+    public DailyStatisticsResponse(Date date, long totalClassified) {
+        this(date != null ? date.toLocalDate() : null, totalClassified);
+    }
+
+    public DailyStatisticsResponse(Timestamp date, long totalClassified) {
+        this(date != null ? date.toLocalDateTime().toLocalDate() : null, totalClassified);
     }
 
     public long getTotalClassified() {
