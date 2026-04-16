@@ -21,6 +21,7 @@ import java.util.UUID;
 public class DeviceWebSocketHandler extends TextWebSocketHandler {
     private static final Path WS_IMAGE_DIR = Path.of("uploads", "images", "ws");
     private static final String DEFAULT_DEVICE_ID = "RASPBERRY_PI";
+    private static final int WS_TEXT_MESSAGE_LIMIT_BYTES = 16 * 1024 * 1024; // 16MB
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final WebSocketSessionService webSocketSessionService;
@@ -29,6 +30,11 @@ public class DeviceWebSocketHandler extends TextWebSocketHandler {
     public DeviceWebSocketHandler(WebSocketSessionService webSocketSessionService, DetectionService detectionService) {
         this.webSocketSessionService = webSocketSessionService;
         this.detectionService = detectionService;
+    }
+
+    @Override
+    public void afterConnectionEstablished(WebSocketSession session) {
+        session.setTextMessageSizeLimit(WS_TEXT_MESSAGE_LIMIT_BYTES);
     }
 
     @Override
