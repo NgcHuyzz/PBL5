@@ -11,25 +11,24 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Base64;
 import java.util.Locale;
 import java.util.UUID;
 
 @Service
 public class DeviceWebSocketHandler extends TextWebSocketHandler {
-    private static final Path WS_IMAGE_DIR = Path.of("uploads", "images", "ws");
     private static final String DEFAULT_DEVICE_ID = "RASPBERRY_PI";
     private static final int WS_TEXT_MESSAGE_LIMIT_BYTES = 16 * 1024 * 1024; // 16MB
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final WebSocketSessionService webSocketSessionService;
     private final DetectionService detectionService;
+    private final CloudinaryImageService cloudinaryImageService;
 
-    public DeviceWebSocketHandler(WebSocketSessionService webSocketSessionService, DetectionService detectionService) {
+    public DeviceWebSocketHandler(WebSocketSessionService webSocketSessionService, DetectionService detectionService, CloudinaryImageService cloudinaryImageService) {
         this.webSocketSessionService = webSocketSessionService;
         this.detectionService = detectionService;
+        this.cloudinaryImageService = cloudinaryImageService;
     }
 
     @Override
@@ -105,11 +104,16 @@ public class DeviceWebSocketHandler extends TextWebSocketHandler {
             return;
         }
 
-        Path savedImagePath;
+        String uploadedImageUrl;
         try {
-            savedImagePath = saveImageToDisk(request.getSystemId(), request.getRequestId(), decodedImage);
-        } catch (IOException e) {
-            sendError(session, request.getSystemId(), request.getRequestId(), "Cannot save image: " + e.getMessage());
+            uploadedImageUrl = cloudinaryImageService.uploadImage(
+                    decodedImage.bytes(),
+                    decodedImage.extension(),
+                    request.getSystemId(),
+                    request.getRequestId()
+            );
+        } catch (Exception e) {
+            sendError(session, request.getSystemId(), request.getRequestId(), "Cannot upload image: " + e.getMessage());
             return;
         }
 
@@ -121,7 +125,7 @@ public class DeviceWebSocketHandler extends TextWebSocketHandler {
                     request.getRequestId(),
                     request.getSystemId(),
                     DEFAULT_DEVICE_ID,
-                    savedImagePath.toString()
+                    uploadedImageUrl
             );
         } catch (Exception e) {
             sendError(session, request.getSystemId(), request.getRequestId(), "Cannot create detection: " + e.getMessage());
@@ -173,21 +177,6 @@ public class DeviceWebSocketHandler extends TextWebSocketHandler {
         }
 
         return new DecodedImage(Base64.getDecoder().decode(value), extension);
-    }
-
-    private Path saveImageToDisk(UUID systemId, String requestId, DecodedImage decodedImage) throws IOException {
-        Path systemDir = WS_IMAGE_DIR.resolve(systemId.toString());
-        Files.createDirectories(systemDir);
-
-        String safeRequestId = requestId.replaceAll("[^a-zA-Z0-9_-]", "_");
-        if (safeRequestId.isBlank()) {
-            safeRequestId = UUID.randomUUID().toString();
-        }
-
-        String fileName = System.currentTimeMillis() + "-" + safeRequestId + "." + decodedImage.extension();
-        Path outputFile = systemDir.resolve(fileName);
-        Files.write(outputFile, decodedImage.bytes());
-        return outputFile.toAbsolutePath().normalize();
     }
 
     private record DecodedImage(byte[] bytes, String extension) {

@@ -13,6 +13,12 @@ public class ImgUrlService {
         if (imgUrl == null || imgUrl.isBlank()) {
             return null;
         }
-        return baseUrl+ imgUrl;
+        if (imgUrl.startsWith("http://") || imgUrl.startsWith("https://")) {
+            return imgUrl;
+        }
+        if (imgUrl.startsWith("/")) {
+            return baseUrl + imgUrl;
+        }
+        return baseUrl + "/" + imgUrl;
     }
 }
