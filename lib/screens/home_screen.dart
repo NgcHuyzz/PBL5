@@ -3,11 +3,22 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../services/system_service.dart';
 import '../utils/app_theme.dart';
-import 'history_screen.dart';
-import 'notifications_screen.dart';
+import 'create_system_screen.dart';
 import 'profile_screen.dart';
-import 'statistics_screen.dart';
 import 'system_detail_screen.dart';
+
+const Color _primary = Color(0xFF8C0011);
+const Color _primaryContainer = Color(0xFFB01E23);
+const Color _secondaryContainer = Color(0xFFB9EEAB);
+const Color _onSecondaryContainer = Color(0xFF3F6D38);
+const Color _errorContainer = Color(0xFFFFDAD6);
+const Color _onErrorContainer = Color(0xFF93000A);
+const Color _surface = Color(0xFFFCF9F8);
+const Color _surfaceContainerLowest = Color(0xFFFFFFFF);
+const Color _surfaceVariant = Color(0xFFE5E2E1);
+const Color _onSurface = Color(0xFF1B1C1C);
+const Color _onSurfaceVariant = Color(0xFF5A403E);
+const Color _outlineVariant = Color(0xFFE3BEBB);
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,7 +28,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 0;
   bool _isLoadingSystems = true;
   String? _systemsError;
   List<Map<String, dynamic>> _systems = [];
@@ -94,74 +104,36 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildCurrentScreen() {
-    final selectedSystemId = _systemId(_selectedSystem);
+  Future<void> _openCreateSystem() async {
+    final message = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(builder: (context) => const CreateSystemScreen()),
+    );
 
-    switch (_selectedIndex) {
-      case 1:
-        return StatisticsScreen(systemId: selectedSystemId);
-      case 2:
-        return HistoryScreen(systemId: selectedSystemId);
-      case 3:
-        return const ProfileScreen();
-      default:
-        return HomeContent(
-          systems: _systems,
-          selectedSystemId: selectedSystemId,
-          isLoading: _isLoadingSystems,
-          errorMessage: _systemsError,
-          onRefresh: _loadSystems,
-          onOpenSystem: _openSystem,
-        );
-    }
+    if (!mounted || message == null) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: _primary,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+    await _loadSystems();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.background,
-      body: _buildCurrentScreen(),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 20,
-              offset: const Offset(0, -5),
-            ),
-          ],
-        ),
-        child: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.white,
-          selectedItemColor: AppTheme.primary,
-          unselectedItemColor: AppTheme.textHint,
-          currentIndex: _selectedIndex,
-          onTap: (index) {
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_rounded),
-              label: 'TRANG CHỦ',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.bar_chart_rounded),
-              label: 'THỐNG KÊ',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.history_rounded),
-              label: 'LỊCH SỬ',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_rounded),
-              label: 'CÁ NHÂN',
-            ),
-          ],
-        ),
+      body: HomeContent(
+        systems: _systems,
+        selectedSystemId: _systemId(_selectedSystem),
+        isLoading: _isLoadingSystems,
+        errorMessage: _systemsError,
+        onRefresh: _loadSystems,
+        onOpenSystem: _openSystem,
+        onCreateSystem: _openCreateSystem,
       ),
     );
   }
@@ -174,6 +146,7 @@ class HomeContent extends StatelessWidget {
   final String? errorMessage;
   final Future<void> Function() onRefresh;
   final ValueChanged<Map<String, dynamic>> onOpenSystem;
+  final VoidCallback onCreateSystem;
 
   const HomeContent({
     super.key,
@@ -183,73 +156,82 @@ class HomeContent extends StatelessWidget {
     required this.errorMessage,
     required this.onRefresh,
     required this.onOpenSystem,
+    required this.onCreateSystem,
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: _surface,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: _surface,
         elevation: 0,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: AppTheme.primaryGradient,
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(30),
-              bottomRight: Radius.circular(30),
-            ),
-          ),
-        ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        toolbarHeight: 72,
+        titleSpacing: 16,
+        title: Row(
           children: [
-            Text(
-              'Xin chào',
-              style: GoogleFonts.inter(fontSize: 14, color: Colors.white70),
+            IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.menu_rounded),
+              color: _onSurfaceVariant,
+              tooltip: 'Menu',
             ),
+            const SizedBox(width: 12),
             Text(
               'Hệ thống của tôi',
-              style: GoogleFonts.poppins(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+              style: GoogleFonts.manrope(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: _onSurface,
               ),
             ),
           ],
         ),
         actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
+          Padding(
+            padding: const EdgeInsets.only(right: 20),
+            child: InkWell(
               borderRadius: BorderRadius.circular(12),
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.notifications_none, color: Colors.white),
-              onPressed: () {
-                if (selectedSystemId == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Chưa chọn hệ thống')),
-                  );
-                  return;
-                }
-
+              onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        NotificationsScreen(systemId: selectedSystemId),
+                    builder: (context) => const ProfileScreen(),
                   ),
                 );
               },
+              child: Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: _onSurfaceVariant,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: _outlineVariant.withValues(alpha: 0.35),
+                    width: 2,
+                  ),
+                ),
+                child: const Icon(
+                  Icons.person_rounded,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
             ),
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: onCreateSystem,
+        backgroundColor: _primaryContainer,
+        foregroundColor: Colors.white,
+        elevation: 14,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: const Icon(Icons.add_rounded, size: 34),
+      ),
       body: RefreshIndicator(
         onRefresh: onRefresh,
-        color: AppTheme.primary,
+        color: _primary,
         child: _buildBody(context),
       ),
     );
@@ -278,6 +260,10 @@ class HomeContent extends StatelessWidget {
               onPressed: onRefresh,
               icon: const Icon(Icons.refresh),
               label: const Text('Thử lại'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _primary,
+                foregroundColor: Colors.white,
+              ),
             ),
           ),
         ],
@@ -298,24 +284,39 @@ class HomeContent extends StatelessWidget {
           Text(
             'Chưa có hệ thống nào',
             textAlign: TextAlign.center,
-            style: AppTheme.titleMedium,
+            style: GoogleFonts.manrope(
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              color: _onSurface,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Kéo xuống để tải lại danh sách hệ thống.',
+            'Nhấn nút + để tạo hệ thống mới hoặc kéo xuống để tải lại.',
             textAlign: TextAlign.center,
-            style: AppTheme.bodySmall,
+            style: GoogleFonts.inter(fontSize: 14, color: _onSurfaceVariant),
           ),
         ],
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: systems.length,
-      itemBuilder: (context, index) {
-        final system = systems[index];
-        return _buildSystemCard(context, system);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth >= 760;
+        return GridView.builder(
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 112),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: isWide ? 2 : 1,
+            crossAxisSpacing: 24,
+            mainAxisSpacing: 24,
+            mainAxisExtent: 320,
+          ),
+          itemCount: systems.length,
+          itemBuilder: (context, index) {
+            final system = systems[index];
+            return _buildSystemCard(context, system);
+          },
+        );
       },
     );
   }
@@ -324,128 +325,112 @@ class HomeContent extends StatelessWidget {
     final systemId = _systemId(system);
     final isSelected = systemId != null && systemId == selectedSystemId;
     final status = _systemStatus(system);
-    final statusColor = _statusColor(status);
+    final statusStyle = _statusStyle(status);
+    final isStopped = _isStoppedStatus(status);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        color: _surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(8),
         border: isSelected
-            ? Border.all(color: AppTheme.primary, width: 1.5)
+            ? Border.all(color: _primary.withValues(alpha: 0.16), width: 1)
             : null,
-        boxShadow: AppTheme.cardShadow,
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: () => onOpenSystem(system),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(8),
           child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
+            padding: const EdgeInsets.all(26),
+            child: Stack(
               children: [
-                Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        AppTheme.primary,
-                        AppTheme.primary.withValues(alpha: 0.7),
-                      ],
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 6,
                     ),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: const Icon(
-                    Icons.qr_code_scanner,
-                    color: Colors.white,
-                    size: 30,
+                    decoration: BoxDecoration(
+                      color: statusStyle.background,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      statusStyle.label,
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.8,
+                        color: statusStyle.foreground,
+                      ),
+                    ),
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              _systemName(system),
-                              style: AppTheme.titleLarge,
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: statusColor.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              status,
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w500,
-                                color: statusColor,
-                              ),
-                            ),
-                          ),
-                        ],
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      _systemIcon(system),
+                      color: isStopped ? Colors.grey.shade400 : _primary,
+                      size: 34,
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      _systemName(system),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.manrope(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        color: _onSurface,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _systemDescription(system),
-                        style: AppTheme.bodySmall,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      _systemDescription(system),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(
+                        fontSize: 15,
+                        height: 1.35,
+                        color: _onSurfaceVariant,
                       ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.location_on,
-                            size: 12,
-                            color: AppTheme.textHint,
+                    ),
+                    const SizedBox(height: 28),
+                    Container(
+                      height: 1,
+                      color: _surfaceVariant.withValues(alpha: 0.7),
+                    ),
+                    const SizedBox(height: 18),
+                    _buildMetaRow(
+                      Icons.location_on_rounded,
+                      _systemLocation(system),
+                    ),
+                    const SizedBox(height: 14),
+                    _buildMetaRow(
+                      Icons.calendar_today_rounded,
+                      'Khởi tạo: ${_systemCreated(system)}',
+                    ),
+                    const Spacer(),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton.icon(
+                        onPressed: () => onOpenSystem(system),
+                        iconAlignment: IconAlignment.end,
+                        icon: const Icon(Icons.arrow_forward_rounded),
+                        label: const Text('Chi tiết'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: _primary,
+                          textStyle: GoogleFonts.inter(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
                           ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              _systemLocation(system),
-                              style: AppTheme.caption,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Icon(
-                            Icons.calendar_today,
-                            size: 12,
-                            color: AppTheme.textHint,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(_systemCreated(system), style: AppTheme.caption),
-                        ],
+                        ),
                       ),
-                    ],
-                  ),
-                ),
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: AppTheme.primaryLight,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(
-                    Icons.chevron_right,
-                    size: 18,
-                    color: AppTheme.primary,
-                  ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -454,6 +439,39 @@ class HomeContent extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildMetaRow(IconData icon, String value) {
+    return Row(
+      children: [
+        Icon(icon, size: 15, color: _onSurfaceVariant),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: _onSurfaceVariant,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StatusStyle {
+  final String label;
+  final Color background;
+  final Color foreground;
+
+  const _StatusStyle({
+    required this.label,
+    required this.background,
+    required this.foreground,
+  });
 }
 
 List<Map<String, dynamic>> _extractSystems(Map<String, dynamic> response) {
@@ -475,7 +493,7 @@ List<Map<String, dynamic>> _extractSystems(Map<String, dynamic> response) {
 String? _systemId(Map<String, dynamic>? system) {
   if (system == null) return null;
 
-  for (final key in ['id', 'systemId', 'uuid']) {
+  for (final key in ['systemId', 'id', 'uuid']) {
     final value = system[key];
     if (value != null && value.toString().isNotEmpty) {
       return value.toString();
@@ -486,8 +504,8 @@ String? _systemId(Map<String, dynamic>? system) {
 }
 
 String _systemName(Map<String, dynamic> system) {
-  return system['name']?.toString() ??
-      system['systemName']?.toString() ??
+  return system['systemName']?.toString() ??
+      system['name']?.toString() ??
       'Hệ thống chưa đặt tên';
 }
 
@@ -517,20 +535,72 @@ String _systemStatus(Map<String, dynamic> system) {
       'UNKNOWN';
 }
 
-Color _statusColor(String status) {
+IconData _systemIcon(Map<String, dynamic> system) {
+  final name = _systemName(system).toLowerCase();
+  if (name.contains('conveyor')) return Icons.conveyor_belt;
+  if (name.contains('ai') || name.contains('sorter')) {
+    return Icons.precision_manufacturing_rounded;
+  }
+  if (name.contains('environment') || name.contains('monitor')) {
+    return Icons.sensors_rounded;
+  }
+  if (name.contains('pack')) return Icons.tune_rounded;
+
+  return Icons.precision_manufacturing_rounded;
+}
+
+bool _isStoppedStatus(String status) {
+  switch (status.toUpperCase()) {
+    case 'STOPPED':
+    case 'OFFLINE':
+    case 'ERROR':
+      return true;
+    default:
+      return false;
+  }
+}
+
+_StatusStyle _statusStyle(String status) {
   switch (status.toUpperCase()) {
     case 'ACTIVE':
     case 'RUNNING':
     case 'ONLINE':
-      return Colors.green;
-    case 'MAINTENANCE':
+      return const _StatusStyle(
+        label: 'ĐANG CHẠY',
+        background: _secondaryContainer,
+        foreground: _onSecondaryContainer,
+      );
+    case 'IDLE':
+      return const _StatusStyle(
+        label: 'SẴN SÀNG',
+        background: Color(0xFFFFDAD7),
+        foreground: _primary,
+      );
     case 'PAUSED':
-      return Colors.orange;
+    case 'MAINTENANCE':
+      return const _StatusStyle(
+        label: 'TẠM DỪNG',
+        background: Color(0xFFFFE0B2),
+        foreground: Color(0xFF7A4B00),
+      );
     case 'ERROR':
+      return const _StatusStyle(
+        label: 'LỖI',
+        background: _errorContainer,
+        foreground: _onErrorContainer,
+      );
     case 'STOPPED':
     case 'OFFLINE':
-      return Colors.red;
+      return const _StatusStyle(
+        label: 'DỪNG',
+        background: _errorContainer,
+        foreground: _onErrorContainer,
+      );
     default:
-      return Colors.grey;
+      return const _StatusStyle(
+        label: 'UNKNOWN',
+        background: _surfaceVariant,
+        foreground: _onSurfaceVariant,
+      );
   }
 }

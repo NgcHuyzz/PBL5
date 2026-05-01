@@ -112,6 +112,31 @@ class SystemService {
     );
   }
 
+  static Future<Map<String, dynamic>> createSystem({
+    required String systemId,
+    required String systemName,
+    required String description,
+    required String location,
+  }) {
+    final url = buildUri('/systems');
+
+    return _sendJson(
+      (headers) => http.post(
+        url,
+        headers: headers,
+        body: jsonEncode({
+          'systemId': systemId,
+          'systemName': systemName,
+          'description': description,
+          'location': location,
+        }),
+      ),
+      successStatusCodes: const {200, 201},
+      failureMessage: 'Tạo hệ thống thất bại',
+      connectionMessage: 'Lỗi kết nối',
+    );
+  }
+
   static Future<Map<String, dynamic>> getControlState(String systemId) {
     final url = buildUri(
       '/system/control-state',

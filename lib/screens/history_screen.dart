@@ -19,6 +19,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   List<Map<String, dynamic>> _detections = [];
   int _currentPage = 0;
   int _totalPages = 1;
+  String? _token;
 
   // Filter values
   String? _selectedFruitType;
@@ -51,8 +52,18 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   void initState() {
     super.initState();
+    _loadToken();
     if (widget.systemId != null && widget.systemId!.isNotEmpty) {
       _loadHistory();
+    }
+  }
+
+  Future<void> _loadToken() async {
+    final token = await SystemService.getToken();
+    if (mounted) {
+      setState(() {
+        _token = token;
+      });
     }
   }
 
@@ -479,9 +490,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 decoration: BoxDecoration(
                   color: AppTheme.primaryLight,
                   borderRadius: BorderRadius.circular(12),
-                  image: detection['imageUrl'] != null
+                  image: detection['imageUrl'] != null && detection['imageUrl'].toString().isNotEmpty
                       ? DecorationImage(
-                          image: NetworkImage(detection['imageUrl']),
+                          image: NetworkImage(
+                            detection['imageUrl'],
+                            headers: _token != null ? {'Authorization': 'Bearer $_token'} : null,
+                          ),
                           fit: BoxFit.cover,
                           colorFilter: isError
                               ? const ColorFilter.mode(
@@ -492,7 +506,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         )
                       : null,
                 ),
-                child: detection['imageUrl'] == null
+                child: detection['imageUrl'] == null || detection['imageUrl'].toString().isEmpty
                     ? Icon(
                         Icons.qr_code_scanner,
                         size: 30,

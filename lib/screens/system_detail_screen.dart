@@ -27,10 +27,13 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
   Map<String, dynamic> _latestDetection = {};
   List<Map<String, dynamic>> _recentDetections = [];
   String _currentStatus = 'IDLE';
+  String? _token;
 
   @override
   void initState() {
     super.initState();
+    _loadToken();
+
     if (widget.systemId == null || widget.systemId!.isEmpty) {
       _isLoading = false;
       _errorMessage = 'Chưa chọn hệ thống';
@@ -47,6 +50,15 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
   void dispose() {
     _timer?.cancel();
     super.dispose();
+  }
+
+  Future<void> _loadToken() async {
+    final token = await SystemService.getToken();
+    if (mounted) {
+      setState(() {
+        _token = token;
+      });
+    }
   }
 
   Future<void> _loadData() async {
@@ -393,6 +405,7 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
     final bin =
         item['targetBin']?.toString() ?? item['bin']?.toString() ?? '---';
     final color = confidence >= 0.95 ? Colors.green : Colors.orange;
+    final imageUrl = item['imageUrl']?.toString();
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -410,8 +423,19 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
+              image: imageUrl != null && imageUrl.isNotEmpty
+                  ? DecorationImage(
+                      image: NetworkImage(
+                        imageUrl,
+                        headers: _token != null ? {'Authorization': 'Bearer $_token'} : null,
+                      ),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
             ),
-            child: Icon(Icons.qr_code_scanner, color: color, size: 28),
+            child: imageUrl == null || imageUrl.isEmpty
+                ? Icon(Icons.qr_code_scanner, color: color, size: 28)
+                : null,
           ),
           const SizedBox(width: 16),
           Expanded(
