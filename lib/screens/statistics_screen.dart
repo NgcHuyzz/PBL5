@@ -166,11 +166,21 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Future<void> _fetchDailyStats(String? from, String? to) async {
+    final systemId = widget.systemId;
+    if (systemId == null) return;
+
+    final result = await SystemService.getStatisticsDaily(
+      systemId,
+      from: from,
+      to: to,
+    );
     if (!mounted) return;
 
-    setState(() {
-      _dailyData = [];
-    });
+    if (result['success'] == true) {
+      setState(() {
+        _dailyData = result['data'] is List ? result['data'] as List : [];
+      });
+    }
   }
 
   Future<void> _selectDateRange() async {
@@ -233,7 +243,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final totalReceived = _asInt(_summaryData['totalClassified']);
+    final totalReceived = _asInt(_summaryData['totalReceived']);
     final totalProcessing = _asInt(_summaryData['totalProcessing']);
     final totalCompleted = _asInt(_summaryData['totalCompleted']);
     final totalFailed = _asInt(_summaryData['totalFailed']);
@@ -488,7 +498,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       _StatCardData(
         icon: Icons.timer_rounded,
         label: 'THỜI GIAN XỬ LÝ TB',
-        value: '${avgTime.toStringAsFixed(1)}s',
+        value: '${avgTime.toStringAsFixed(1)}ms',
         color: _primaryContainer,
       ),
     ];
@@ -553,7 +563,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     }
 
     final maxCount = _dailyData
-        .map<int>((e) => _asInt(_asMap(e)['count']))
+        .map<int>((e) => _asInt(_asMap(e)['totalClassified']))
         .fold<int>(1, (max, count) => count > max ? count : max);
 
     return _ChartShell(
@@ -567,7 +577,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: _dailyData.map((item) {
                 final data = _asMap(item);
-                final count = _asInt(data['count']);
+                final count = _asInt(data['totalClassified']);
                 final height = (count / maxCount) * 150;
                 final isPeak = count == maxCount;
 
@@ -597,7 +607,18 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: _dailyData.map((item) {
-              final day = _asMap(item)['day']?.toString() ?? '';
+              final fullDate = _asMap(item)['date']?.toString() ?? '';
+              String day = '';
+              if (fullDate.isNotEmpty) {
+                try {
+                  final parsedDate = DateTime.parse(fullDate);
+                  day =
+                      '${parsedDate.day.toString().padLeft(2, '0')}/${parsedDate.month.toString().padLeft(2, '0')}';
+                } catch (_) {
+                  day = fullDate;
+                }
+              }
+
               return Text(
                 day,
                 style: GoogleFonts.inter(

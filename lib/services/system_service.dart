@@ -210,6 +210,21 @@ class SystemService {
     );
   }
 
+  static Future<Map<String, dynamic>> getStatisticsDaily(
+    String systemId, {
+    String? from,
+    String? to,
+  }) {
+    final url = buildUri(
+      '/detections/statistics-daily',
+      queryParameters: {'systemId': systemId, 'from': from, 'to': to},
+    );
+    return _sendJson(
+      (headers) => http.get(url, headers: headers),
+      failureMessage: 'Lỗi khi lấy thống kê theo ngày',
+    );
+  }
+
   static Future<Map<String, dynamic>> getStatisticsByFruit(
     String systemId, {
     String? from,
