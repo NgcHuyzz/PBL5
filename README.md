@@ -1,17 +1,29 @@
-# flutter_application_1
+# PBL5 Fruit Sorter App
 
-A new Flutter project.
+Flutter frontend for the PBL5 fruit sorting/classification system.
 
-## Getting Started
+## Run
 
-This project is a starting point for a Flutter application.
+```sh
+flutter pub get
+flutter run -d chrome
+```
 
-A few resources to get you started if this is your first Flutter project:
+The default API base URL is the deployed backend:
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+```text
+https://pbl5-backend-t23i.onrender.com/api
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Override it for local development with `--dart-define`:
+
+```sh
+flutter run -d chrome --dart-define=API_BASE_URL=http://localhost:8080/api
+```
+
+## Verify
+
+```sh
+flutter analyze
+flutter test
+```

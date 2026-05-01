@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/auth_service.dart';
 import '../utils/app_theme.dart';
-import 'register_screen.dart';
-import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -55,9 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
-          gradient: AppTheme.loginGradient,
-        ),
+        decoration: BoxDecoration(gradient: AppTheme.loginGradient),
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
@@ -70,10 +66,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.qr_code_scanner, size: 40, color: Colors.white),
+                    child: const Icon(
+                      Icons.qr_code_scanner,
+                      size: 40,
+                      color: Colors.white,
+                    ),
                   ),
                   const SizedBox(height: 24),
                   Text(
@@ -103,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 40),
-                  
+
                   // Form Card
                   Container(
                     decoration: BoxDecoration(
@@ -125,43 +125,62 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 child: Row(
                                   children: [
-                                    Icon(Icons.error, color: Colors.red.shade700, size: 20),
+                                    Icon(
+                                      Icons.error,
+                                      color: Colors.red.shade700,
+                                      size: 20,
+                                    ),
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
                                         _errorMessage!,
-                                        style: TextStyle(color: Colors.red.shade700, fontSize: 12),
+                                        style: TextStyle(
+                                          color: Colors.red.shade700,
+                                          fontSize: 12,
+                                        ),
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                            if (_errorMessage != null) const SizedBox(height: 16),
-                            
+                            if (_errorMessage != null)
+                              const SizedBox(height: 16),
+
                             // Username/Email
                             TextFormField(
                               controller: _identifierController,
                               decoration: InputDecoration(
                                 labelText: 'USERNAME OR EMAIL',
                                 labelStyle: AppTheme.caption,
-                                prefixIcon: const Icon(Icons.person_outline, size: 20),
+                                prefixIcon: const Icon(
+                                  Icons.person_outline,
+                                  size: 20,
+                                ),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(color: Colors.grey.shade300),
+                                  borderSide: BorderSide(
+                                    color: Colors.grey.shade300,
+                                  ),
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(color: Colors.grey.shade300),
+                                  borderSide: BorderSide(
+                                    color: Colors.grey.shade300,
+                                  ),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: const BorderSide(color: AppTheme.primary),
+                                  borderSide: const BorderSide(
+                                    color: AppTheme.primary,
+                                  ),
                                 ),
                               ),
-                              validator: (v) => v == null || v.isEmpty ? 'Vui lòng nhập thông tin' : null,
+                              validator: (v) => v == null || v.isEmpty
+                                  ? 'Vui lòng nhập thông tin'
+                                  : null,
                             ),
                             const SizedBox(height: 16),
-                            
+
                             // Password
                             TextFormField(
                               controller: _passwordController,
@@ -169,28 +188,46 @@ class _LoginScreenState extends State<LoginScreen> {
                               decoration: InputDecoration(
                                 labelText: 'MẶT KHẨU',
                                 labelStyle: AppTheme.caption,
-                                prefixIcon: const Icon(Icons.lock_outline, size: 20),
+                                prefixIcon: const Icon(
+                                  Icons.lock_outline,
+                                  size: 20,
+                                ),
                                 suffixIcon: IconButton(
-                                  icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility, size: 20),
-                                  onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                                  icon: Icon(
+                                    _obscurePassword
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
+                                    size: 20,
+                                  ),
+                                  onPressed: () => setState(
+                                    () => _obscurePassword = !_obscurePassword,
+                                  ),
                                 ),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(color: Colors.grey.shade300),
+                                  borderSide: BorderSide(
+                                    color: Colors.grey.shade300,
+                                  ),
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(color: Colors.grey.shade300),
+                                  borderSide: BorderSide(
+                                    color: Colors.grey.shade300,
+                                  ),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: const BorderSide(color: AppTheme.primary),
+                                  borderSide: const BorderSide(
+                                    color: AppTheme.primary,
+                                  ),
                                 ),
                               ),
-                              validator: (v) => v == null || v.isEmpty ? 'Vui lòng nhập mật khẩu' : null,
+                              validator: (v) => v == null || v.isEmpty
+                                  ? 'Vui lòng nhập mật khẩu'
+                                  : null,
                             ),
                             const SizedBox(height: 8),
-                            
+
                             // Forgot password
                             Align(
                               alignment: Alignment.centerRight,
@@ -198,12 +235,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                 onPressed: () {},
                                 child: Text(
                                   'Quên mật khẩu?',
-                                  style: AppTheme.bodySmall.copyWith(color: AppTheme.primary),
+                                  style: AppTheme.bodySmall.copyWith(
+                                    color: AppTheme.primary,
+                                  ),
                                 ),
                               ),
                             ),
                             const SizedBox(height: 24),
-                            
+
                             // Login Button
                             SizedBox(
                               width: double.infinity,
@@ -212,33 +251,59 @@ class _LoginScreenState extends State<LoginScreen> {
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppTheme.primary,
                                   foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                 ),
                                 child: _isLoading
-                                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                                    ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
+                                      )
                                     : Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         children: [
-                                          Text('Đăng nhập', style: AppTheme.buttonText),
+                                          Text(
+                                            'Đăng nhập',
+                                            style: AppTheme.buttonText,
+                                          ),
                                           const SizedBox(width: 8),
-                                          const Icon(Icons.arrow_forward, size: 18),
+                                          const Icon(
+                                            Icons.arrow_forward,
+                                            size: 18,
+                                          ),
                                         ],
                                       ),
                               ),
                             ),
                             const SizedBox(height: 16),
-                            
+
                             // Register link
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text('Chưa có tài khoản?', style: AppTheme.bodySmall),
+                                Text(
+                                  'Chưa có tài khoản?',
+                                  style: AppTheme.bodySmall,
+                                ),
                                 TextButton(
-                                  onPressed: () => Navigator.pushNamed(context, '/register'),
-                                  child: Text('Đăng ký', style: AppTheme.bodySmall.copyWith(color: AppTheme.primary, fontWeight: FontWeight.bold)),
+                                  onPressed: () =>
+                                      Navigator.pushNamed(context, '/register'),
+                                  child: Text(
+                                    'Đăng ký',
+                                    style: AppTheme.bodySmall.copyWith(
+                                      color: AppTheme.primary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -247,7 +312,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 32),
                   Text(
                     '© 2024 AGRITECH ATELIER PRECISION OPTICS',

@@ -4,10 +4,6 @@ import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/system_detail_screen.dart';
-import 'screens/statistics_screen.dart';
-import 'screens/history_screen.dart';
-import 'screens/notifications_screen.dart';
-import 'screens/profile_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -32,7 +28,19 @@ class MyApp extends StatelessWidget {
         '/': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
         '/home': (context) => const HomeScreen(),
-        '/system-detail': (context) => SystemDetailScreen(systemName: ModalRoute.of(context)?.settings.arguments as String? ?? ''),
+        '/system-detail': (context) {
+          final arguments = ModalRoute.of(context)?.settings.arguments;
+          if (arguments is Map<String, dynamic>) {
+            return SystemDetailScreen(
+              systemName: arguments['name']?.toString() ?? '',
+              systemId: arguments['id']?.toString(),
+            );
+          }
+
+          return SystemDetailScreen(
+            systemName: arguments is String ? arguments : '',
+          );
+        },
       },
     );
   }

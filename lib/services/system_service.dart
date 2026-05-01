@@ -1,240 +1,205 @@
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+
+import 'token_storage_service.dart';
 
 class SystemService {
-  static const String baseUrl = 'https://pbl5-backend-t23i.onrender.com/api';
-  
-  static Future<String?> getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('access_token');
+  static const String baseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'https://pbl5-backend-t23i.onrender.com/api',
+  );
+  static const Duration _requestTimeout = Duration(seconds: 15);
+
+  static Uri buildUri(
+    String path, {
+    Map<String, String?> queryParameters = const {},
+  }) {
+    final uri = Uri.parse('$baseUrl$path');
+    final params = <String, String>{};
+
+    for (final entry in queryParameters.entries) {
+      final value = entry.value;
+      if (value != null && value.isNotEmpty) {
+        params[entry.key] = value;
+      }
+    }
+
+    return params.isEmpty ? uri : uri.replace(queryParameters: params);
   }
 
-  // ✅ 1. ดึงรายการ Systems ทั้งหมด
-  static Future<Map<String, dynamic>> getSystems() async {
-    final url = Uri.parse('$baseUrl/systems');
+  static Future<String?> getToken() {
+    return TokenStorageService.getToken();
+  }
+
+  static Future<Map<String, String>?> _authHeaders() async {
     final token = await getToken();
-    
+    if (token == null || token.isEmpty) {
+      return null;
+    }
+
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+  }
+
+  static Map<String, dynamic> _unauthenticated() {
+    return {'success': false, 'message': 'Vui lòng đăng nhập lại'};
+  }
+
+  static Future<Map<String, dynamic>> _sendJson(
+    Future<http.Response> Function(Map<String, String> headers) send, {
+    Set<int> successStatusCodes = const {200},
+    required String failureMessage,
+    String connectionMessage = 'Không thể kết nối',
+  }) async {
+    final headers = await _authHeaders();
+    if (headers == null) {
+      return _unauthenticated();
+    }
+
     try {
-      final response = await http.get(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-      
-      print('Get systems status: ${response.statusCode}');
-      print('Get systems body: ${response.body}');
-      
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        return {'success': false, 'message': 'Không thể lấy danh sách systems'};
+      final response = await send(headers).timeout(_requestTimeout);
+      final data = _decodeObject(response.body);
+
+      if (successStatusCodes.contains(response.statusCode)) {
+        if (data.containsKey('success') || data.containsKey('data')) {
+          return {if (!data.containsKey('success')) 'success': true, ...data};
+        }
+
+        return {'success': true, 'data': data};
       }
-    } catch (e) {
-      print('Error: $e');
-      return {'success': false, 'message': 'Lỗi kết nối: $e'};
+
+      return {
+        'success': false,
+        'message': data['message'] ?? failureMessage,
+        if (data['errorCode'] != null) 'errorCode': data['errorCode'],
+      };
+    } catch (_) {
+      return {'success': false, 'message': connectionMessage};
     }
   }
 
-  // ✅ 2. Đăng ký System mới
+  static Future<Map<String, dynamic>> getSystems() {
+    final url = buildUri('/systems');
+    return _sendJson(
+      (headers) => http.get(url, headers: headers),
+      failureMessage: 'Không thể lấy danh sách systems',
+      connectionMessage: 'Lỗi kết nối',
+    );
+  }
+
   static Future<Map<String, dynamic>> registerSystem({
     required String name,
     required String description,
     required String location,
-  }) async {
-    final url = Uri.parse('$baseUrl/systems/register?name=$name&description=$description&location=$location');
-    final token = await getToken();
-    
-    try {
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-      
-      print('Register system status: ${response.statusCode}');
-      print('Register system body: ${response.body}');
-      
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return jsonDecode(response.body);
-      } else {
-        return {'success': false, 'message': 'Đăng ký system thất bại'};
-      }
-    } catch (e) {
-      return {'success': false, 'message': 'Lỗi kết nối: $e'};
-    }
+  }) {
+    final url = buildUri(
+      '/systems/register',
+      queryParameters: {
+        'name': name,
+        'description': description,
+        'location': location,
+      },
+    );
+
+    return _sendJson(
+      (headers) => http.post(url, headers: headers),
+      successStatusCodes: const {200, 201},
+      failureMessage: 'Đăng ký system thất bại',
+      connectionMessage: 'Lỗi kết nối',
+    );
   }
 
-  // ✅ 3. Lấy trạng thái điều khiển hệ thống (cần systemId)
-  static Future<Map<String, dynamic>> getControlState(String systemId) async {
-    final url = Uri.parse('$baseUrl/system/control-state?systemId=$systemId');
-    final token = await getToken();
-    
-    try {
-      final response = await http.get(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-      
-      print('Control state status: ${response.statusCode}');
-      
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        return {'success': false, 'message': 'Không thể lấy trạng thái'};
-      }
-    } catch (e) {
-      return {'success': false, 'message': 'Lỗi kết nối: $e'};
-    }
+  static Future<Map<String, dynamic>> getControlState(String systemId) {
+    final url = buildUri(
+      '/system/control-state',
+      queryParameters: {'systemId': systemId},
+    );
+    return _sendJson(
+      (headers) => http.get(url, headers: headers),
+      failureMessage: 'Không thể lấy trạng thái',
+      connectionMessage: 'Lỗi kết nối',
+    );
   }
 
-  // ✅ 4. Điều khiển hệ thống (Start/Pause/Stop)
-  static Future<Map<String, dynamic>> controlSystem(String systemId, String action) async {
-    final url = Uri.parse('$baseUrl/system/control?systemId=$systemId');
-    final token = await getToken();
-    
-    try {
-      final response = await http.post(
+  static Future<Map<String, dynamic>> controlSystem(
+    String systemId,
+    String action,
+  ) {
+    final url = buildUri(
+      '/system/control',
+      queryParameters: {'systemId': systemId},
+    );
+    return _sendJson(
+      (headers) => http.post(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
+        headers: headers,
         body: jsonEncode({'action': action}),
-      );
-      
-      print('Control system status: ${response.statusCode}');
-      
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        return {'success': false, 'message': 'Điều khiển thất bại'};
-      }
-    } catch (e) {
-      return {'success': false, 'message': 'Lỗi kết nối: $e'};
-    }
+      ),
+      failureMessage: 'Điều khiển thất bại',
+      connectionMessage: 'Lỗi kết nối',
+    );
   }
 
-  // ✅ 5. Lấy kết quả phân loại mới nhất
-  static Future<Map<String, dynamic>> getLatestDetection(String systemId) async {
-    final url = Uri.parse('$baseUrl/detections/latest?systemId=$systemId');
-    final token = await getToken();
-    
-    try {
-      final response = await http.get(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-      
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        return {'success': false, 'message': 'Không có dữ liệu phân loại'};
-      }
-    } catch (e) {
-      return {'success': false, 'message': 'Lỗi kết nối: $e'};
-    }
+  static Future<Map<String, dynamic>> getLatestDetection(String systemId) {
+    final url = buildUri(
+      '/detections/latest',
+      queryParameters: {'systemId': systemId},
+    );
+    return _sendJson(
+      (headers) => http.get(url, headers: headers),
+      failureMessage: 'Không có dữ liệu phân loại',
+      connectionMessage: 'Lỗi kết nối',
+    );
   }
 
-  // ✅ 6. Lấy danh sách phân loại gần đây
-  static Future<Map<String, dynamic>> getRecentDetections(String systemId, {int limit = 10}) async {
-    final url = Uri.parse('$baseUrl/detections/recent?systemId=$systemId&limit=$limit');
-    final token = await getToken();
-    
-    try {
-      final response = await http.get(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-      
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        return {'success': false, 'message': 'Không có dữ liệu'};
-      }
-    } catch (e) {
-      return {'success': false, 'message': 'Lỗi kết nối: $e'};
-    }
+  static Future<Map<String, dynamic>> getRecentDetections(
+    String systemId, {
+    int limit = 10,
+  }) {
+    final url = buildUri(
+      '/detections/recent',
+      queryParameters: {'systemId': systemId, 'limit': limit.toString()},
+    );
+    return _sendJson(
+      (headers) => http.get(url, headers: headers),
+      failureMessage: 'Không có dữ liệu',
+      connectionMessage: 'Lỗi kết nối',
+    );
   }
 
-  // ✅ 7. Lấy thống kê tổng quan
   static Future<Map<String, dynamic>> getStatisticsSummary(
     String systemId, {
     String? from,
     String? to,
-  }) async {
-    final url = Uri.parse('$baseUrl/detections/statistics-summary?systemId=$systemId')
-        .replace(queryParameters: {
-          if (from != null) 'from': from,
-          if (to != null) 'to': to,
-        });
-    final token = await getToken();
-    
-    try {
-      final response = await http.get(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-      
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        return {'success': false, 'message': 'Lỗi khi lấy thống kê'};
-      }
-    } catch (e) {
-      return {'success': false, 'message': 'Không thể kết nối'};
-    }
+  }) {
+    final url = buildUri(
+      '/detections/statistics-summary',
+      queryParameters: {'systemId': systemId, 'from': from, 'to': to},
+    );
+    return _sendJson(
+      (headers) => http.get(url, headers: headers),
+      failureMessage: 'Lỗi khi lấy thống kê',
+    );
   }
 
-  // ✅ 8. Lấy thống kê theo loại trái cây
   static Future<Map<String, dynamic>> getStatisticsByFruit(
     String systemId, {
     String? from,
     String? to,
-  }) async {
-    final url = Uri.parse('$baseUrl/detections/count-by-fruit?systemId=$systemId')
-        .replace(queryParameters: {
-          if (from != null) 'from': from,
-          if (to != null) 'to': to,
-        });
-    final token = await getToken();
-    
-    try {
-      final response = await http.get(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-      
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        return {'success': false, 'message': 'Lỗi khi lấy thống kê theo loại'};
-      }
-    } catch (e) {
-      return {'success': false, 'message': 'Không thể kết nối'};
-    }
+  }) {
+    final url = buildUri(
+      '/detections/count-by-fruit',
+      queryParameters: {'systemId': systemId, 'from': from, 'to': to},
+    );
+    return _sendJson(
+      (headers) => http.get(url, headers: headers),
+      failureMessage: 'Lỗi khi lấy thống kê theo loại',
+    );
   }
 
-  // ✅ 9. Lấy lịch sử phân loại (có phân trang)
   static Future<Map<String, dynamic>> getDetectionHistory(
     String systemId, {
     int page = 0,
@@ -243,140 +208,94 @@ class SystemService {
     String? status,
     String? from,
     String? to,
-  }) async {
-    final url = Uri.parse('$baseUrl/detections?systemId=$systemId')
-        .replace(queryParameters: {
-          'page': page.toString(),
-          'size': size.toString(),
-          if (fruitType != null && fruitType != 'all') 'fruitType': fruitType,
-          if (status != null && status != 'all') 'status': status,
-          if (from != null) 'from': from,
-          if (to != null) 'to': to,
-        });
-    final token = await getToken();
-    
-    try {
-      final response = await http.get(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-      
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        return {'success': false, 'message': 'Lỗi khi lấy lịch sử'};
-      }
-    } catch (e) {
-      return {'success': false, 'message': 'Không thể kết nối'};
-    }
+  }) {
+    final url = buildUri(
+      '/detections',
+      queryParameters: {
+        'systemId': systemId,
+        'page': page.toString(),
+        'size': size.toString(),
+        if (fruitType != null && fruitType != 'all') 'fruitType': fruitType,
+        if (status != null && status != 'all') 'status': status,
+        'from': from,
+        'to': to,
+      },
+    );
+    return _sendJson(
+      (headers) => http.get(url, headers: headers),
+      failureMessage: 'Lỗi khi lấy lịch sử',
+    );
   }
 
-  // ✅ 10. Lấy danh sách thông báo
   static Future<Map<String, dynamic>> getNotifications(
     String systemId, {
     String? level,
     int page = 0,
     int size = 10,
-  }) async {
-    final url = Uri.parse('$baseUrl/notifications?systemId=$systemId')
-        .replace(queryParameters: {
-          'page': page.toString(),
-          'size': size.toString(),
-          if (level != null && level != 'all') 'level': level,
-        });
-    final token = await getToken();
-    
-    try {
-      final response = await http.get(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-      
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        return {'success': false, 'message': 'Lỗi khi lấy thông báo'};
-      }
-    } catch (e) {
-      return {'success': false, 'message': 'Không thể kết nối'};
-    }
+  }) {
+    final url = buildUri(
+      '/notifications',
+      queryParameters: {
+        'systemId': systemId,
+        'page': page.toString(),
+        'size': size.toString(),
+        if (level != null && level != 'all') 'level': level,
+      },
+    );
+    return _sendJson(
+      (headers) => http.get(url, headers: headers),
+      failureMessage: 'Lỗi khi lấy thông báo',
+    );
   }
 
-  // ✅ 11. Đánh dấu đã đọc thông báo
-  static Future<Map<String, dynamic>> markNotificationRead(String systemId, String notificationId) async {
-    final url = Uri.parse('$baseUrl/notifications/$notificationId/read?systemId=$systemId');
-    final token = await getToken();
-    
-    try {
-      final response = await http.patch(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-      
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        return {'success': false, 'message': 'Đánh dấu thất bại'};
-      }
-    } catch (e) {
-      return {'success': false, 'message': 'Lỗi kết nối'};
-    }
+  static Future<Map<String, dynamic>> markNotificationRead(
+    String systemId,
+    String notificationId,
+  ) {
+    final url = buildUri(
+      '/notifications/$notificationId/read',
+      queryParameters: {'systemId': systemId},
+    );
+    return _sendJson(
+      (headers) => http.patch(url, headers: headers),
+      failureMessage: 'Đánh dấu thất bại',
+      connectionMessage: 'Lỗi kết nối',
+    );
   }
 
-  // ✅ 12. Đánh dấu tất cả đã đọc
-  static Future<Map<String, dynamic>> markAllNotificationsRead(String systemId) async {
-    final url = Uri.parse('$baseUrl/notifications/read-all?systemId=$systemId');
-    final token = await getToken();
-    
-    try {
-      final response = await http.patch(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-      
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        return {'success': false, 'message': 'Đánh dấu thất bại'};
-      }
-    } catch (e) {
-      return {'success': false, 'message': 'Lỗi kết nối'};
-    }
+  static Future<Map<String, dynamic>> markAllNotificationsRead(
+    String systemId,
+  ) {
+    final url = buildUri(
+      '/notifications/read-all',
+      queryParameters: {'systemId': systemId},
+    );
+    return _sendJson(
+      (headers) => http.patch(url, headers: headers),
+      failureMessage: 'Đánh dấu thất bại',
+      connectionMessage: 'Lỗi kết nối',
+    );
   }
 
-  // ✅ 13. Lấy số lượng thông báo chưa đọc
-  static Future<Map<String, dynamic>> getUnreadCount(String systemId) async {
-    final url = Uri.parse('$baseUrl/notifications/unread-count?systemId=$systemId');
-    final token = await getToken();
-    
-    try {
-      final response = await http.get(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-      
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        return {'success': false, 'message': 'Lỗi khi lấy số lượng'};
-      }
-    } catch (e) {
-      return {'success': false, 'message': 'Không thể kết nối'};
+  static Future<Map<String, dynamic>> getUnreadCount(String systemId) {
+    final url = buildUri(
+      '/notifications/unread-count',
+      queryParameters: {'systemId': systemId},
+    );
+    return _sendJson(
+      (headers) => http.get(url, headers: headers),
+      failureMessage: 'Lỗi khi lấy số lượng',
+    );
+  }
+
+  static Map<String, dynamic> _decodeObject(String body) {
+    if (body.isEmpty) return {};
+
+    final decoded = jsonDecode(body);
+    if (decoded is Map<String, dynamic>) {
+      return decoded;
     }
+
+    return {'success': true, 'data': decoded};
   }
 }

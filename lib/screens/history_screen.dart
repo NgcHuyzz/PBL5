@@ -1,24 +1,24 @@
 // lib/screens/history_screen.dart
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import '../services/system_service.dart';
 import '../utils/app_theme.dart';
+import 'notifications_screen.dart';
 
 class HistoryScreen extends StatefulWidget {
-  const HistoryScreen({super.key});
+  final String? systemId;
+
+  const HistoryScreen({super.key, this.systemId});
 
   @override
   State<HistoryScreen> createState() => _HistoryScreenState();
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
-  late String systemId;
   bool _isLoading = false;
   bool _isLoadingMore = false;
   List<Map<String, dynamic>> _detections = [];
   int _currentPage = 0;
   int _totalPages = 1;
-  int _totalElements = 0;
 
   // Filter values
   String? _selectedFruitType;
@@ -51,12 +51,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   void initState() {
     super.initState();
-    // TODO: Lấy systemId thật từ nơi lưu trữ (SharedPreferences / Provider)
-    systemId = '66efdf73-2aa6-4328-b0e1-b7377ad0f6e8';
-    _loadHistory();
+    if (widget.systemId != null && widget.systemId!.isNotEmpty) {
+      _loadHistory();
+    }
   }
 
   Future<void> _loadHistory({bool reset = true}) async {
+    final systemId = widget.systemId;
+    if (systemId == null || systemId.isEmpty) {
+      setState(() {
+        _isLoading = false;
+        _isLoadingMore = false;
+      });
+      return;
+    }
+
     if (reset) {
       setState(() {
         _currentPage = 0;
@@ -79,6 +88,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
       to: _endDate?.toIso8601String(),
     );
 
+    if (!mounted) return;
+
     if (reset) {
       setState(() => _isLoading = false);
     } else {
@@ -86,15 +97,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
 
     if (result['success'] == true) {
-      final data = result['data'];
+      final data = _asMap(result['data']);
       setState(() {
         if (reset) {
-          _detections = (data['content'] as List).cast<Map<String, dynamic>>();
+          _detections = _extractDetectionList(data);
         } else {
-          _detections.addAll((data['content'] as List).cast<Map<String, dynamic>>());
+          _detections = [..._detections, ..._extractDetectionList(data)];
         }
         _totalPages = data['totalPages'] ?? 1;
-        _totalElements = data['totalElements'] ?? 0;
       });
     } else {
       // Hiển thị lỗi nếu cần
@@ -161,13 +171,26 @@ class _HistoryScreenState extends State<HistoryScreen> {
           IconButton(
             icon: const Icon(Icons.notifications_none),
             onPressed: () {
-              // TODO: Navigate to notifications screen
+              if (widget.systemId == null || widget.systemId!.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Chưa chọn hệ thống')),
+                );
+                return;
+              }
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      NotificationsScreen(systemId: widget.systemId),
+                ),
+              );
             },
           ),
           CircleAvatar(
             radius: 16,
             backgroundColor: AppTheme.primaryLight,
-            backgroundImage: const NetworkImage('https://i.pravatar.cc/300'),
+            child: const Icon(Icons.person, size: 18, color: AppTheme.primary),
           ),
         ],
       ),
@@ -178,26 +201,44 @@ class _HistoryScreenState extends State<HistoryScreen> {
           const SizedBox(height: 8),
           // History list
           Expanded(
-            child: _isLoading
+            child: widget.systemId == null || widget.systemId!.isEmpty
+                ? _buildMessageState('Chưa chọn hệ thống')
+                : _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _detections.isEmpty
-                    ? _buildEmptyState()
-                    : ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        itemCount: _detections.length + 1,
-                        itemBuilder: (context, index) {
-                          if (index == _detections.length) {
-                            if (_currentPage + 1 < _totalPages) {
-                              return _buildLoadMoreButton();
-                            } else {
-                              return const SizedBox.shrink();
-                            }
-                          }
-                          return _buildHistoryCard(_detections[index]);
-                        },
-                      ),
+                ? _buildEmptyState()
+                : ListView.builder(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    itemCount: _detections.length + 1,
+                    itemBuilder: (context, index) {
+                      if (index == _detections.length) {
+                        if (_currentPage + 1 < _totalPages) {
+                          return _buildLoadMoreButton();
+                        } else {
+                          return const SizedBox.shrink();
+                        }
+                      }
+                      return _buildHistoryCard(_detections[index]);
+                    },
+                  ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildMessageState(String message) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: AppTheme.bodyMedium,
+        ),
       ),
     );
   }
@@ -231,12 +272,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
           const SizedBox(height: 16),
           // Dropdown loại quả
           DropdownButtonFormField<String>(
-            value: _selectedFruitType,
+            initialValue: _selectedFruitType,
             decoration: InputDecoration(
               labelText: 'Chọn loại quả',
               labelStyle: AppTheme.caption,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 8,
+              ),
             ),
             items: _fruitTypes.entries.map((e) {
               return DropdownMenuItem(
@@ -253,12 +299,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
           const SizedBox(height: 12),
           // Dropdown trạng thái
           DropdownButtonFormField<String>(
-            value: _selectedStatus,
+            initialValue: _selectedStatus,
             decoration: InputDecoration(
               labelText: 'Chọn trạng thái',
               labelStyle: AppTheme.caption,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 8,
+              ),
             ),
             items: _statuses.entries.map((e) {
               return DropdownMenuItem(
@@ -290,14 +341,23 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     }
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
-                      border: Border.all(color: AppTheme.textHint.withOpacity(0.3)),
+                      border: Border.all(
+                        color: AppTheme.textHint.withValues(alpha: 0.3),
+                      ),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.calendar_today, size: 16, color: AppTheme.textHint),
+                        const Icon(
+                          Icons.calendar_today,
+                          size: 16,
+                          color: AppTheme.textHint,
+                        ),
                         const SizedBox(width: 8),
                         Text(
                           _startDate != null
@@ -325,14 +385,23 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     }
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
-                      border: Border.all(color: AppTheme.textHint.withOpacity(0.3)),
+                      border: Border.all(
+                        color: AppTheme.textHint.withValues(alpha: 0.3),
+                      ),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.calendar_today, size: 16, color: AppTheme.textHint),
+                        const Icon(
+                          Icons.calendar_today,
+                          size: 16,
+                          color: AppTheme.textHint,
+                        ),
                         const SizedBox(width: 8),
                         Text(
                           _endDate != null
@@ -355,7 +424,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 onPressed: _resetFilters,
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(color: AppTheme.outlineVariant),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 child: const Text('Xóa lọc'),
               ),
@@ -365,7 +436,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primary,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 child: const Text('Lọc kết quả'),
               ),
@@ -377,11 +450,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Widget _buildHistoryCard(Map<String, dynamic> detection) {
-    final fruitType = detection['fruitType'] ?? 'unknown';
-    final confidence = (detection['confidence'] ?? 0.0) as double;
-    final targetBin = detection['targetBin'] ?? '---';
-    final classifiedAt = detection['classifiedAt'];
-    final status = detection['status'] ?? 'COMPLETED';
+    final fruitType = detection['fruitType']?.toString() ?? 'unknown';
+    final confidence = _asDouble(detection['confidence']);
+    final targetBin = detection['targetBin']?.toString() ?? '---';
+    final classifiedAt = detection['classifiedAt']?.toString();
+    final status = detection['status']?.toString() ?? 'COMPLETED';
     final isError = status == 'FAILED' || status == 'REJECTED';
     final fruitName = _fruitTypes[fruitType] ?? fruitType;
 
@@ -411,7 +484,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           image: NetworkImage(detection['imageUrl']),
                           fit: BoxFit.cover,
                           colorFilter: isError
-                              ? const ColorFilter.mode(Colors.grey, BlendMode.saturation)
+                              ? const ColorFilter.mode(
+                                  Colors.grey,
+                                  BlendMode.saturation,
+                                )
                               : null,
                         )
                       : null,
@@ -420,7 +496,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     ? Icon(
                         Icons.qr_code_scanner,
                         size: 30,
-                        color: AppTheme.primary.withOpacity(0.5),
+                        color: AppTheme.primary.withValues(alpha: 0.5),
                       )
                     : null,
               ),
@@ -434,14 +510,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       children: [
                         Text(
                           fruitName,
-                          style: AppTheme.titleMedium.copyWith(fontWeight: FontWeight.bold),
+                          style: AppTheme.titleMedium.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const Spacer(),
                         if (status != 'COMPLETED')
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
-                              color: _statusColors[status]?.withOpacity(0.1),
+                              color: _statusColors[status]?.withValues(
+                                alpha: 0.1,
+                              ),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
@@ -461,13 +544,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('ĐỘ TIN CẬY', style: TextStyle(fontSize: 9, color: AppTheme.textHint)),
+                              const Text(
+                                'ĐỘ TIN CẬY',
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  color: AppTheme.textHint,
+                                ),
+                              ),
                               Text(
                                 '${(confidence * 100).toInt()}%',
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
-                                  color: isError ? AppTheme.error : AppTheme.primary,
+                                  color: isError
+                                      ? AppTheme.error
+                                      : AppTheme.primary,
                                 ),
                               ),
                             ],
@@ -477,8 +568,19 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('THÙNG CHỨA', style: TextStyle(fontSize: 9, color: AppTheme.textHint)),
-                              Text(targetBin, style: const TextStyle(fontWeight: FontWeight.w500)),
+                              const Text(
+                                'THÙNG CHỨA',
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  color: AppTheme.textHint,
+                                ),
+                              ),
+                              Text(
+                                targetBin,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -487,7 +589,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(Icons.access_time, size: 12, color: AppTheme.textHint),
+                        const Icon(
+                          Icons.access_time,
+                          size: 12,
+                          color: AppTheme.textHint,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           _formatDateTime(classifiedAt),
@@ -520,7 +626,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   backgroundColor: Colors.white,
                   foregroundColor: AppTheme.primary,
                   side: BorderSide(color: AppTheme.outlineVariant),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
                 ),
               ),
       ),
@@ -547,4 +655,28 @@ class _HistoryScreenState extends State<HistoryScreen> {
       ),
     );
   }
+}
+
+Map<String, dynamic> _asMap(Object? data) {
+  if (data is Map<String, dynamic>) return data;
+  if (data is Map) return Map<String, dynamic>.from(data);
+  return {};
+}
+
+List<Map<String, dynamic>> _extractDetectionList(Object? data) {
+  final source = data is Map
+      ? data['content'] ?? data['items'] ?? data['detections']
+      : data;
+
+  if (source is! List) return [];
+
+  return source
+      .whereType<Map>()
+      .map((item) => Map<String, dynamic>.from(item))
+      .toList();
+}
+
+double _asDouble(Object? value) {
+  if (value is num) return value.toDouble();
+  return double.tryParse(value?.toString() ?? '') ?? 0;
 }

@@ -4,14 +4,15 @@ import '../services/system_service.dart';
 import '../utils/app_theme.dart';
 
 class StatisticsScreen extends StatefulWidget {
-  const StatisticsScreen({super.key});
+  final String? systemId;
+
+  const StatisticsScreen({super.key, this.systemId});
 
   @override
   State<StatisticsScreen> createState() => _StatisticsScreenState();
 }
 
 class _StatisticsScreenState extends State<StatisticsScreen> {
-  late String systemId;
   bool _isLoading = true;
   Map<String, dynamic> _summaryData = {};
   List<dynamic> _fruitData = [];
@@ -38,7 +39,12 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   @override
   void initState() {
     super.initState();
-    systemId = '66efdf73-2aa6-4328-b0e1-b7377ad0f6e8'; // TODO: replace with real systemId
+    if (widget.systemId == null || widget.systemId!.isEmpty) {
+      _isLoading = false;
+      _errorMessage = 'Chưa chọn hệ thống';
+      return;
+    }
+
     _applyQuickFilter(_quickFilter);
   }
 
@@ -68,6 +74,15 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Future<void> _loadStatistics() async {
+    final systemId = widget.systemId;
+    if (systemId == null || systemId.isEmpty) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Chưa chọn hệ thống';
+      });
+      return;
+    }
+
     setState(() {
       _isLoading = true;
       _errorMessage = '';
@@ -82,13 +97,24 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       _fetchDailyStats(from, to),
     ]);
 
+    if (!mounted) return;
+
     setState(() {
       _isLoading = false;
     });
   }
 
   Future<void> _fetchSummary(String? from, String? to) async {
-    final result = await SystemService.getStatisticsSummary(systemId, from: from, to: to);
+    final systemId = widget.systemId;
+    if (systemId == null) return;
+
+    final result = await SystemService.getStatisticsSummary(
+      systemId,
+      from: from,
+      to: to,
+    );
+    if (!mounted) return;
+
     if (result['success'] == true) {
       setState(() {
         _summaryData = result['data'] ?? {};
@@ -101,7 +127,16 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Future<void> _fetchFruitStats(String? from, String? to) async {
-    final result = await SystemService.getStatisticsByFruit(systemId, from: from, to: to);
+    final systemId = widget.systemId;
+    if (systemId == null) return;
+
+    final result = await SystemService.getStatisticsByFruit(
+      systemId,
+      from: from,
+      to: to,
+    );
+    if (!mounted) return;
+
     if (result['success'] == true) {
       setState(() {
         _fruitData = result['data'] ?? [];
@@ -110,17 +145,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Future<void> _fetchDailyStats(String? from, String? to) async {
-    // TODO: call real API when available
+    // TODO: Wire to backend daily statistics endpoint when the contract is available.
+    if (!mounted) return;
+
     setState(() {
-      _dailyData = [
-        {'day': 'T2', 'count': 120},
-        {'day': 'T3', 'count': 180},
-        {'day': 'T4', 'count': 320},
-        {'day': 'T5', 'count': 210},
-        {'day': 'T6', 'count': 190},
-        {'day': 'T7', 'count': 250},
-        {'day': 'CN', 'count': 150},
-      ];
+      _dailyData = [];
     });
   }
 
@@ -152,11 +181,11 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final totalReceived = _summaryData['totalClassified'] ?? 0;
-    final totalProcessing = _summaryData['totalProcessing'] ?? 0;
-    final totalCompleted = _summaryData['totalCompleted'] ?? 0;
-    final totalFailed = _summaryData['totalFailed'] ?? 0;
-    final avgTime = _summaryData['averageProcessingTimeMs'] ?? 0.0;
+    final totalReceived = _asInt(_summaryData['totalClassified']);
+    final totalProcessing = _asInt(_summaryData['totalProcessing']);
+    final totalCompleted = _asInt(_summaryData['totalCompleted']);
+    final totalFailed = _asInt(_summaryData['totalFailed']);
+    final avgTime = _asDouble(_summaryData['averageProcessingTimeMs']);
 
     return Scaffold(
       backgroundColor: AppTheme.background,
@@ -179,6 +208,8 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
+          : _errorMessage.isNotEmpty
+          ? _buildMessageState(_errorMessage)
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -186,12 +217,30 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 children: [
                   _buildFilterSection(),
                   const SizedBox(height: 24),
-                  _buildOverviewGrid(totalReceived, totalProcessing, totalCompleted, totalFailed, avgTime),
+                  _buildOverviewGrid(
+                    totalReceived,
+                    totalProcessing,
+                    totalCompleted,
+                    totalFailed,
+                    avgTime,
+                  ),
                   const SizedBox(height: 24),
                   _buildChartsSection(),
                 ],
               ),
             ),
+    );
+  }
+
+  Widget _buildMessageState(String message) {
+    return ListView(
+      padding: const EdgeInsets.all(24),
+      children: [
+        const SizedBox(height: 120),
+        Icon(Icons.info_outline, size: 56, color: Colors.grey.shade500),
+        const SizedBox(height: 16),
+        Text(message, textAlign: TextAlign.center, style: AppTheme.bodyMedium),
+      ],
     );
   }
 
@@ -210,7 +259,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('TỪ NGÀY', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                    const Text(
+                      'TỪ NGÀY',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(height: 4),
                     Text(
                       _startDate != null
@@ -226,7 +281,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('ĐẾN NGÀY', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                    const Text(
+                      'ĐẾN NGÀY',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(height: 4),
                     Text(
                       _endDate != null
@@ -243,7 +304,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primary,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 child: const Text('Lọc'),
               ),
@@ -268,7 +331,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     color: isSelected ? Colors.white : AppTheme.textSecondary,
                     fontWeight: FontWeight.w600,
                   ),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
                 ),
               );
             }).toList(),
@@ -278,13 +343,44 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     );
   }
 
-  Widget _buildOverviewGrid(int totalReceived, int totalProcessing, int totalCompleted, int totalFailed, double avgTime) {
+  Widget _buildOverviewGrid(
+    int totalReceived,
+    int totalProcessing,
+    int totalCompleted,
+    int totalFailed,
+    double avgTime,
+  ) {
     final items = [
-      {'icon': Icons.move_to_inbox, 'label': 'TỔNG TIẾP NHẬN', 'value': _formatNumber(totalReceived), 'color': AppTheme.primary},
-      {'icon': Icons.hourglass_empty, 'label': 'ĐANG XỬ LÝ', 'value': _formatNumber(totalProcessing), 'color': AppTheme.warning},
-      {'icon': Icons.check_circle, 'label': 'HOÀN THÀNH', 'value': _formatNumber(totalCompleted), 'color': AppTheme.success},
-      {'icon': Icons.error, 'label': 'LỖI', 'value': _formatNumber(totalFailed), 'color': AppTheme.error},
-      {'icon': Icons.timer, 'label': 'THỜI GIAN XỬ LÝ TB', 'value': '${avgTime.toStringAsFixed(1)}s', 'color': AppTheme.primary},
+      {
+        'icon': Icons.move_to_inbox,
+        'label': 'TỔNG TIẾP NHẬN',
+        'value': _formatNumber(totalReceived),
+        'color': AppTheme.primary,
+      },
+      {
+        'icon': Icons.hourglass_empty,
+        'label': 'ĐANG XỬ LÝ',
+        'value': _formatNumber(totalProcessing),
+        'color': AppTheme.warning,
+      },
+      {
+        'icon': Icons.check_circle,
+        'label': 'HOÀN THÀNH',
+        'value': _formatNumber(totalCompleted),
+        'color': AppTheme.success,
+      },
+      {
+        'icon': Icons.error,
+        'label': 'LỖI',
+        'value': _formatNumber(totalFailed),
+        'color': AppTheme.error,
+      },
+      {
+        'icon': Icons.timer,
+        'label': 'THỜI GIAN XỬ LÝ TB',
+        'value': '${avgTime.toStringAsFixed(1)}s',
+        'color': AppTheme.primary,
+      },
     ];
 
     return GridView.count(
@@ -306,11 +402,29 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(item['icon'] as IconData, size: 24, color: item['color'] as Color),
+              Icon(
+                item['icon'] as IconData,
+                size: 24,
+                color: item['color'] as Color,
+              ),
               const SizedBox(height: 8),
-              Text(item['label'] as String, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.textHint)),
+              Text(
+                item['label'] as String,
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textHint,
+                ),
+              ),
               const SizedBox(height: 4),
-              Text(item['value'] as String, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: item['color'] as Color)),
+              Text(
+                item['value'] as String,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: item['color'] as Color,
+                ),
+              ),
             ],
           ),
         );
@@ -330,7 +444,23 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Widget _buildBarChartCard() {
-    final maxCount = _dailyData.isEmpty ? 1 : (_dailyData.map<int>((e) => e['count'] as int).reduce((a, b) => a > b ? a : b));
+    if (_dailyData.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: AppTheme.cardShadow,
+        ),
+        child: Text('Chưa có dữ liệu theo ngày', style: AppTheme.bodySmall),
+      );
+    }
+
+    final maxCount = _dailyData.isEmpty
+        ? 1
+        : (_dailyData
+              .map<int>((e) => e['count'] as int)
+              .reduce((a, b) => a > b ? a : b));
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -344,8 +474,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Biểu đồ theo ngày', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              Icon(Icons.bar_chart, color: AppTheme.textHint.withOpacity(0.4)),
+              const Text(
+                'Biểu đồ theo ngày',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              Icon(
+                Icons.bar_chart,
+                color: AppTheme.textHint.withValues(alpha: 0.4),
+              ),
             ],
           ),
           const SizedBox(height: 20),
@@ -370,7 +506,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Text(item['day'], style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                      Text(
+                        item['day'],
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ],
                   ),
                 );
@@ -383,17 +525,32 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   }
 
   Widget _buildFruitDistributionCard() {
-    int total = _fruitData.fold<int>(0, (sum, item) => sum + (item['count'] as int? ?? 0));
-    final displayData = _fruitData.isEmpty
-        ? [
-            {'fruitType': 'strawberry', 'count': 50},
-            {'fruitType': 'raspberry', 'count': 30},
-            {'fruitType': 'grape', 'count': 20},
-          ]
-        : _fruitData;
+    int total = _fruitData.fold<int>(
+      0,
+      (sum, item) => sum + (item['count'] as int? ?? 0),
+    );
+    if (_fruitData.isEmpty || total == 0) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: AppTheme.cardShadow,
+        ),
+        child: Text(
+          'Chưa có thống kê theo loại trái cây',
+          style: AppTheme.bodySmall,
+        ),
+      );
+    }
 
-    // Recalculate total after possible mock
-    total = displayData.fold<int>(0, (sum, item) => sum + (item['count'] as int));
+    final displayData = _fruitData;
+
+    // Recalculate total from API data.
+    total = displayData.fold<int>(
+      0,
+      (sum, item) => sum + (item['count'] as int),
+    );
 
     // Build SweepGradient stops
     List<double> stops = [];
@@ -424,8 +581,14 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Loại trái cây', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              Icon(Icons.pie_chart, color: AppTheme.textHint.withOpacity(0.4)),
+              const Text(
+                'Loại trái cây',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              Icon(
+                Icons.pie_chart,
+                color: AppTheme.textHint.withValues(alpha: 0.4),
+              ),
             ],
           ),
           const SizedBox(height: 20),
@@ -442,10 +605,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       height: 100,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        gradient: SweepGradient(
-                          colors: colors,
-                          stops: stops,
-                        ),
+                        gradient: SweepGradient(colors: colors, stops: stops),
                       ),
                     ),
                     Container(
@@ -458,7 +618,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       child: Center(
                         child: Text(
                           '$total',
-                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
@@ -484,8 +647,19 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          Expanded(child: Text(_fruitNames[fruitType] ?? fruitType, style: const TextStyle(fontSize: 12))),
-                          Text('$count', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                          Expanded(
+                            child: Text(
+                              _fruitNames[fruitType] ?? fruitType,
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          ),
+                          Text(
+                            '$count',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
                         ],
                       ),
                     );
@@ -498,4 +672,15 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       ),
     );
   }
+}
+
+int _asInt(Object? value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  return int.tryParse(value?.toString() ?? '') ?? 0;
+}
+
+double _asDouble(Object? value) {
+  if (value is num) return value.toDouble();
+  return double.tryParse(value?.toString() ?? '') ?? 0;
 }

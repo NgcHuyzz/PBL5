@@ -3,19 +3,19 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shimmer/shimmer.dart';
 import 'dart:async';
 import '../services/system_service.dart';
-import '../services/auth_service.dart';
 import '../utils/theme.dart';
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+  final String? systemId;
+  const DashboardScreen({super.key, this.systemId});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  late Timer _timer;
-  late String systemId;
+  Timer? _timer;
+  String? _systemId;
 
   bool _isLoading = true;
   Map<String, dynamic> _controlState = {};
@@ -26,7 +26,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-  systemId = 'c9fd27b7-a693-4a91-a144-2200c1dad56b';
+    _systemId = widget.systemId;
+    if (_systemId == null || _systemId!.isEmpty) {
+      _isLoading = false;
+      _errorMessage = 'Chưa chọn hệ thống';
+      return;
+    }
+
     _loadDashboardData();
     _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
       _refreshData();
@@ -35,20 +41,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   void dispose() {
-    _timer.cancel();
+    _timer?.cancel();
     super.dispose();
   }
 
   Future<void> _loadDashboardData() async {
+    if (_systemId == null || _systemId!.isEmpty) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Chưa chọn hệ thống';
+      });
+      return;
+    }
+
     setState(() {
       _isLoading = true;
       _errorMessage = '';
     });
 
-    await Future.wait([
-      _fetchControlState(),
-      _fetchLatestDetection(),
-    ]);
+    await Future.wait([_fetchControlState(), _fetchLatestDetection()]);
+
+    if (!mounted) return;
 
     setState(() {
       _isLoading = false;
@@ -56,15 +69,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _refreshData() async {
-    await Future.wait([
-      _fetchControlState(),
-      _fetchLatestDetection(),
-    ]);
+    await Future.wait([_fetchControlState(), _fetchLatestDetection()]);
+    if (!mounted) return;
     setState(() {});
   }
 
   Future<void> _fetchControlState() async {
+    final systemId = _systemId;
+    if (systemId == null) return;
+
     final result = await SystemService.getControlState(systemId);
+    if (!mounted) return;
+
     if (result['success'] == true) {
       setState(() {
         _controlState = result['data'] ?? {};
@@ -78,7 +94,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _fetchLatestDetection() async {
+    final systemId = _systemId;
+    if (systemId == null) return;
+
     final result = await SystemService.getLatestDetection(systemId);
+    if (!mounted) return;
+
     if (result['success'] == true) {
       setState(() {
         _latestDetection = result['data'] ?? {};
@@ -87,12 +108,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _handleControl(String action) async {
+    final systemId = _systemId;
+    if (systemId == null) return;
+
     final result = await SystemService.controlSystem(systemId, action);
+    if (!mounted) return;
+
     if (result['success'] == true) {
       await _fetchControlState();
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Đã ${action == 'START' ? 'khởi động' : action == 'PAUSE' ? 'tạm dừng' : 'dừng'} hệ thống'),
+          content: Text(
+            'Đã ${action == 'START'
+                ? 'khởi động'
+                : action == 'PAUSE'
+                ? 'tạm dừng'
+                : 'dừng'} hệ thống',
+          ),
           backgroundColor: AppTheme.primaryGreen,
           behavior: SnackBarBehavior.floating,
         ),
@@ -159,15 +192,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Container(
-        decoration: BoxDecoration(
-          gradient: AppTheme.backgroundGradient,
-        ),
+        decoration: BoxDecoration(gradient: AppTheme.backgroundGradient),
         child: SafeArea(
           child: RefreshIndicator(
             onRefresh: _loadDashboardData,
             color: AppTheme.primaryGreen,
             child: _isLoading
                 ? _buildShimmerLoading()
+                : _errorMessage.isNotEmpty
+                ? _buildMessageState(_errorMessage)
                 : SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
                     padding: const EdgeInsets.all(20),
@@ -177,23 +210,45 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         // Header
                         _buildHeader(),
                         const SizedBox(height: 24),
-                        
+
                         // Control State Card
-                        _buildControlStateCard().animate().fadeIn(duration: 300.ms).slideY(begin: 0.1),
+                        _buildControlStateCard()
+                            .animate()
+                            .fadeIn(duration: 300.ms)
+                            .slideY(begin: 0.1),
                         const SizedBox(height: 20),
-                        
+
                         // Control Buttons
-                        _buildControlButtons().animate().fadeIn(duration: 400.ms).slideY(begin: 0.1),
+                        _buildControlButtons()
+                            .animate()
+                            .fadeIn(duration: 400.ms)
+                            .slideY(begin: 0.1),
                         const SizedBox(height: 20),
-                        
+
                         // Latest Detection Card
-                        _buildLatestDetectionCard().animate().fadeIn(duration: 500.ms).slideY(begin: 0.1),
+                        _buildLatestDetectionCard()
+                            .animate()
+                            .fadeIn(duration: 500.ms)
+                            .slideY(begin: 0.1),
                       ],
                     ),
                   ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildMessageState(String message) {
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(24),
+      children: [
+        const SizedBox(height: 120),
+        Icon(Icons.info_outline, size: 56, color: Colors.grey.shade500),
+        const SizedBox(height: 16),
+        Text(message, textAlign: TextAlign.center, style: AppTheme.bodyStyle),
+      ],
     );
   }
 
@@ -206,20 +261,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
             gradient: AppTheme.primaryGradient,
             shape: BoxShape.circle,
           ),
-          child: const Icon(Icons.qr_code_scanner, color: Colors.white, size: 24),
+          child: const Icon(
+            Icons.qr_code_scanner,
+            color: Colors.white,
+            size: 24,
+          ),
         ),
         const SizedBox(width: 12),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Fruit Sorter',
-              style: AppTheme.headingStyle,
-            ),
-            Text(
-              'Hệ thống phân loại thông minh',
-              style: AppTheme.bodyStyle,
-            ),
+            Text('Fruit Sorter', style: AppTheme.headingStyle),
+            Text('Hệ thống phân loại thông minh', style: AppTheme.bodyStyle),
           ],
         ),
       ],
@@ -234,11 +287,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            Container(height: 100, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))),
+            Container(
+              height: 100,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
             const SizedBox(height: 20),
-            Container(height: 150, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))),
+            Container(
+              height: 150,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
             const SizedBox(height: 20),
-            Container(height: 200, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))),
+            Container(
+              height: 200,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
           ],
         ),
       ),
@@ -249,7 +320,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      shadowColor: Colors.black.withOpacity(0.1),
+      shadowColor: Colors.black.withValues(alpha: 0.1),
       child: Container(
         decoration: BoxDecoration(
           gradient: AppTheme.primaryGradient,
@@ -265,7 +336,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   SizedBox(width: 12),
                   Text(
                     'Trạng thái hệ thống',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                 ],
               ),
@@ -273,7 +348,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
@@ -284,7 +359,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       style: TextStyle(fontSize: 18, color: Colors.white),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(30),
@@ -320,10 +398,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               children: [
                 Icon(Icons.control_camera, color: AppTheme.primaryGreen),
                 const SizedBox(width: 12),
-                Text(
-                  'Điều khiển hệ thống',
-                  style: AppTheme.subheadingStyle,
-                ),
+                Text('Điều khiển hệ thống', style: AppTheme.subheadingStyle),
               ],
             ),
             const SizedBox(height: 20),
@@ -334,19 +409,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   icon: Icons.play_arrow,
                   label: 'Start',
                   color: Colors.green,
-                  onPressed: _currentSystemStatus == 'RUNNING' ? null : () => _handleControl('START'),
+                  onPressed: _currentSystemStatus == 'RUNNING'
+                      ? null
+                      : () => _handleControl('START'),
                 ),
                 _buildControlButton(
                   icon: Icons.pause,
                   label: 'Pause',
                   color: Colors.orange,
-                  onPressed: _currentSystemStatus == 'PAUSED' ? null : () => _handleControl('PAUSE'),
+                  onPressed: _currentSystemStatus == 'PAUSED'
+                      ? null
+                      : () => _handleControl('PAUSE'),
                 ),
                 _buildControlButton(
                   icon: Icons.stop,
                   label: 'Stop',
                   color: Colors.red,
-                  onPressed: _currentSystemStatus == 'STOPPED' ? null : () => _handleControl('STOP'),
+                  onPressed: _currentSystemStatus == 'STOPPED'
+                      ? null
+                      : () => _handleControl('STOP'),
                 ),
               ],
             ),
@@ -379,7 +460,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
         const SizedBox(height: 8),
-        Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+        ),
       ],
     );
   }
@@ -393,7 +477,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
           padding: const EdgeInsets.all(32),
           child: Column(
             children: [
-              Icon(Icons.hourglass_empty, size: 48, color: Colors.grey.shade400),
+              Icon(
+                Icons.hourglass_empty,
+                size: 48,
+                color: Colors.grey.shade400,
+              ),
               const SizedBox(height: 12),
               Text(
                 'Chưa có dữ liệu phân loại',
@@ -437,18 +525,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: Column(
                   children: [
                     Text(
-                      _getFruitName(_latestDetection['fruitType'] ?? '?'),
+                      _getFruitName(
+                        _latestDetection['fruitType']?.toString() ?? '?',
+                      ),
                       style: const TextStyle(fontSize: 56),
                     ),
                     const SizedBox(height: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.2),
+                        color: Colors.green.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        'Độ tin cậy: ${((_latestDetection['confidence'] ?? 0) * 100).toInt()}%',
+                        'Độ tin cậy: ${(_asDouble(_latestDetection['confidence']) * 100).toInt()}%',
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -456,16 +549,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('ID:', style: TextStyle(color: Colors.grey.shade600)),
-                        Text(_latestDetection['id'] ?? '---'),
+                        Text(
+                          'ID:',
+                          style: TextStyle(color: Colors.grey.shade600),
+                        ),
+                        Text(_latestDetection['id']?.toString() ?? '---'),
                       ],
                     ),
                     const SizedBox(height: 4),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Thời gian:', style: TextStyle(color: Colors.grey.shade600)),
-                        Text(_latestDetection['classifiedAt'] ?? '---'),
+                        Text(
+                          'Thời gian:',
+                          style: TextStyle(color: Colors.grey.shade600),
+                        ),
+                        Text(
+                          _latestDetection['classifiedAt']?.toString() ?? '---',
+                        ),
                       ],
                     ),
                   ],
@@ -477,4 +578,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
+}
+
+double _asDouble(Object? value) {
+  if (value is num) return value.toDouble();
+  return double.tryParse(value?.toString() ?? '') ?? 0;
 }
