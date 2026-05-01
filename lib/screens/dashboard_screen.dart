@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shimmer/shimmer.dart';
 import 'dart:async';
 import '../services/system_service.dart';
+import '../utils/app_sizes.dart';
 import '../utils/theme.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -203,27 +204,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ? _buildMessageState(_errorMessage)
                 : SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(AppSizes.spacingXL),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Header
                         _buildHeader(),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: AppSizes.spacingXXL),
 
                         // Control State Card
                         _buildControlStateCard()
                             .animate()
                             .fadeIn(duration: 300.ms)
                             .slideY(begin: 0.1),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: AppSizes.spacingXL),
 
                         // Control Buttons
                         _buildControlButtons()
                             .animate()
                             .fadeIn(duration: 400.ms)
                             .slideY(begin: 0.1),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: AppSizes.spacingXL),
 
                         // Latest Detection Card
                         _buildLatestDetectionCard()
@@ -242,11 +243,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildMessageState(String message) {
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(AppSizes.spacingXXL),
       children: [
-        const SizedBox(height: 120),
-        Icon(Icons.info_outline, size: 56, color: Colors.grey.shade500),
-        const SizedBox(height: 16),
+        const SizedBox(height: 96),
+        Icon(Icons.info_outline, size: AppSizes.iconXXLarge, color: Colors.grey.shade500),
+        const SizedBox(height: AppSizes.spacingL),
         Text(message, textAlign: TextAlign.center, style: AppTheme.bodyStyle),
       ],
     );
@@ -256,7 +257,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Row(
       children: [
         Container(
-          padding: const EdgeInsets.all(10),
+          padding: const EdgeInsets.all(AppSizes.spacingS),
           decoration: BoxDecoration(
             gradient: AppTheme.primaryGradient,
             shape: BoxShape.circle,
@@ -264,10 +265,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: const Icon(
             Icons.qr_code_scanner,
             color: Colors.white,
-            size: 24,
+            size: AppSizes.iconMedium,
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: AppSizes.spacingM),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -284,30 +285,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
       baseColor: Colors.grey.shade300,
       highlightColor: Colors.grey.shade100,
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(AppSizes.spacingXL),
         child: Column(
           children: [
             Container(
-              height: 100,
+              height: 80,
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(AppSizes.radiusL),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSizes.spacingXL),
             Container(
-              height: 150,
+              height: 120,
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(AppSizes.radiusL),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSizes.spacingXL),
             Container(
-              height: 200,
+              height: 160,
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(AppSizes.radiusL),
               ),
             ),
           ],
@@ -319,58 +320,58 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildControlStateCard() {
     return Card(
       elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusXXL)),
       shadowColor: Colors.black.withValues(alpha: 0.1),
       child: Container(
         decoration: BoxDecoration(
           gradient: AppTheme.primaryGradient,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(AppSizes.radiusXXL),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(AppSizes.spacingXXL),
           child: Column(
             children: [
               const Row(
                 children: [
-                  Icon(Icons.toggle_on, color: Colors.white, size: 28),
-                  SizedBox(width: 12),
+                  Icon(Icons.toggle_on, color: Colors.white, size: AppSizes.iconLarge),
+                  SizedBox(width: AppSizes.spacingM),
                   Text(
                     'Trạng thái hệ thống',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: AppSizes.fontHeadlineMedium,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSizes.spacingXL),
               Container(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(AppSizes.spacingXL),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(AppSizes.radiusXL),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text(
                       'Trạng thái:',
-                      style: TextStyle(fontSize: 18, color: Colors.white),
+                      style: TextStyle(fontSize: AppSizes.fontHeadlineMedium, color: Colors.white),
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 8,
+                        horizontal: AppSizes.spacingXL,
+                        vertical: AppSizes.spacingS,
                       ),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(30),
+                        borderRadius: BorderRadius.circular(AppSizes.radiusXXL),
                       ),
                       child: Text(
                         _getStatusText(_currentSystemStatus),
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: AppSizes.fontTitleLarge,
                           fontWeight: FontWeight.bold,
                           color: _getStatusColor(_currentSystemStatus),
                         ),
@@ -389,19 +390,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildControlButtons() {
     return Card(
       elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusXXL)),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(AppSizes.spacingXL),
         child: Column(
           children: [
             Row(
               children: [
                 Icon(Icons.control_camera, color: AppTheme.primaryGreen),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSizes.spacingM),
                 Text('Điều khiển hệ thống', style: AppTheme.subheadingStyle),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSizes.spacingXL),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -453,16 +454,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
               backgroundColor: color,
               foregroundColor: Colors.white,
               shape: const CircleBorder(),
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(AppSizes.spacingXL),
               elevation: onPressed == null ? 0 : 4,
             ),
-            child: Icon(icon, size: 32),
+            child: Icon(icon, size: AppSizes.iconLarge),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSizes.spacingS),
         Text(
           label,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+          style: const TextStyle(fontSize: AppSizes.fontBody, fontWeight: FontWeight.w500),
         ),
       ],
     );
@@ -472,17 +473,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (_latestDetection.isEmpty) {
       return Card(
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusXXL)),
         child: Padding(
-          padding: const EdgeInsets.all(32),
+          padding: const EdgeInsets.all(AppSizes.spacingXXL),
           child: Column(
             children: [
               Icon(
                 Icons.hourglass_empty,
-                size: 48,
+                size: AppSizes.iconXLarge,
                 color: Colors.grey.shade400,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSizes.spacingM),
               Text(
                 'Chưa có dữ liệu phân loại',
                 style: TextStyle(color: Colors.grey.shade600),
@@ -495,7 +496,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     return Card(
       elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusXXL)),
       child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -503,24 +504,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
             end: Alignment.bottomRight,
             colors: [Colors.orange.shade50, Colors.white],
           ),
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(AppSizes.radiusXXL),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(AppSizes.spacingXL),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Row(
                 children: [
                   Icon(Icons.qr_code_scanner, color: Colors.orange),
-                  SizedBox(width: 12),
+                  SizedBox(width: AppSizes.spacingM),
                   Text(
                     'Kết quả phân loại mới nhất',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: AppSizes.fontHeadlineMedium, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSizes.spacingL),
               Center(
                 child: Column(
                   children: [
@@ -528,24 +529,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       _getFruitName(
                         _latestDetection['fruitType']?.toString() ?? '?',
                       ),
-                      style: const TextStyle(fontSize: 56),
+                      style: const TextStyle(fontSize: AppSizes.iconXXLarge),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSizes.spacingS),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
+                        horizontal: AppSizes.spacingL,
+                        vertical: AppSizes.spacingS,
                       ),
                       decoration: BoxDecoration(
                         color: Colors.green.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(AppSizes.radiusXL),
                       ),
                       child: Text(
                         'Độ tin cậy: ${(_asDouble(_latestDetection['confidence']) * 100).toInt()}%',
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSizes.spacingM),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -556,7 +557,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Text(_latestDetection['id']?.toString() ?? '---'),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSizes.spacingXS),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [

@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../models/user.dart';
 import '../services/auth_service.dart';
+import '../utils/app_sizes.dart';
 
 const Color _primary = Color(0xFF8C0011);
 const Color _primaryContainer = Color(0xFFB01E23);
@@ -87,8 +88,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: _surface,
         elevation: 0,
         scrolledUnderElevation: 0,
-        toolbarHeight: 72,
-        leadingWidth: 72,
+        toolbarHeight: 58,
+        leadingWidth: 58,
         leading: IconButton(
           onPressed: () => Navigator.maybePop(context),
           icon: const Icon(Icons.arrow_back_rounded),
@@ -100,7 +101,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           'Thông tin cá nhân',
           style: GoogleFonts.manrope(
             color: _onSurface,
-            fontSize: 24,
+            fontSize: AppSizes.fontHeadlineLarge,
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -133,7 +134,7 @@ class _LoadingView extends StatelessWidget {
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       children: const [
-        SizedBox(height: 260),
+        SizedBox(height: 200),
         Center(child: CircularProgressIndicator(color: _primary)),
       ],
     );
@@ -165,15 +166,15 @@ class _ProfileContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final horizontalPadding = constraints.maxWidth >= 720 ? 32.0 : 28.0;
+        final horizontalPadding = constraints.maxWidth >= 720 ? AppSizes.spacingXXL : AppSizes.spacingXL;
 
         return ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: EdgeInsets.fromLTRB(
             horizontalPadding,
-            76,
+            AppSizes.spacingXXL,
             horizontalPadding,
-            56,
+            AppSizes.spacingXXL,
           ),
           children: [
             Center(
@@ -184,12 +185,12 @@ class _ProfileContent extends StatelessWidget {
                   children: [
                     _ProfileHeader(displayName: displayName),
                     if (errorMessage != null) ...[
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppSizes.spacingXL),
                       _ErrorBanner(message: errorMessage!, onRetry: onRetry),
                     ],
-                    const SizedBox(height: 58),
+                    const SizedBox(height: 46),
                     _SectionLabel(text: 'CHI TIẾT TÀI KHOẢN'),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: AppSizes.spacingXXL),
                     _InfoPanel(
                       children: [
                         _InfoRow(
@@ -215,15 +216,15 @@ class _ProfileContent extends StatelessWidget {
                           ),
                       ],
                     ),
-                    const SizedBox(height: 84),
+                    const SizedBox(height: 64),
                     _LogoutButton(onPressed: onLogout),
-                    const SizedBox(height: 46),
+                    const SizedBox(height: 36),
                     Text(
                       'AGRITECH ATELIER V2.4.0 • FACTORY CONTROL SYSTEM',
                       textAlign: TextAlign.center,
                       style: GoogleFonts.inter(
                         color: _onSurfaceVariant.withValues(alpha: 0.42),
-                        fontSize: 13,
+                        fontSize: AppSizes.fontCaption,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -246,10 +247,10 @@ class _ProfileHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 56, 24, 56),
+      padding: const EdgeInsets.fromLTRB(AppSizes.spacingXXL, 46.0, AppSizes.spacingXXL, 46.0),
       decoration: BoxDecoration(
         color: _surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppSizes.radiusM),
         border: Border.all(color: _outlineVariant.withValues(alpha: 0.16)),
         boxShadow: [
           BoxShadow(
@@ -262,7 +263,7 @@ class _ProfileHeader extends StatelessWidget {
       child: Column(
         children: [
           const _Avatar(),
-          const SizedBox(height: 54),
+          const SizedBox(height: 44),
           Text(
             displayName,
             textAlign: TextAlign.center,
@@ -270,7 +271,7 @@ class _ProfileHeader extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.manrope(
               color: _onSurface,
-              fontSize: 34,
+              fontSize: AppSizes.fontDisplayMedium,
               height: 1.08,
               fontWeight: FontWeight.w800,
             ),
@@ -287,30 +288,30 @@ class _Avatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 226,
-      height: 226,
+      width: 180,
+      height: 180,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
           Align(
             alignment: Alignment.topCenter,
             child: Container(
-              width: 220,
-              height: 220,
-              padding: const EdgeInsets.all(12),
+              width: 176,
+              height: 176,
+              padding: const EdgeInsets.all(AppSizes.spacingM),
               decoration: BoxDecoration(
                 color: _surfaceContainerLow,
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(AppSizes.radiusM),
               ),
               child: Container(
                 decoration: BoxDecoration(
                   color: const Color(0xFF33434E),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(AppSizes.radiusM),
                 ),
                 child: const Icon(
                   Icons.person_rounded,
                   color: Color(0xFFF6F3F2),
-                  size: 132,
+                  size: 104,
                 ),
               ),
             ),
@@ -319,11 +320,11 @@ class _Avatar extends StatelessWidget {
             right: -2,
             bottom: 0,
             child: Container(
-              width: 70,
-              height: 70,
+              width: 56,
+              height: 56,
               decoration: BoxDecoration(
                 color: _primaryContainer,
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(AppSizes.radiusL),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.16),
@@ -335,7 +336,7 @@ class _Avatar extends StatelessWidget {
               child: const Icon(
                 Icons.edit_rounded,
                 color: Colors.white,
-                size: 28,
+                size: AppSizes.iconLarge,
               ),
             ),
           ),
@@ -353,12 +354,12 @@ class _SectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14),
+      padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingM),
       child: Text(
         text,
         style: GoogleFonts.inter(
           color: _onSurfaceVariant.withValues(alpha: 0.62),
-          fontSize: 14,
+          fontSize: AppSizes.fontBody,
           fontWeight: FontWeight.w900,
           letterSpacing: 0,
         ),
@@ -377,7 +378,7 @@ class _InfoPanel extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: _surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppSizes.radiusM),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -410,20 +411,20 @@ class _InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(34, 36, 28, 36),
+      padding: const EdgeInsets.fromLTRB(AppSizes.spacingXXL, AppSizes.spacingXXL, AppSizes.spacingXL, AppSizes.spacingXXL),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            width: 70,
-            height: 70,
+            width: 56,
+            height: 56,
             decoration: BoxDecoration(
               color: _surfaceContainerLow,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppSizes.radiusM),
             ),
-            child: Icon(icon, color: _primary, size: 34),
+            child: Icon(icon, color: _primary, size: AppSizes.iconLarge),
           ),
-          const SizedBox(width: 28),
+          const SizedBox(width: AppSizes.spacingXXL),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -435,19 +436,19 @@ class _InfoRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.inter(
                     color: _onSurfaceVariant,
-                    fontSize: 13,
+                    fontSize: AppSizes.fontCaption,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 0,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSizes.spacingM),
                 Text(
                   value,
                   softWrap: true,
                   overflow: TextOverflow.visible,
                   style: GoogleFonts.inter(
                     color: _onSurface,
-                    fontSize: 24,
+                    fontSize: AppSizes.fontHeadlineLarge,
                     height: 1.18,
                     fontWeight: FontWeight.w700,
                   ),
@@ -469,10 +470,10 @@ class _LogoutButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 104,
+      height: 84,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(AppSizes.radiusM),
           gradient: const LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -488,11 +489,11 @@ class _LogoutButton extends StatelessWidget {
         ),
         child: ElevatedButton.icon(
           onPressed: onPressed,
-          icon: const Icon(Icons.logout_rounded, size: 34),
+          icon: const Icon(Icons.logout_rounded, size: AppSizes.iconLarge),
           label: Text(
             'Đăng xuất',
             style: GoogleFonts.manrope(
-              fontSize: 26,
+              fontSize: AppSizes.fontHeadlineLarge,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -501,7 +502,7 @@ class _LogoutButton extends StatelessWidget {
             shadowColor: Colors.transparent,
             foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(AppSizes.radiusM),
             ),
           ),
         ),
@@ -519,15 +520,15 @@ class _ErrorBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSizes.spacingL),
       decoration: BoxDecoration(
         color: const Color(0xFFFFDAD6),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppSizes.radiusM),
       ),
       child: Row(
         children: [
           const Icon(Icons.error_outline_rounded, color: Color(0xFF93000A)),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSizes.spacingM),
           Expanded(
             child: Text(
               message,

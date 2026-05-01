@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'app_sizes.dart';
+
 class AppTheme {
   // สีหลัก
   static const Color primaryGreen = Color(0xFF2E7D32);
@@ -33,24 +35,24 @@ class AppTheme {
 
   // Text Style
   static TextStyle headingStyle = GoogleFonts.poppins(
-    fontSize: 24,
+    fontSize: AppSizes.fontHeadlineMedium,
     fontWeight: FontWeight.bold,
     color: darkGreen,
   );
 
   static TextStyle subheadingStyle = GoogleFonts.poppins(
-    fontSize: 16,
+    fontSize: AppSizes.fontTitleLarge,
     fontWeight: FontWeight.w500,
     color: Colors.grey.shade700,
   );
 
   static TextStyle bodyStyle = GoogleFonts.roboto(
-    fontSize: 14,
+    fontSize: AppSizes.fontBody,
     color: Colors.grey.shade600,
   );
 
   static TextStyle buttonStyle = GoogleFonts.poppins(
-    fontSize: 16,
+    fontSize: AppSizes.fontTitleLarge,
     fontWeight: FontWeight.w600,
     color: Colors.white,
   );

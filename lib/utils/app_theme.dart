@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'app_sizes.dart';
+
 class AppTheme {
   // Primary Colors - Modern Teal
   static const Color primary = Color(0xFF006D5B);
@@ -58,45 +60,45 @@ class AppTheme {
 
   // Text Styles
   static TextStyle headlineLarge = GoogleFonts.poppins(
-    fontSize: 28,
+    fontSize: AppSizes.fontHeadlineLarge,
     fontWeight: FontWeight.bold,
     color: textPrimary,
     letterSpacing: -0.5,
   );
 
   static TextStyle headlineMedium = GoogleFonts.poppins(
-    fontSize: 22,
+    fontSize: AppSizes.fontHeadlineMedium,
     fontWeight: FontWeight.w600,
     color: textPrimary,
   );
 
   static TextStyle titleLarge = GoogleFonts.inter(
-    fontSize: 18,
+    fontSize: AppSizes.fontTitleLarge,
     fontWeight: FontWeight.w600,
     color: textPrimary,
   );
 
   static TextStyle titleMedium = GoogleFonts.inter(
-    fontSize: 16,
+    fontSize: AppSizes.fontTitleMedium,
     fontWeight: FontWeight.w500,
     color: textPrimary,
   );
 
   static TextStyle bodyMedium = GoogleFonts.inter(
-    fontSize: 14,
+    fontSize: AppSizes.fontBody,
     color: textSecondary,
   );
 
-  static TextStyle bodySmall = GoogleFonts.inter(fontSize: 12, color: textHint);
+  static TextStyle bodySmall = GoogleFonts.inter(fontSize: AppSizes.fontCaption, color: textHint);
 
   static TextStyle caption = GoogleFonts.inter(
-    fontSize: 10,
+    fontSize: AppSizes.fontCaption,
     color: textHint,
     letterSpacing: 0.5,
   );
 
   static TextStyle buttonText = GoogleFonts.poppins(
-    fontSize: 16,
+    fontSize: AppSizes.fontTitleMedium,
     fontWeight: FontWeight.w600,
     color: Colors.white,
   );

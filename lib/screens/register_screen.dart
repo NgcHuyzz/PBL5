@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/auth_service.dart';
+import '../utils/app_sizes.dart';
 import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -121,8 +122,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     keyboardDismissBehavior:
                         ScrollViewKeyboardDismissBehavior.onDrag,
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 32,
+                      horizontal: AppSizes.spacingXXL,
+                      vertical: AppSizes.spacingXXL,
                     ),
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
@@ -133,9 +134,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             _buildIdentity(),
-                            const SizedBox(height: 28),
+                            const SizedBox(height: AppSizes.spacingXXL),
                             _buildRegisterCard(context),
-                            const SizedBox(height: 32),
+                            const SizedBox(height: 26),
                             _buildDecorativeCaption(),
                           ],
                         ),
@@ -155,7 +156,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Container(
       width: double.infinity,
       color: _surface,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingL, vertical: AppSizes.spacingM),
       child: Row(
         children: [
           IconButton(
@@ -164,14 +165,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
             color: _primaryContainer,
             tooltip: 'Quay lại đăng nhập',
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: AppSizes.spacingXS),
           Expanded(
             child: Text(
               'Hệ thống Phân loại Trái cây',
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: GoogleFonts.manrope(
-                fontSize: 18,
+                fontSize: AppSizes.fontHeadlineMedium,
                 fontWeight: FontWeight.w800,
                 height: 1.12,
                 color: _primaryContainer,
@@ -187,8 +188,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Column(
       children: [
         Container(
-          width: 80,
-          height: 80,
+          width: 64,
+          height: 64,
           decoration: BoxDecoration(
             color: _primaryContainer,
             shape: BoxShape.circle,
@@ -200,25 +201,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
             ],
           ),
-          child: const Icon(Icons.eco_rounded, color: Colors.white, size: 40),
+          child: const Icon(Icons.eco_rounded, color: Colors.white, size: 32),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSizes.spacingL),
         Text(
           'Create account',
           textAlign: TextAlign.center,
           style: GoogleFonts.manrope(
-            fontSize: 30,
+            fontSize: AppSizes.fontDisplaySmall,
             fontWeight: FontWeight.w800,
             height: 1.12,
             color: _onBackground,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSizes.spacingXS),
         Text(
           'Join PBL5 Fruit Sorter to start intelligent classification today.',
           textAlign: TextAlign.center,
           style: GoogleFonts.inter(
-            fontSize: 14,
+            fontSize: AppSizes.fontBody,
             height: 1.45,
             fontWeight: FontWeight.w500,
             color: _onSurfaceVariant,
@@ -230,14 +231,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Widget _buildRegisterCard(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
-    final cardPadding = width < 380 ? 24.0 : 32.0;
+    final cardPadding = width < 380 ? AppSizes.spacingXXL : 26.0;
 
     return Container(
       width: double.infinity,
       constraints: const BoxConstraints(maxWidth: 448),
       decoration: BoxDecoration(
         color: _surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppSizes.radiusS),
         boxShadow: [
           BoxShadow(
             color: _onSurfaceVariant.withValues(alpha: 0.05),
@@ -256,18 +257,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
             Text(
               'Tạo tài khoản mới',
               style: GoogleFonts.manrope(
-                fontSize: 22,
+                fontSize: AppSizes.fontHeadlineLarge,
                 fontWeight: FontWeight.w800,
                 color: _onBackground,
               ),
             ),
-            const SizedBox(height: 28),
+            const SizedBox(height: AppSizes.spacingXXL),
             if (_errorMessage != null) ...[
               _buildErrorBanner(_errorMessage!),
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSizes.spacingXL),
             ],
             _buildLabel('Họ và tên'),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSizes.spacingXS),
             TextFormField(
               controller: _fullNameController,
               textInputAction: TextInputAction.next,
@@ -280,9 +281,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 return null;
               },
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSizes.spacingXL),
             _buildLabel('Tên đăng nhập'),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSizes.spacingXS),
             TextFormField(
               controller: _usernameController,
               textInputAction: TextInputAction.next,
@@ -298,9 +299,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 return null;
               },
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSizes.spacingXL),
             _buildLabel('Email'),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSizes.spacingXS),
             TextFormField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
@@ -317,9 +318,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 return null;
               },
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSizes.spacingXL),
             _buildLabel('Mật khẩu'),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSizes.spacingXS),
             TextFormField(
               controller: _passwordController,
               obscureText: _obscurePassword,
@@ -351,9 +352,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 return null;
               },
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSizes.spacingXL),
             _buildLabel('Xác nhận mật khẩu'),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSizes.spacingXS),
             TextFormField(
               controller: _confirmPasswordController,
               obscureText: _obscureConfirmPassword,
@@ -386,9 +387,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 return null;
               },
             ),
-            const SizedBox(height: 28),
+            const SizedBox(height: AppSizes.spacingXXL),
             _buildRegisterButton(),
-            const SizedBox(height: 28),
+            const SizedBox(height: AppSizes.spacingXXL),
             _buildLoginLink(),
           ],
         ),
@@ -400,7 +401,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Text(
       text,
       style: GoogleFonts.inter(
-        fontSize: 12,
+        fontSize: AppSizes.fontCaption,
         fontWeight: FontWeight.w800,
         letterSpacing: 0.8,
         color: _onSurfaceVariant,
@@ -417,48 +418,48 @@ class _RegisterScreenState extends State<RegisterScreen> {
       hintStyle: GoogleFonts.inter(color: _outlineVariant),
       filled: true,
       fillColor: _surfaceContainerLow,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+      contentPadding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingL, vertical: AppSizes.spacingM),
       suffixIcon: suffixIcon,
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppSizes.radiusS),
         borderSide: BorderSide.none,
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppSizes.radiusS),
         borderSide: BorderSide.none,
       ),
       focusedBorder: const UnderlineInputBorder(
         borderSide: BorderSide(color: _surfaceTint, width: 2),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(8)),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(AppSizes.radiusS)),
       ),
       errorBorder: const UnderlineInputBorder(
         borderSide: BorderSide(color: Colors.red, width: 2),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(8)),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(AppSizes.radiusS)),
       ),
       focusedErrorBorder: const UnderlineInputBorder(
         borderSide: BorderSide(color: Colors.red, width: 2),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(8)),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(AppSizes.radiusS)),
       ),
     );
   }
 
   Widget _buildErrorBanner(String message) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(AppSizes.spacingM),
       decoration: BoxDecoration(
         color: const Color(0xFFFFDAD6),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppSizes.radiusS),
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline, color: Color(0xFF93000A), size: 20),
-          const SizedBox(width: 10),
+          const Icon(Icons.error_outline, color: Color(0xFF93000A), size: AppSizes.iconSmall),
+          const SizedBox(width: AppSizes.spacingS),
           Expanded(
             child: Text(
               message,
               style: GoogleFonts.inter(
                 color: const Color(0xFF93000A),
-                fontSize: 12,
+                fontSize: AppSizes.fontCaption,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -470,7 +471,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Widget _buildRegisterButton() {
     return SizedBox(
-      height: 56,
+      height: 46,
       child: DecoratedBox(
         decoration: BoxDecoration(
           gradient: const LinearGradient(
@@ -478,7 +479,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             end: Alignment.bottomCenter,
             colors: [_primary, _primaryContainer],
           ),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppSizes.radiusS),
           boxShadow: [
             BoxShadow(
               color: _primary.withValues(alpha: 0.22),
@@ -495,7 +496,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             shadowColor: Colors.transparent,
             foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(AppSizes.radiusS),
             ),
           ),
           child: _isLoading
@@ -513,12 +514,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     Text(
                       'Đăng ký',
                       style: GoogleFonts.manrope(
-                        fontSize: 16,
+                        fontSize: AppSizes.fontTitleLarge,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    const Icon(Icons.how_to_reg_rounded, size: 20),
+                    const SizedBox(width: AppSizes.spacingS),
+                    const Icon(Icons.how_to_reg_rounded, size: AppSizes.iconSmall),
                   ],
                 ),
         ),
@@ -528,7 +529,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Widget _buildLoginLink() {
     return Container(
-      padding: const EdgeInsets.only(top: 24),
+      padding: const EdgeInsets.only(top: AppSizes.spacingXXL),
       decoration: BoxDecoration(
         border: Border(
           top: BorderSide(color: _outlineVariant.withValues(alpha: 0.45)),
@@ -541,7 +542,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           Text(
             'Đã có tài khoản?',
             style: GoogleFonts.inter(
-              fontSize: 14,
+              fontSize: AppSizes.fontBody,
               fontWeight: FontWeight.w500,
               color: _onSurfaceVariant,
             ),
@@ -559,7 +560,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: Text(
               'Đăng nhập',
               style: GoogleFonts.inter(
-                fontSize: 14,
+                fontSize: AppSizes.fontBody,
                 fontWeight: FontWeight.w800,
                 decoration: TextDecoration.underline,
                 decorationColor: _primary.withValues(alpha: 0.3),
@@ -579,8 +580,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 54,
-              height: 54,
+              width: 44,
+              height: 44,
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: LinearGradient(
@@ -591,14 +592,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               child: const Icon(Icons.spa_rounded, color: Colors.white),
             ),
-            const SizedBox(width: 14),
+            const SizedBox(width: AppSizes.spacingM),
             Container(width: 42, height: 1, color: _onSurfaceVariant),
-            const SizedBox(width: 14),
+            const SizedBox(width: AppSizes.spacingM),
             Flexible(
               child: Text(
                 'INDUSTRIAL HORTICULTURAL PRECISION',
                 style: GoogleFonts.inter(
-                  fontSize: 10,
+                  fontSize: AppSizes.fontCaption,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 2,
                   color: _onSurfaceVariant,

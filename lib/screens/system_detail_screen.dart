@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../services/system_service.dart';
+import '../utils/app_sizes.dart';
 import 'history_screen.dart';
 import 'notifications_screen.dart';
 import 'profile_screen.dart';
@@ -244,7 +245,7 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
           overflow: TextOverflow.ellipsis,
           style: GoogleFonts.manrope(
             color: _primaryContainer,
-            fontSize: 20,
+            fontSize: AppSizes.fontHeadlineMedium,
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -256,7 +257,7 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
             tooltip: 'Thông báo',
           ),
           Padding(
-            padding: const EdgeInsets.only(right: 16),
+            padding: const EdgeInsets.only(right: AppSizes.spacingL),
             child: InkWell(
               onTap: _openProfile,
               borderRadius: BorderRadius.circular(999),
@@ -273,7 +274,7 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
                 child: const Icon(
                   Icons.person_rounded,
                   color: _primaryContainer,
-                  size: 22,
+                  size: AppSizes.iconMedium,
                 ),
               ),
             ),
@@ -291,7 +292,7 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
                 builder: (context, constraints) {
                   return SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.fromLTRB(20, 28, 20, 56),
+                    padding: const EdgeInsets.fromLTRB(AppSizes.spacingXL, AppSizes.spacingXXL, AppSizes.spacingXL, AppSizes.spacingXXL),
                     child: Center(
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 680),
@@ -299,11 +300,11 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             _buildStatusCard(),
-                            const SizedBox(height: 28),
+                            const SizedBox(height: AppSizes.spacingXXL),
                             _buildControls(),
-                            const SizedBox(height: 30),
+                            const SizedBox(height: AppSizes.spacingXXL),
                             _buildLatestDetection(constraints.maxWidth),
-                            const SizedBox(height: 34),
+                            const SizedBox(height: AppSizes.spacingXXL),
                             _buildRecentClassifications(),
                           ],
                         ),
@@ -323,15 +324,15 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
 
   Widget _buildMessageState(String message) {
     return ListView(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(AppSizes.spacingXXL),
       children: [
-        const SizedBox(height: 120),
-        Icon(Icons.info_outline_rounded, size: 56, color: _onSurfaceVariant),
-        const SizedBox(height: 16),
+        const SizedBox(height: 96),
+        Icon(Icons.info_outline_rounded, size: AppSizes.iconXXLarge, color: _onSurfaceVariant),
+        const SizedBox(height: AppSizes.spacingL),
         Text(
           message,
           textAlign: TextAlign.center,
-          style: GoogleFonts.inter(fontSize: 14, color: _onSurfaceVariant),
+          style: GoogleFonts.inter(fontSize: AppSizes.fontBody, color: _onSurfaceVariant),
         ),
       ],
     );
@@ -341,10 +342,10 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
     final status = _statusStyle(_currentStatus);
 
     return Container(
-      padding: const EdgeInsets.all(28),
+      padding: const EdgeInsets.all(AppSizes.spacingXXL),
       decoration: BoxDecoration(
         color: _surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppSizes.radiusM),
         boxShadow: _softShadow,
       ),
       child: Row(
@@ -357,22 +358,22 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
                   'TRẠNG THÁI HỆ THỐNG',
                   style: GoogleFonts.inter(
                     color: _onSurfaceVariant,
-                    fontSize: 14,
+                    fontSize: AppSizes.fontBody,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSizes.spacingM),
                 Row(
                   children: [
                     Container(
-                      width: 13,
-                      height: 13,
+                      width: 10,
+                      height: 10,
                       decoration: BoxDecoration(
                         color: status.color,
                         shape: BoxShape.circle,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: AppSizes.spacingM),
                     Flexible(
                       child: Text(
                         status.label,
@@ -380,7 +381,7 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.manrope(
                           color: status.color,
-                          fontSize: 36,
+                          fontSize: AppSizes.fontDisplaySmall,
                           height: 1,
                           fontWeight: FontWeight.w800,
                         ),
@@ -391,18 +392,18 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
               ],
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: AppSizes.spacingL),
           Container(
-            width: 62,
-            height: 62,
+            width: 50,
+            height: 50,
             decoration: BoxDecoration(
               color: status.containerColor,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(AppSizes.radiusL),
             ),
             child: Icon(
               Icons.precision_manufacturing_rounded,
               color: status.iconColor,
-              size: 34,
+              size: AppSizes.iconLarge,
             ),
           ),
         ],
@@ -420,14 +421,14 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
           isMuted: _currentStatus.toUpperCase() == 'RUNNING',
           onPressed: () => _handleControl('START'),
         ),
-        const SizedBox(width: 14),
+        const SizedBox(width: AppSizes.spacingM),
         _buildControlTile(
           label: 'PAUSE',
           icon: Icons.pause_rounded,
           color: _primary,
           onPressed: () => _handleControl('PAUSE'),
         ),
-        const SizedBox(width: 14),
+        const SizedBox(width: AppSizes.spacingM),
         _buildControlTile(
           label: 'STOP',
           icon: Icons.stop_rounded,
@@ -447,28 +448,28 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
   }) {
     return Expanded(
       child: SizedBox(
-        height: 108,
+        height: 86,
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: isMuted ? _surfaceContainerLow : _surfaceContainerLowest,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppSizes.radiusM),
             boxShadow: isMuted ? null : _softShadow,
           ),
           child: Material(
             color: Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppSizes.radiusM),
             child: InkWell(
               onTap: onPressed,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppSizes.radiusM),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
                     icon,
-                    size: 36,
+                    size: AppSizes.iconLarge,
                     color: isMuted ? _onSurface.withValues(alpha: 0.28) : color,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSizes.spacingS),
                   Text(
                     label,
                     maxLines: 1,
@@ -477,7 +478,7 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
                       color: isMuted
                           ? _onSurface.withValues(alpha: 0.34)
                           : _onSurface,
-                      fontSize: 13,
+                      fontSize: AppSizes.fontBody,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
@@ -501,11 +502,11 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _SectionTitle('Kết quả mới nhất'),
-        const SizedBox(height: 20),
+        const SizedBox(height: AppSizes.spacingXL),
         Container(
           decoration: BoxDecoration(
             color: _surfaceContainerLowest,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppSizes.radiusM),
             boxShadow: _softShadow,
           ),
           clipBehavior: Clip.antiAlias,
@@ -550,20 +551,20 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _SectionTitle('Phân loại gần đây'),
-        const SizedBox(height: 20),
+        const SizedBox(height: AppSizes.spacingXL),
         if (_recentDetections.isEmpty)
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(AppSizes.spacingXL),
             decoration: BoxDecoration(
               color: _surfaceContainerLowest,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppSizes.radiusM),
               boxShadow: _softShadow,
             ),
             child: Text(
               'Chưa có phân loại gần đây',
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(fontSize: 13, color: _onSurfaceVariant),
+              style: GoogleFonts.inter(fontSize: AppSizes.fontBody, color: _onSurfaceVariant),
             ),
           )
         else
@@ -579,17 +580,17 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
     final imageUrl = item['imageUrl']?.toString();
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
+      margin: const EdgeInsets.only(bottom: AppSizes.spacingM),
+      padding: const EdgeInsets.all(AppSizes.spacingM),
       decoration: BoxDecoration(
         color: _surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppSizes.radiusM),
         boxShadow: _softShadow,
       ),
       child: Row(
         children: [
           _RecentThumb(imageUrl: imageUrl, token: _token),
-          const SizedBox(width: 16),
+          const SizedBox(width: AppSizes.spacingL),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -600,25 +601,25 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.inter(
                     color: _onSurface,
-                    fontSize: 16,
+                    fontSize: AppSizes.fontTitleLarge,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSizes.spacingXS),
                 Text(
                   '${_formatTime(item['classifiedAt']?.toString())} • $bin',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.inter(
                     color: _onSurfaceVariant,
-                    fontSize: 13,
+                    fontSize: AppSizes.fontBody,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSizes.spacingM),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -626,7 +627,7 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
                 _formatConfidence(confidence),
                 style: GoogleFonts.inter(
                   color: _secondary,
-                  fontSize: 16,
+                  fontSize: AppSizes.fontTitleLarge,
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -634,7 +635,7 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
                 'Confidence',
                 style: GoogleFonts.inter(
                   color: _onSurfaceVariant,
-                  fontSize: 10,
+                  fontSize: AppSizes.fontCaption,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -662,8 +663,8 @@ class _SystemBottomNav extends StatelessWidget {
     return SafeArea(
       top: false,
       child: Container(
-        height: 80,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+        height: 64,
+        padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingXL, vertical: AppSizes.spacingS),
         decoration: BoxDecoration(
           color: _surfaceContainerLowest,
           border: Border(
@@ -726,25 +727,25 @@ class _SystemBottomNavItem extends StatelessWidget {
           color: isSelected
               ? const Color(0xFFFFDAD6).withValues(alpha: 0.3)
               : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppSizes.radiusM),
           child: InkWell(
             onTap: onTap,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppSizes.radiusM),
             child: Container(
               constraints: const BoxConstraints(minWidth: 78),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingM, vertical: AppSizes.spacingXS),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(icon, color: color, size: 24),
-                  const SizedBox(height: 4),
+                  Icon(icon, color: color, size: AppSizes.iconMedium),
+                  const SizedBox(height: AppSizes.spacingXS),
                   Text(
                     label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.inter(
                       color: color,
-                      fontSize: 10,
+                      fontSize: AppSizes.fontCaption,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
@@ -766,12 +767,12 @@ class _SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
+      padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingXS),
       child: Text(
         text,
         style: GoogleFonts.manrope(
           color: _onSurface,
-          fontSize: 24,
+          fontSize: AppSizes.fontHeadlineLarge,
           fontWeight: FontWeight.w800,
         ),
       ),
@@ -808,7 +809,7 @@ class _DetectionImage extends StatelessWidget {
               child: const Icon(
                 Icons.qr_code_scanner_rounded,
                 color: Color(0xFFB9EEAB),
-                size: 90,
+                size: 72,
               ),
             ),
           const DecoratedBox(
@@ -824,16 +825,16 @@ class _DetectionImage extends StatelessWidget {
             left: 20,
             bottom: 18,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingM, vertical: AppSizes.spacingS),
               decoration: BoxDecoration(
                 color: _primary,
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(AppSizes.radiusS),
               ),
               child: Text(
                 'LIVE ANALYSIS',
                 style: GoogleFonts.inter(
                   color: Colors.white,
-                  fontSize: 12,
+                  fontSize: AppSizes.fontBody,
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -861,13 +862,13 @@ class _LatestDetectionDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(28),
+      padding: const EdgeInsets.all(AppSizes.spacingXXL),
       child: GridView.count(
         crossAxisCount: 2,
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        crossAxisSpacing: 18,
-        mainAxisSpacing: 20,
+        crossAxisSpacing: AppSizes.spacingL,
+        mainAxisSpacing: AppSizes.spacingXL,
         childAspectRatio: 2.5,
         children: [
           _DetectionMetric(
@@ -917,16 +918,16 @@ class _DetectionMetric extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: GoogleFonts.inter(
             color: _onSurfaceVariant,
-            fontSize: 10,
+            fontSize: AppSizes.fontCaption,
             fontWeight: FontWeight.w800,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSizes.spacingS),
         Row(
           children: [
             if (icon != null) ...[
-              Icon(icon, size: 18, color: _onSurfaceVariant),
-              const SizedBox(width: 8),
+              Icon(icon, size: AppSizes.iconSmall, color: _onSurfaceVariant),
+              const SizedBox(width: AppSizes.spacingS),
             ],
             Expanded(
               child: Text(
@@ -935,7 +936,7 @@ class _DetectionMetric extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.manrope(
                   color: valueColor ?? _onSurface,
-                  fontSize: 18,
+                  fontSize: AppSizes.fontHeadlineMedium,
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -958,11 +959,11 @@ class _RecentThumb extends StatelessWidget {
     final url = imageUrl;
 
     return Container(
-      width: 56,
-      height: 56,
+      width: 44,
+      height: 44,
       decoration: BoxDecoration(
         color: _surfaceContainerLow,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppSizes.radiusM),
         image: url != null && url.isNotEmpty
             ? DecorationImage(
                 image: NetworkImage(
@@ -976,7 +977,7 @@ class _RecentThumb extends StatelessWidget {
             : null,
       ),
       child: url == null || url.isEmpty
-          ? const Icon(Icons.spa_rounded, color: _primary, size: 28)
+          ? const Icon(Icons.spa_rounded, color: _primary, size: AppSizes.iconLarge)
           : null,
     );
   }

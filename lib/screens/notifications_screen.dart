@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../services/system_service.dart';
+import '../utils/app_sizes.dart';
 
 const Color _primary = Color(0xFF8C0011);
 const Color _primaryContainer = Color(0xFFB01E23);
@@ -144,8 +145,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       backgroundColor: _surface,
       elevation: 0,
       scrolledUnderElevation: 0,
-      toolbarHeight: 78,
-      leadingWidth: 72,
+      toolbarHeight: 62,
+      leadingWidth: 58,
       leading: IconButton(
         onPressed: () => Navigator.maybePop(context),
         icon: const Icon(Icons.arrow_back_rounded),
@@ -159,13 +160,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         overflow: TextOverflow.ellipsis,
         style: GoogleFonts.manrope(
           color: _onSurface,
-          fontSize: 30,
+          fontSize: AppSizes.fontDisplaySmall,
           fontWeight: FontWeight.w800,
         ),
       ),
       actions: [
         Padding(
-          padding: const EdgeInsets.only(right: 18),
+          padding: const EdgeInsets.only(right: AppSizes.spacingL),
           child: TextButton(
             onPressed: unreadCount > 0 ? _markAllAsRead : null,
             style: TextButton.styleFrom(
@@ -174,7 +175,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 alpha: 0.34,
               ),
               textStyle: GoogleFonts.inter(
-                fontSize: 15,
+                fontSize: AppSizes.fontBody,
                 fontWeight: FontWeight.w800,
               ),
             ),
@@ -190,7 +191,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       builder: (context, constraints) {
         return ListView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(28, 20, 28, 48),
+          padding: const EdgeInsets.fromLTRB(AppSizes.spacingXXL, AppSizes.spacingXL, AppSizes.spacingXXL, 38.0),
           children: [
             Center(
               child: ConstrainedBox(
@@ -199,7 +200,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     _buildHeader(unreadCount, constraints.maxWidth),
-                    const SizedBox(height: 56),
+                    const SizedBox(height: 46),
                     if (_notifications.isEmpty)
                       _buildEmptyState()
                     else
@@ -228,16 +229,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 'TRẠNG THÁI HỆ THỐNG',
                 style: GoogleFonts.inter(
                   color: _onSurfaceVariant,
-                  fontSize: 13,
+                  fontSize: AppSizes.fontCaption,
                   fontWeight: FontWeight.w800,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSizes.spacingXS),
               Text(
                 'Thông báo mới',
                 style: GoogleFonts.manrope(
                   color: _onSurface,
-                  fontSize: 42,
+                  fontSize: AppSizes.fontDisplayLarge,
                   height: 1.05,
                   fontWeight: FontWeight.w800,
                 ),
@@ -246,29 +247,29 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           ),
         ),
         if (showCountChip) ...[
-          const SizedBox(width: 20),
+          const SizedBox(width: AppSizes.spacingXL),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingL, vertical: AppSizes.spacingS),
             decoration: BoxDecoration(
               color: _surfaceContainerLow,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppSizes.radiusM),
             ),
             child: Row(
               children: [
                 Container(
-                  width: 8,
-                  height: 8,
+                  width: 6,
+                  height: 6,
                   decoration: const BoxDecoration(
                     color: _primary,
                     shape: BoxShape.circle,
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: AppSizes.spacingS),
                 Text(
                   '$unreadCount thông báo chưa đọc',
                   style: GoogleFonts.inter(
                     color: _onSurfaceVariant,
-                    fontSize: 13,
+                    fontSize: AppSizes.fontCaption,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -283,19 +284,19 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Widget _buildMessageState(String message) {
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(28),
+      padding: const EdgeInsets.all(AppSizes.spacingXXL),
       children: [
-        const SizedBox(height: 120),
+        const SizedBox(height: 96),
         Icon(
           Icons.notifications_none_rounded,
-          size: 64,
+          size: 50,
           color: _onSurfaceVariant.withValues(alpha: 0.38),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSizes.spacingL),
         Text(
           message,
           textAlign: TextAlign.center,
-          style: GoogleFonts.inter(color: _onSurfaceVariant, fontSize: 14),
+          style: GoogleFonts.inter(color: _onSurfaceVariant, fontSize: AppSizes.fontBody),
         ),
       ],
     );
@@ -303,34 +304,34 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   Widget _buildEmptyState() {
     return Container(
-      padding: const EdgeInsets.all(28),
+      padding: const EdgeInsets.all(AppSizes.spacingXXL),
       decoration: BoxDecoration(
         color: _surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppSizes.radiusM),
         boxShadow: _cardShadow,
       ),
       child: Column(
         children: [
           Icon(
             Icons.notifications_none_rounded,
-            size: 58,
+            size: 46,
             color: _onSurfaceVariant.withValues(alpha: 0.36),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSizes.spacingL),
           Text(
             'Chưa có thông báo',
             textAlign: TextAlign.center,
             style: GoogleFonts.manrope(
               color: _onSurface,
-              fontSize: 22,
+              fontSize: AppSizes.fontHeadlineLarge,
               fontWeight: FontWeight.w800,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSizes.spacingXS),
           Text(
             'Các cảnh báo và cập nhật hệ thống sẽ xuất hiện tại đây.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(color: _onSurfaceVariant, fontSize: 13),
+            style: GoogleFonts.inter(color: _onSurfaceVariant, fontSize: AppSizes.fontCaption),
           ),
         ],
       ),
@@ -350,12 +351,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final time = _notificationTime(notification);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 22),
+      margin: const EdgeInsets.only(bottom: AppSizes.spacingXL),
       decoration: BoxDecoration(
         color: isRead
             ? _surfaceContainerLow.withValues(alpha: 0.5)
             : _surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppSizes.radiusM),
         border: isRead
             ? null
             : const Border(left: BorderSide(color: _primary, width: 5)),
@@ -363,19 +364,19 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       ),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppSizes.radiusM),
         child: InkWell(
           onTap: () => _markAsRead(notification),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppSizes.radiusM),
           child: Opacity(
             opacity: isRead ? 0.78 : 1,
             child: Padding(
-              padding: const EdgeInsets.all(22),
+              padding: const EdgeInsets.all(AppSizes.spacingXL),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _NotificationIcon(style: style),
-                  const SizedBox(width: 20),
+                  const SizedBox(width: AppSizes.spacingXL),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -388,18 +389,18 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                 title,
                                 style: GoogleFonts.manrope(
                                   color: _onSurface,
-                                  fontSize: 21,
+                                  fontSize: AppSizes.fontHeadlineMedium,
                                   height: 1.12,
                                   fontWeight: FontWeight.w800,
                                 ),
                               ),
                             ),
                             if (!isRead) ...[
-                              const SizedBox(width: 12),
+                              const SizedBox(width: AppSizes.spacingM),
                               Container(
-                                width: 11,
-                                height: 11,
-                                margin: const EdgeInsets.only(top: 7),
+                                width: 8,
+                                height: 8,
+                                margin: const EdgeInsets.only(top: AppSizes.spacingS),
                                 decoration: const BoxDecoration(
                                   color: _primary,
                                   shape: BoxShape.circle,
@@ -409,31 +410,31 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                           ],
                         ),
                         if (message.isNotEmpty) ...[
-                          const SizedBox(height: 14),
+                          const SizedBox(height: AppSizes.spacingM),
                           Text(
                             message,
                             style: GoogleFonts.inter(
                               color: _onSurfaceVariant,
-                              fontSize: 16,
+                              fontSize: AppSizes.fontTitleLarge,
                               height: 1.45,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
                         if (relatedSystem.isNotEmpty) ...[
-                          const SizedBox(height: 8),
+                          const SizedBox(height: AppSizes.spacingXS),
                           Text(
                             relatedSystem,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.inter(
                               color: _onSurfaceVariant.withValues(alpha: 0.7),
-                              fontSize: 12,
+                              fontSize: AppSizes.fontCaption,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
                         ],
-                        const SizedBox(height: 24),
+                        const SizedBox(height: AppSizes.spacingXXL),
                         Row(
                           children: [
                             Expanded(
@@ -445,12 +446,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                   color: _onSurfaceVariant.withValues(
                                     alpha: 0.62,
                                   ),
-                                  fontSize: 13,
+                                  fontSize: AppSizes.fontCaption,
                                   fontWeight: FontWeight.w800,
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 12),
+                            const SizedBox(width: AppSizes.spacingM),
                             _TypePill(style: style),
                           ],
                         ),
@@ -493,13 +494,13 @@ class _NotificationIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 88,
-      height: 88,
+      width: 70,
+      height: 70,
       decoration: BoxDecoration(
         color: style.background,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppSizes.radiusM),
       ),
-      child: Icon(style.icon, color: style.foreground, size: 34),
+      child: Icon(style.icon, color: style.foreground, size: AppSizes.iconLarge),
     );
   }
 }
@@ -512,16 +513,16 @@ class _TypePill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 7),
+      padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingM, vertical: AppSizes.spacingXS),
       decoration: BoxDecoration(
         color: style.pillBackground,
-        borderRadius: BorderRadius.circular(3),
+        borderRadius: BorderRadius.circular(AppSizes.radiusS),
       ),
       child: Text(
         style.label,
         style: GoogleFonts.inter(
           color: style.pillForeground,
-          fontSize: 12,
+          fontSize: AppSizes.fontCaption,
           fontWeight: FontWeight.w900,
         ),
       ),

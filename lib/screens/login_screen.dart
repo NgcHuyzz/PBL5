@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/auth_service.dart';
+import '../utils/app_sizes.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,7 +13,6 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   static const Color _primary = Color(0xFF8C0011);
   static const Color _primaryContainer = Color(0xFFB01E23);
-  static const Color _secondary = Color(0xFF3B6934);
   static const Color _surface = Color(0xFFFCF9F8);
   static const Color _surfaceContainerLow = Color(0xFFF6F3F2);
   static const Color _surfaceContainerLowest = Color(0xFFFFFFFF);
@@ -73,8 +73,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 builder: (context, constraints) {
                   return SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 40,
+                      horizontal: AppSizes.spacingXXL,
+                      vertical: 32.0,
                     ),
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
@@ -109,29 +109,29 @@ class _LoginScreenState extends State<LoginScreen> {
     return Container(
       width: double.infinity,
       color: _surfaceContainerLow,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingXXL, vertical: AppSizes.spacingL),
       child: Row(
         children: [
           const Icon(
             Icons.settings_rounded,
             color: _primaryContainer,
-            size: 26,
+            size: AppSizes.iconMedium,
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSizes.spacingM),
           Expanded(
             child: Text(
               'Hệ thống Phân loại Trái cây',
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: GoogleFonts.manrope(
-                fontSize: 20,
+                fontSize: AppSizes.fontHeadlineMedium,
                 fontWeight: FontWeight.w800,
                 height: 1.1,
                 color: _onBackground,
               ),
             ),
           ),
-          const SizedBox(width: 40),
+          const SizedBox(width: 32),
         ],
       ),
     );
@@ -139,14 +139,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildLoginCard(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
-    final cardPadding = width < 380 ? 24.0 : 32.0;
+    final cardPadding = width < 380 ? AppSizes.spacingXXL : 26.0;
 
     return Container(
       width: double.infinity,
       constraints: const BoxConstraints(maxWidth: 448),
       decoration: BoxDecoration(
         color: _surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppSizes.radiusS),
         boxShadow: [
           BoxShadow(
             color: _onSurfaceVariant.withValues(alpha: 0.05),
@@ -163,13 +163,13 @@ class _LoginScreenState extends State<LoginScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildHeaderCopy(),
-            const SizedBox(height: 36),
+            const SizedBox(height: 30),
             if (_errorMessage != null) ...[
               _buildErrorBanner(_errorMessage!),
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSizes.spacingXL),
             ],
             _buildLabel('Username or Email'),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSizes.spacingXS),
             TextFormField(
               controller: _identifierController,
               keyboardType: TextInputType.emailAddress,
@@ -179,7 +179,7 @@ class _LoginScreenState extends State<LoginScreen> {
               validator: (v) =>
                   v == null || v.isEmpty ? 'Vui lòng nhập thông tin' : null,
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSizes.spacingXXL),
             Row(
               children: [
                 Expanded(child: _buildLabel('MẬT KHẨU')),
@@ -194,14 +194,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Text(
                     'Quên mật khẩu?',
                     style: GoogleFonts.inter(
-                      fontSize: 12,
+                      fontSize: AppSizes.fontCaption,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSizes.spacingXS),
             TextFormField(
               controller: _passwordController,
               obscureText: _obscurePassword,
@@ -215,7 +215,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     _obscurePassword
                         ? Icons.visibility_outlined
                         : Icons.visibility_off_outlined,
-                    size: 21,
+                    size: AppSizes.iconMedium,
                     color: _onSurfaceVariant,
                   ),
                   onPressed: () =>
@@ -225,9 +225,9 @@ class _LoginScreenState extends State<LoginScreen> {
               validator: (v) =>
                   v == null || v.isEmpty ? 'Vui lòng nhập mật khẩu' : null,
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 26),
             _buildLoginButton(),
-            const SizedBox(height: 28),
+            const SizedBox(height: AppSizes.spacingXXL),
             _buildRegisterLink(),
           ],
         ),
@@ -242,17 +242,17 @@ class _LoginScreenState extends State<LoginScreen> {
         Text(
           'Chào mừng quay trở lại',
           style: GoogleFonts.manrope(
-            fontSize: 30,
+            fontSize: AppSizes.fontDisplaySmall,
             fontWeight: FontWeight.w800,
             height: 1.12,
             color: _onBackground,
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: AppSizes.spacingS),
         Text(
           'Truy cập bảng điều khiển phân loại để theo dõi các chỉ số thu hoạch của bạn.',
           style: GoogleFonts.inter(
-            fontSize: 14,
+            fontSize: AppSizes.fontBody,
             height: 1.55,
             color: _onSurfaceVariant,
           ),
@@ -265,7 +265,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Text(
       text,
       style: GoogleFonts.inter(
-        fontSize: 12,
+        fontSize: AppSizes.fontCaption,
         fontWeight: FontWeight.w800,
         letterSpacing: 0.8,
         color: _onSurfaceVariant,
@@ -282,48 +282,48 @@ class _LoginScreenState extends State<LoginScreen> {
       hintStyle: GoogleFonts.inter(color: _outlineVariant),
       filled: true,
       fillColor: _surfaceContainerLow,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 17),
+      contentPadding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingL, vertical: AppSizes.spacingM),
       suffixIcon: suffixIcon,
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppSizes.radiusS),
         borderSide: BorderSide.none,
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppSizes.radiusS),
         borderSide: BorderSide.none,
       ),
       focusedBorder: const UnderlineInputBorder(
         borderSide: BorderSide(color: _surfaceTint, width: 2),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(8)),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(AppSizes.radiusS)),
       ),
       errorBorder: const UnderlineInputBorder(
         borderSide: BorderSide(color: Colors.red, width: 2),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(8)),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(AppSizes.radiusS)),
       ),
       focusedErrorBorder: const UnderlineInputBorder(
         borderSide: BorderSide(color: Colors.red, width: 2),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(8)),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(AppSizes.radiusS)),
       ),
     );
   }
 
   Widget _buildErrorBanner(String message) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(AppSizes.spacingM),
       decoration: BoxDecoration(
         color: const Color(0xFFFFDAD6),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppSizes.radiusS),
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline, color: Color(0xFF93000A), size: 20),
-          const SizedBox(width: 10),
+          const Icon(Icons.error_outline, color: Color(0xFF93000A), size: AppSizes.iconSmall),
+          const SizedBox(width: AppSizes.spacingS),
           Expanded(
             child: Text(
               message,
               style: GoogleFonts.inter(
                 color: const Color(0xFF93000A),
-                fontSize: 12,
+                fontSize: AppSizes.fontCaption,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -335,7 +335,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildLoginButton() {
     return SizedBox(
-      height: 56,
+      height: 46,
       child: DecoratedBox(
         decoration: BoxDecoration(
           gradient: const LinearGradient(
@@ -343,7 +343,7 @@ class _LoginScreenState extends State<LoginScreen> {
             end: Alignment.bottomCenter,
             colors: [_primary, _primaryContainer],
           ),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppSizes.radiusS),
           boxShadow: [
             BoxShadow(
               color: _primary.withValues(alpha: 0.22),
@@ -360,7 +360,7 @@ class _LoginScreenState extends State<LoginScreen> {
             shadowColor: Colors.transparent,
             foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(AppSizes.radiusS),
             ),
           ),
           child: _isLoading
@@ -378,12 +378,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     Text(
                       'Đăng nhập',
                       style: GoogleFonts.manrope(
-                        fontSize: 16,
+                        fontSize: AppSizes.fontTitleLarge,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    const Icon(Icons.login_rounded, size: 20),
+                    const SizedBox(width: AppSizes.spacingS),
+                    const Icon(Icons.login_rounded, size: AppSizes.iconSmall),
                   ],
                 ),
         ),
@@ -398,7 +398,7 @@ class _LoginScreenState extends State<LoginScreen> {
       children: [
         Text(
           'Chưa có tài khoản?',
-          style: GoogleFonts.inter(fontSize: 14, color: _onSurfaceVariant),
+          style: GoogleFonts.inter(fontSize: AppSizes.fontBody, color: _onSurfaceVariant),
         ),
         TextButton(
           onPressed: () => Navigator.pushNamed(context, '/register'),
@@ -411,7 +411,7 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Text(
             'Đăng ký',
             style: GoogleFonts.inter(
-              fontSize: 14,
+              fontSize: AppSizes.fontBody,
               fontWeight: FontWeight.w800,
               decoration: TextDecoration.underline,
               decorationColor: _primary.withValues(alpha: 0.3),
@@ -429,10 +429,10 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Opacity(
           opacity: 0.92,
           child: Container(
-            width: 118,
-            height: 118,
+            width: 94,
+            height: 94,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(AppSizes.radiusS),
               gradient: const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -454,7 +454,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Icon(
                     Icons.spa_rounded,
                     color: Colors.white.withValues(alpha: 0.62),
-                    size: 42,
+                    size: 34,
                   ),
                 ),
                 Positioned(
@@ -463,7 +463,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Icon(
                     Icons.grain_rounded,
                     color: Colors.white.withValues(alpha: 0.56),
-                    size: 44,
+                    size: 35,
                   ),
                 ),
               ],
@@ -476,12 +476,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildFooter() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 8, 24, 28),
+      padding: const EdgeInsets.fromLTRB(AppSizes.spacingXXL, AppSizes.spacingS, AppSizes.spacingXXL, AppSizes.spacingXXL),
       child: Text(
         '© 2024 AGRITECH ATELIER PRECISION OPTICS',
         textAlign: TextAlign.center,
         style: GoogleFonts.inter(
-          fontSize: 10,
+          fontSize: AppSizes.fontCaption,
           fontWeight: FontWeight.w800,
           letterSpacing: 2,
           color: _outline,

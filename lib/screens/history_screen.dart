@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../services/system_service.dart';
+import '../utils/app_sizes.dart';
 import 'notifications_screen.dart';
 import 'profile_screen.dart';
 import 'statistics_screen.dart';
@@ -261,7 +262,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         overflow: TextOverflow.ellipsis,
         style: GoogleFonts.manrope(
           color: _primaryContainer,
-          fontSize: 20,
+          fontSize: AppSizes.fontHeadlineMedium,
           fontWeight: FontWeight.w800,
         ),
       ),
@@ -273,7 +274,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           onPressed: _openNotifications,
         ),
         Padding(
-          padding: const EdgeInsets.only(right: 16),
+          padding: const EdgeInsets.only(right: AppSizes.spacingL),
           child: InkWell(
             onTap: _openProfile,
             borderRadius: BorderRadius.circular(999),
@@ -287,7 +288,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               child: const Icon(
                 Icons.person_rounded,
                 color: _primaryContainer,
-                size: 21,
+                size: AppSizes.iconMedium,
               ),
             ),
           ),
@@ -301,7 +302,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       builder: (context, constraints) {
         return ListView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(18, 22, 18, 28),
+          padding: const EdgeInsets.fromLTRB(AppSizes.spacingL, AppSizes.spacingXL, AppSizes.spacingL, AppSizes.spacingXXL),
           children: [
             Center(
               child: ConstrainedBox(
@@ -310,9 +311,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     _buildFilterSection(constraints.maxWidth),
-                    const SizedBox(height: 38),
+                    const SizedBox(height: 30),
                     _SectionTitle('Lịch sử phân loại'),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: AppSizes.spacingXL),
                     if (_detections.isEmpty)
                       _buildEmptyState()
                     else ...[
@@ -333,15 +334,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Widget _buildMessageState(String message) {
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(AppSizes.spacingXXL),
       children: [
-        const SizedBox(height: 120),
-        Icon(Icons.info_outline_rounded, size: 56, color: _onSurfaceVariant),
-        const SizedBox(height: 16),
+        const SizedBox(height: 96),
+        Icon(Icons.info_outline_rounded, size: AppSizes.iconXXLarge, color: _onSurfaceVariant),
+        const SizedBox(height: AppSizes.spacingL),
         Text(
           message,
           textAlign: TextAlign.center,
-          style: GoogleFonts.inter(fontSize: 14, color: _onSurfaceVariant),
+          style: GoogleFonts.inter(fontSize: AppSizes.fontBody, color: _onSurfaceVariant),
         ),
       ],
     );
@@ -379,10 +380,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
     ];
 
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(AppSizes.spacingXXL),
       decoration: BoxDecoration(
         color: _surfaceContainerLow,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppSizes.radiusM),
         border: Border.all(color: _outlineVariant.withValues(alpha: 0.16)),
       ),
       child: Column(
@@ -392,28 +393,28 @@ class _HistoryScreenState extends State<HistoryScreen> {
             children: [
               const Icon(
                 Icons.filter_list_rounded,
-                size: 17,
+                size: AppSizes.iconSmall,
                 color: _onSurfaceVariant,
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: AppSizes.spacingS),
               Text(
                 'BỘ LỌC TÌM KIẾM',
                 style: GoogleFonts.inter(
                   color: _onSurfaceVariant,
-                  fontSize: 15,
+                  fontSize: AppSizes.fontTitleMedium,
                   fontWeight: FontWeight.w700,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 22),
+          const SizedBox(height: AppSizes.spacingXL),
           if (isWide)
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 for (final field in fields) ...[
                   Expanded(child: field),
-                  if (field != fields.last) const SizedBox(width: 16),
+                  if (field != fields.last) const SizedBox(width: AppSizes.spacingL),
                 ],
               ],
             )
@@ -422,11 +423,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
               children: [
                 for (final field in fields) ...[
                   field,
-                  if (field != fields.last) const SizedBox(height: 20),
+                  if (field != fields.last) const SizedBox(height: AppSizes.spacingXL),
                 ],
               ],
             ),
-          const SizedBox(height: 28),
+          const SizedBox(height: AppSizes.spacingXXL),
           isWide
               ? Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -436,7 +437,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       onPressed: _resetFilters,
                       isPrimary: false,
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: AppSizes.spacingM),
                     _FilterActionButton(
                       label: 'Lọc kết quả',
                       onPressed: _applyFilters,
@@ -452,7 +453,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       onPressed: _resetFilters,
                       isPrimary: false,
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: AppSizes.spacingM),
                     _FilterActionButton(
                       label: 'Lọc kết quả',
                       onPressed: _applyFilters,
@@ -495,17 +496,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final imageUrl = detection['imageUrl']?.toString();
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 18),
-      padding: const EdgeInsets.all(18),
+      margin: const EdgeInsets.only(bottom: AppSizes.spacingL),
+      padding: const EdgeInsets.all(AppSizes.spacingL),
       decoration: BoxDecoration(
         color: _surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppSizes.radiusM),
         border: Border.all(color: _outlineVariant.withValues(alpha: 0.22)),
       ),
       child: Row(
         children: [
           _HistoryThumb(imageUrl: imageUrl, token: _token, isMuted: isError),
-          const SizedBox(width: 20),
+          const SizedBox(width: AppSizes.spacingXL),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -519,7 +520,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.manrope(
                           color: _onSurface,
-                          fontSize: 22,
+                          fontSize: AppSizes.fontHeadlineMedium,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -527,10 +528,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     if (status != 'COMPLETED') _StatusChip(status: status),
                   ],
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: AppSizes.spacingM),
                 Wrap(
-                  spacing: 24,
-                  runSpacing: 10,
+                  spacing: AppSizes.spacingXXL,
+                  runSpacing: AppSizes.spacingS,
                   children: [
                     _HistoryMetric(
                       label: 'ĐỘ TIN CẬY',
@@ -547,7 +548,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ],
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSizes.spacingS),
           Icon(
             Icons.chevron_right_rounded,
             color: _onSurfaceVariant.withValues(alpha: 0.45),
@@ -560,35 +561,35 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Widget _buildLoadMoreButton() {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(0, 28, 0, 12),
+        padding: const EdgeInsets.fromLTRB(0, AppSizes.spacingXXL, 0, AppSizes.spacingM),
         child: _isLoadingMore
             ? const CircularProgressIndicator(color: _primary)
             : InkWell(
                 onTap: _loadMore,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(AppSizes.radiusL),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      width: 58,
-                      height: 58,
+                      width: 46,
+                      height: 46,
                       decoration: BoxDecoration(
                         color: _surface,
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(AppSizes.radiusL),
                         border: Border.all(color: _outlineVariant, width: 2),
                       ),
                       child: const Icon(
                         Icons.keyboard_arrow_down_rounded,
                         color: _onSurfaceVariant,
-                        size: 30,
+                        size: AppSizes.iconLarge,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSizes.spacingM),
                     Text(
                       'TẢI THÊM',
                       style: GoogleFonts.inter(
                         color: _onSurfaceVariant,
-                        fontSize: 12,
+                        fontSize: AppSizes.fontBody,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -601,34 +602,34 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   Widget _buildEmptyState() {
     return Container(
-      padding: const EdgeInsets.all(28),
+      padding: const EdgeInsets.all(AppSizes.spacingXXL),
       decoration: BoxDecoration(
         color: _surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppSizes.radiusM),
         border: Border.all(color: _outlineVariant.withValues(alpha: 0.22)),
       ),
       child: Column(
         children: [
           Icon(
             Icons.history_rounded,
-            size: 64,
+            size: AppSizes.iconXXLarge,
             color: _onSurfaceVariant.withValues(alpha: 0.35),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSizes.spacingL),
           Text(
             'Chưa có lịch sử phân loại',
             textAlign: TextAlign.center,
             style: GoogleFonts.manrope(
               color: _onSurface,
-              fontSize: 20,
+              fontSize: AppSizes.fontHeadlineMedium,
               fontWeight: FontWeight.w800,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSizes.spacingS),
           Text(
             'Hãy bắt đầu phân loại trái cây đầu tiên',
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(color: _onSurfaceVariant, fontSize: 13),
+            style: GoogleFonts.inter(color: _onSurfaceVariant, fontSize: AppSizes.fontBody),
           ),
         ],
       ),
@@ -664,7 +665,7 @@ class _FilterSelect extends StatelessWidget {
           value: value,
           isExpanded: true,
           icon: const Icon(Icons.keyboard_arrow_down_rounded),
-          style: GoogleFonts.inter(color: _onSurface, fontSize: 15),
+          style: GoogleFonts.inter(color: _onSurface, fontSize: AppSizes.fontTitleMedium),
           items: items.entries.map((entry) {
             return DropdownMenuItem<String?>(
               value: entry.key == 'all' ? null : entry.key,
@@ -703,12 +704,12 @@ class _DateField extends StatelessWidget {
                     ? '${value!.month.toString().padLeft(2, '0')}/${value!.day.toString().padLeft(2, '0')}/${value!.year}'
                     : 'mm/dd/yyyy',
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.inter(color: _onSurface, fontSize: 15),
+                style: GoogleFonts.inter(color: _onSurface, fontSize: AppSizes.fontTitleMedium),
               ),
             ),
             const Icon(
               Icons.calendar_today_rounded,
-              size: 18,
+              size: AppSizes.iconSmall,
               color: _onSurface,
             ),
           ],
@@ -730,22 +731,22 @@ class _FilterFieldFrame extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          padding: const EdgeInsets.only(left: AppSizes.spacingXS, bottom: AppSizes.spacingS),
           child: Text(
             label,
             style: GoogleFonts.inter(
               color: _onSurfaceVariant,
-              fontSize: 12,
+              fontSize: AppSizes.fontBody,
               fontWeight: FontWeight.w800,
             ),
           ),
         ),
         Container(
-          height: 54,
-          padding: const EdgeInsets.symmetric(horizontal: 14),
+          height: 44,
+          padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingM),
           decoration: BoxDecoration(
             color: _surfaceContainerLowest,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(AppSizes.radiusS),
           ),
           child: Center(child: child),
         ),
@@ -768,7 +769,7 @@ class _FilterActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 52,
+      height: 42,
       child: DecoratedBox(
         decoration: BoxDecoration(
           gradient: isPrimary
@@ -778,21 +779,21 @@ class _FilterActionButton extends StatelessWidget {
                   colors: [_primary, _primaryContainer],
                 )
               : null,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppSizes.radiusS),
           border: isPrimary ? null : Border.all(color: _outlineVariant),
         ),
         child: TextButton(
           onPressed: onPressed,
           style: TextButton.styleFrom(
             foregroundColor: isPrimary ? Colors.white : _onSurfaceVariant,
-            padding: const EdgeInsets.symmetric(horizontal: 34),
+            padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingXXL),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(AppSizes.radiusS),
             ),
           ),
           child: Text(
             label,
-            style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w800),
+            style: GoogleFonts.inter(fontSize: AppSizes.fontTitleMedium, fontWeight: FontWeight.w800),
           ),
         ),
       ),
@@ -811,7 +812,7 @@ class _SectionTitle extends StatelessWidget {
       text,
       style: GoogleFonts.manrope(
         color: _onSurface,
-        fontSize: 24,
+        fontSize: AppSizes.fontHeadlineLarge,
         fontWeight: FontWeight.w800,
       ),
     );
@@ -834,11 +835,11 @@ class _HistoryThumb extends StatelessWidget {
     final url = imageUrl;
 
     return Container(
-      width: 94,
-      height: 94,
+      width: 75,
+      height: 75,
       decoration: BoxDecoration(
         color: _surfaceContainerLow,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppSizes.radiusS),
         image: url != null && url.isNotEmpty
             ? DecorationImage(
                 image: NetworkImage(
@@ -855,7 +856,7 @@ class _HistoryThumb extends StatelessWidget {
             : null,
       ),
       child: url == null || url.isEmpty
-          ? const Icon(Icons.qr_code_scanner_rounded, color: _primary, size: 34)
+          ? const Icon(Icons.qr_code_scanner_rounded, color: _primary, size: AppSizes.iconLarge)
           : null,
     );
   }
@@ -875,7 +876,7 @@ class _HistoryMetric extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 120,
+      width: 96,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -885,18 +886,18 @@ class _HistoryMetric extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.inter(
               color: _onSurfaceVariant.withValues(alpha: 0.58),
-              fontSize: 10,
+              fontSize: AppSizes.fontCaption,
               fontWeight: FontWeight.w800,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSizes.spacingXS),
           Text(
             value,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.inter(
               color: valueColor ?? _onSurface,
-              fontSize: 14,
+              fontSize: AppSizes.fontBody,
               height: 1.2,
               fontWeight: FontWeight.w700,
             ),
@@ -921,7 +922,7 @@ class _StatusChip extends StatelessWidget {
     };
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingS, vertical: AppSizes.spacingXS),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(999),
@@ -930,7 +931,7 @@ class _StatusChip extends StatelessWidget {
         status,
         style: GoogleFonts.inter(
           color: color,
-          fontSize: 10,
+          fontSize: AppSizes.fontCaption,
           fontWeight: FontWeight.w800,
         ),
       ),
@@ -987,8 +988,8 @@ class _HistoryBottomNav extends StatelessWidget {
     return SafeArea(
       top: false,
       child: Container(
-        height: 80,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+        height: 64,
+        padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingXL, vertical: AppSizes.spacingS),
         decoration: BoxDecoration(
           color: _surfaceContainerLowest,
           border: Border(
@@ -1054,25 +1055,25 @@ class _HistBottomNavItem extends StatelessWidget {
           color: isSelected
               ? const Color(0xFFFFDAD6).withValues(alpha: 0.3)
               : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppSizes.radiusM),
           child: InkWell(
             onTap: onTap,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppSizes.radiusM),
             child: Container(
               constraints: const BoxConstraints(minWidth: 78),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingM, vertical: AppSizes.spacingXS),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(icon, color: color, size: 24),
-                  const SizedBox(height: 4),
+                  Icon(icon, color: color, size: AppSizes.iconMedium),
+                  const SizedBox(height: AppSizes.spacingXS),
                   Text(
                     label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.inter(
                       color: color,
-                      fontSize: 10,
+                      fontSize: AppSizes.fontCaption,
                       fontWeight: FontWeight.w800,
                     ),
                   ),

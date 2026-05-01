@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../services/system_service.dart';
+import '../utils/app_sizes.dart';
 import 'history_screen.dart';
 import 'notifications_screen.dart';
 import 'profile_screen.dart';
@@ -268,7 +269,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 builder: (context, constraints) {
                   return SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.fromLTRB(18, 18, 18, 32),
+                    padding: const EdgeInsets.fromLTRB(AppSizes.spacingL, AppSizes.spacingL, AppSizes.spacingL, AppSizes.spacingXXL),
                     child: Center(
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 900),
@@ -276,9 +277,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             _buildFilterSection(constraints.maxWidth),
-                            const SizedBox(height: 18),
+                            const SizedBox(height: AppSizes.spacingL),
                             _buildQuickChips(),
-                            const SizedBox(height: 30),
+                            const SizedBox(height: AppSizes.spacingXXL),
                             _buildOverviewGrid(
                               totalReceived,
                               totalProcessing,
@@ -286,7 +287,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                               totalFailed,
                               avgTime,
                             ),
-                            const SizedBox(height: 26),
+                            const SizedBox(height: AppSizes.spacingXXL),
                             _buildChartsSection(constraints.maxWidth),
                           ],
                         ),
@@ -323,7 +324,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         overflow: TextOverflow.ellipsis,
         style: GoogleFonts.manrope(
           color: _primaryContainer,
-          fontSize: 20,
+          fontSize: AppSizes.fontHeadlineMedium,
           fontWeight: FontWeight.w800,
         ),
       ),
@@ -335,7 +336,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           tooltip: 'Thông báo',
         ),
         Padding(
-          padding: const EdgeInsets.only(right: 16),
+          padding: const EdgeInsets.only(right: AppSizes.spacingL),
           child: InkWell(
             onTap: _openProfile,
             borderRadius: BorderRadius.circular(999),
@@ -352,7 +353,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               child: const Icon(
                 Icons.person_rounded,
                 color: _primaryContainer,
-                size: 21,
+                size: AppSizes.iconMedium,
               ),
             ),
           ),
@@ -364,15 +365,15 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   Widget _buildMessageState(String message) {
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(AppSizes.spacingXXL),
       children: [
-        const SizedBox(height: 120),
-        Icon(Icons.info_outline_rounded, size: 56, color: _onSurfaceVariant),
-        const SizedBox(height: 16),
+        const SizedBox(height: 96),
+        Icon(Icons.info_outline_rounded, size: AppSizes.iconXXLarge, color: _onSurfaceVariant),
+        const SizedBox(height: AppSizes.spacingL),
         Text(
           message,
           textAlign: TextAlign.center,
-          style: GoogleFonts.inter(fontSize: 14, color: _onSurfaceVariant),
+          style: GoogleFonts.inter(fontSize: AppSizes.fontBody, color: _onSurfaceVariant),
         ),
       ],
     );
@@ -382,10 +383,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     final isWide = maxWidth >= 760;
 
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(AppSizes.spacingL),
       decoration: BoxDecoration(
         color: _surfaceContainerLow,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppSizes.radiusM),
       ),
       child: isWide
           ? Row(
@@ -398,7 +399,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     onTap: _selectDateRange,
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: AppSizes.spacingL),
                 Expanded(
                   child: _DateBox(
                     label: 'ĐẾN NGÀY',
@@ -406,7 +407,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     onTap: _selectDateRange,
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: AppSizes.spacingL),
                 _FilterButton(onPressed: _loadStatistics),
               ],
             )
@@ -418,13 +419,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   value: _startDate,
                   onTap: _selectDateRange,
                 ),
-                const SizedBox(height: 18),
+                const SizedBox(height: AppSizes.spacingL),
                 _DateBox(
                   label: 'ĐẾN NGÀY',
                   value: _endDate,
                   onTap: _selectDateRange,
                 ),
-                const SizedBox(height: 18),
+                const SizedBox(height: AppSizes.spacingL),
                 _FilterButton(onPressed: _loadStatistics),
               ],
             ),
@@ -438,7 +439,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         children: ['Hôm nay', '7 ngày', '30 ngày'].map((filter) {
           final isSelected = _quickFilter == filter;
           return Padding(
-            padding: const EdgeInsets.only(right: 10),
+            padding: const EdgeInsets.only(right: AppSizes.spacingS),
             child: ChoiceChip(
               label: Text(filter),
               selected: isSelected,
@@ -452,10 +453,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               ),
               labelStyle: GoogleFonts.inter(
                 color: isSelected ? Colors.white : _onSurfaceVariant,
-                fontSize: 14,
+                fontSize: AppSizes.fontBody,
                 fontWeight: FontWeight.w700,
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingM, vertical: AppSizes.spacingS),
             ),
           );
         }).toList(),
@@ -536,13 +537,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(child: charts[0]),
-          const SizedBox(width: 18),
+          const SizedBox(width: AppSizes.spacingL),
           Expanded(child: charts[1]),
         ],
       );
     }
 
-    return Column(children: [charts[0], const SizedBox(height: 24), charts[1]]);
+    return Column(children: [charts[0], const SizedBox(height: AppSizes.spacingXXL), charts[1]]);
   }
 
   Widget _buildBarChartCard() {
@@ -583,7 +584,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
                 return Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingXS),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
@@ -592,7 +593,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                           decoration: BoxDecoration(
                             color: isPeak ? _primary : _surfaceContainerLow,
                             borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(2),
+                              top: Radius.circular(AppSizes.spacingXS),
                             ),
                           ),
                         ),
@@ -683,37 +684,37 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       child: Row(
         children: [
           Container(
-            width: 138,
-            height: 138,
+            width: 110,
+            height: 110,
             decoration: BoxDecoration(
               color: _primary,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(AppSizes.radiusM),
             ),
             child: Center(
               child: Stack(
                 alignment: Alignment.center,
                 children: [
                   Container(
-                    width: 106,
-                    height: 106,
+                    width: 85,
+                    height: 85,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: SweepGradient(colors: colors, stops: stops),
                     ),
                   ),
                   Container(
-                    width: 54,
-                    height: 54,
+                    width: 44,
+                    height: 44,
                     decoration: BoxDecoration(
                       color: _surfaceContainerLowest,
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(AppSizes.radiusM),
                     ),
                     child: Center(
                       child: Text(
                         '100%',
                         style: GoogleFonts.inter(
                           color: _onSurface,
-                          fontSize: 11,
+                          fontSize: AppSizes.fontCaption,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -723,7 +724,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               ),
             ),
           ),
-          const SizedBox(width: 22),
+          const SizedBox(width: AppSizes.spacingXL),
           Expanded(
             child: Column(
               children: displayData.map((item) {
@@ -735,18 +736,18 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     Colors.grey;
 
                 return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 7),
+                  padding: const EdgeInsets.symmetric(vertical: AppSizes.spacingS),
                   child: Row(
                     children: [
                       Container(
-                        width: 12,
-                        height: 12,
+                        width: 10,
+                        height: 10,
                         decoration: BoxDecoration(
                           color: color,
                           shape: BoxShape.circle,
                         ),
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: AppSizes.spacingS),
                       Expanded(
                         child: Text(
                           _fruitNames[fruitType] ??
@@ -756,7 +757,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.inter(
                             color: _onSurface,
-                            fontSize: 13,
+                            fontSize: AppSizes.fontBody,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -765,7 +766,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         '$count',
                         style: GoogleFonts.inter(
                           color: _onSurface,
-                          fontSize: 13,
+                          fontSize: AppSizes.fontBody,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -801,20 +802,20 @@ class _DateBox extends StatelessWidget {
           label,
           style: GoogleFonts.inter(
             color: _onSurfaceVariant,
-            fontSize: 10,
+            fontSize: AppSizes.fontCaption,
             fontWeight: FontWeight.w800,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSizes.spacingS),
         Material(
           color: _surfaceContainerLowest,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppSizes.radiusS),
           child: InkWell(
             onTap: onTap,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(AppSizes.radiusS),
             child: Container(
-              height: 48,
-              padding: const EdgeInsets.symmetric(horizontal: 14),
+              height: 40,
+              padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingM),
               child: Row(
                 children: [
                   Expanded(
@@ -823,12 +824,12 @@ class _DateBox extends StatelessWidget {
                           ? '${value!.month.toString().padLeft(2, '0')}/${value!.day.toString().padLeft(2, '0')}/${value!.year}'
                           : 'Chọn ngày',
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(color: _onSurface, fontSize: 14),
+                      style: GoogleFonts.inter(color: _onSurface, fontSize: AppSizes.fontBody),
                     ),
                   ),
                   const Icon(
                     Icons.calendar_today_rounded,
-                    size: 18,
+                    size: AppSizes.iconSmall,
                     color: _onSurface,
                   ),
                 ],
@@ -849,7 +850,7 @@ class _FilterButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 48,
+      height: 40,
       child: DecoratedBox(
         decoration: BoxDecoration(
           gradient: const LinearGradient(
@@ -857,20 +858,20 @@ class _FilterButton extends StatelessWidget {
             end: Alignment.bottomCenter,
             colors: [_primary, _primaryContainer],
           ),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppSizes.radiusS),
         ),
         child: TextButton(
           onPressed: onPressed,
           style: TextButton.styleFrom(
             foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 38),
+            padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingXXL),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(AppSizes.radiusS),
             ),
           ),
           child: Text(
             'Lọc',
-            style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w800),
+            style: GoogleFonts.inter(fontSize: AppSizes.fontTitleLarge, fontWeight: FontWeight.w800),
           ),
         ),
       ),
@@ -900,16 +901,16 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 126,
-      padding: const EdgeInsets.all(18),
+      height: 100,
+      padding: const EdgeInsets.all(AppSizes.spacingL),
       decoration: BoxDecoration(
         color: _surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppSizes.radiusS),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(data.icon, size: 22, color: data.color),
+          Icon(data.icon, size: AppSizes.iconMedium, color: data.color),
           const Spacer(),
           Text(
             data.label,
@@ -917,18 +918,18 @@ class _StatCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.inter(
               color: _onSurfaceVariant,
-              fontSize: 10,
+              fontSize: AppSizes.fontCaption,
               fontWeight: FontWeight.w800,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSizes.spacingS),
           Text(
             data.value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.manrope(
               color: _onSurface,
-              fontSize: 28,
+              fontSize: AppSizes.fontHeadlineLarge,
               height: 1,
               fontWeight: FontWeight.w900,
             ),
@@ -953,10 +954,10 @@ class _ChartShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(26),
+      padding: const EdgeInsets.all(AppSizes.spacingXXL),
       decoration: BoxDecoration(
         color: _surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppSizes.radiusS),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -968,7 +969,7 @@ class _ChartShell extends StatelessWidget {
                   title,
                   style: GoogleFonts.manrope(
                     color: _onSurface,
-                    fontSize: 21,
+                    fontSize: AppSizes.fontHeadlineMedium,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -976,7 +977,7 @@ class _ChartShell extends StatelessWidget {
               Icon(icon, color: _onSurfaceVariant.withValues(alpha: 0.36)),
             ],
           ),
-          const SizedBox(height: 28),
+          const SizedBox(height: AppSizes.spacingXXL),
           child,
         ],
       ),
@@ -1019,8 +1020,8 @@ class _StatsBottomNav extends StatelessWidget {
     return SafeArea(
       top: false,
       child: Container(
-        height: 80,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+        height: 64,
+        padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingXL, vertical: AppSizes.spacingS),
         decoration: BoxDecoration(
           color: _surfaceContainerLowest,
           border: Border(
@@ -1086,25 +1087,25 @@ class _BottomNavItem extends StatelessWidget {
           color: isSelected
               ? const Color(0xFFFFDAD6).withValues(alpha: 0.3)
               : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppSizes.radiusM),
           child: InkWell(
             onTap: onTap,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppSizes.radiusM),
             child: Container(
               constraints: const BoxConstraints(minWidth: 78),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingM, vertical: AppSizes.spacingXS),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(icon, color: color, size: 24),
-                  const SizedBox(height: 4),
+                  Icon(icon, color: color, size: AppSizes.iconMedium),
+                  const SizedBox(height: AppSizes.spacingXS),
                   Text(
                     label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.inter(
                       color: color,
-                      fontSize: 10,
+                      fontSize: AppSizes.fontCaption,
                       fontWeight: FontWeight.w800,
                     ),
                   ),

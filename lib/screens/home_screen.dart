@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../services/system_service.dart';
+import '../utils/app_sizes.dart';
 import '../utils/app_theme.dart';
 import 'create_system_screen.dart';
 import 'profile_screen.dart';
@@ -167,7 +168,7 @@ class HomeContent extends StatelessWidget {
         backgroundColor: _surface,
         elevation: 0,
         toolbarHeight: 72,
-        titleSpacing: 16,
+        titleSpacing: AppSizes.spacingL,
         title: Row(
           children: [
             IconButton(
@@ -176,11 +177,11 @@ class HomeContent extends StatelessWidget {
               color: _onSurfaceVariant,
               tooltip: 'Menu',
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSizes.spacingM),
             Text(
               'Hệ thống của tôi',
               style: GoogleFonts.manrope(
-                fontSize: 22,
+                fontSize: AppSizes.fontHeadlineMedium,
                 fontWeight: FontWeight.w800,
                 color: _onSurface,
               ),
@@ -189,9 +190,9 @@ class HomeContent extends StatelessWidget {
         ),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 20),
+            padding: const EdgeInsets.only(right: AppSizes.spacingXL),
             child: InkWell(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppSizes.radiusM),
               onTap: () {
                 Navigator.push(
                   context,
@@ -205,7 +206,7 @@ class HomeContent extends StatelessWidget {
                 height: 42,
                 decoration: BoxDecoration(
                   color: _onSurfaceVariant,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(AppSizes.radiusM),
                   border: Border.all(
                     color: _outlineVariant.withValues(alpha: 0.35),
                     width: 2,
@@ -214,7 +215,7 @@ class HomeContent extends StatelessWidget {
                 child: const Icon(
                   Icons.person_rounded,
                   color: Colors.white,
-                  size: 24,
+                  size: AppSizes.iconMedium,
                 ),
               ),
             ),
@@ -226,8 +227,8 @@ class HomeContent extends StatelessWidget {
         backgroundColor: _primaryContainer,
         foregroundColor: Colors.white,
         elevation: 14,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: const Icon(Icons.add_rounded, size: 34),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusL)),
+        child: const Icon(Icons.add_rounded, size: AppSizes.iconLarge),
       ),
       body: RefreshIndicator(
         onRefresh: onRefresh,
@@ -244,17 +245,17 @@ class HomeContent extends StatelessWidget {
 
     if (errorMessage != null) {
       return ListView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(AppSizes.spacingXL),
         children: [
           const SizedBox(height: 80),
-          Icon(Icons.cloud_off, size: 64, color: Colors.grey.shade400),
-          const SizedBox(height: 16),
+          Icon(Icons.cloud_off, size: AppSizes.iconXXLarge, color: Colors.grey.shade400),
+          const SizedBox(height: AppSizes.spacingL),
           Text(
             errorMessage!,
             textAlign: TextAlign.center,
             style: AppTheme.bodyMedium,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSizes.spacingL),
           Center(
             child: ElevatedButton.icon(
               onPressed: onRefresh,
@@ -272,29 +273,29 @@ class HomeContent extends StatelessWidget {
 
     if (systems.isEmpty) {
       return ListView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(AppSizes.spacingXL),
         children: [
           const SizedBox(height: 80),
           Icon(
             Icons.precision_manufacturing,
-            size: 64,
+            size: AppSizes.iconXXLarge,
             color: Colors.grey.shade400,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSizes.spacingL),
           Text(
             'Chưa có hệ thống nào',
             textAlign: TextAlign.center,
             style: GoogleFonts.manrope(
-              fontSize: 22,
+              fontSize: AppSizes.fontHeadlineMedium,
               fontWeight: FontWeight.w800,
               color: _onSurface,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSizes.spacingS),
           Text(
             'Nhấn nút + để tạo hệ thống mới hoặc kéo xuống để tải lại.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(fontSize: 14, color: _onSurfaceVariant),
+            style: GoogleFonts.inter(fontSize: AppSizes.fontBody, color: _onSurfaceVariant),
           ),
         ],
       );
@@ -304,11 +305,11 @@ class HomeContent extends StatelessWidget {
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= 760;
         return GridView.builder(
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 112),
+          padding: const EdgeInsets.fromLTRB(AppSizes.spacingXL, AppSizes.spacingXL, AppSizes.spacingXL, 112),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: isWide ? 2 : 1,
-            crossAxisSpacing: 24,
-            mainAxisSpacing: 24,
+            crossAxisSpacing: AppSizes.spacingXL,
+            mainAxisSpacing: AppSizes.spacingXL,
             mainAxisExtent: 320,
           ),
           itemCount: systems.length,
@@ -331,7 +332,7 @@ class HomeContent extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: _surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppSizes.radiusS),
         border: isSelected
             ? Border.all(color: _primary.withValues(alpha: 0.16), width: 1)
             : null,
@@ -340,9 +341,9 @@ class HomeContent extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: () => onOpenSystem(system),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppSizes.radiusS),
           child: Padding(
-            padding: const EdgeInsets.all(26),
+            padding: const EdgeInsets.all(AppSizes.spacingXXL),
             child: Stack(
               children: [
                 Positioned(
@@ -350,8 +351,8 @@ class HomeContent extends StatelessWidget {
                   right: 0,
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 6,
+                      horizontal: AppSizes.spacingM,
+                      vertical: AppSizes.spacingXS,
                     ),
                     decoration: BoxDecoration(
                       color: statusStyle.background,
@@ -360,7 +361,7 @@ class HomeContent extends StatelessWidget {
                     child: Text(
                       statusStyle.label,
                       style: GoogleFonts.inter(
-                        fontSize: 10,
+                        fontSize: AppSizes.fontCaption,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 0.8,
                         color: statusStyle.foreground,
@@ -374,41 +375,41 @@ class HomeContent extends StatelessWidget {
                     Icon(
                       _systemIcon(system),
                       color: isStopped ? Colors.grey.shade400 : _primary,
-                      size: 34,
+                      size: AppSizes.iconLarge,
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: AppSizes.spacingXL),
                     Text(
                       _systemName(system),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.manrope(
-                        fontSize: 22,
+                        fontSize: AppSizes.fontHeadlineMedium,
                         fontWeight: FontWeight.w800,
                         color: _onSurface,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSizes.spacingS),
                     Text(
                       _systemDescription(system),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.inter(
-                        fontSize: 15,
+                        fontSize: AppSizes.fontTitleMedium,
                         height: 1.35,
                         color: _onSurfaceVariant,
                       ),
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: AppSizes.spacingXXL),
                     Container(
                       height: 1,
                       color: _surfaceVariant.withValues(alpha: 0.7),
                     ),
-                    const SizedBox(height: 18),
+                    const SizedBox(height: AppSizes.spacingL),
                     _buildMetaRow(
                       Icons.location_on_rounded,
                       _systemLocation(system),
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: AppSizes.spacingM),
                     _buildMetaRow(
                       Icons.calendar_today_rounded,
                       'Khởi tạo: ${_systemCreated(system)}',
@@ -424,7 +425,7 @@ class HomeContent extends StatelessWidget {
                         style: TextButton.styleFrom(
                           foregroundColor: _primary,
                           textStyle: GoogleFonts.inter(
-                            fontSize: 15,
+                            fontSize: AppSizes.fontTitleMedium,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
@@ -443,15 +444,15 @@ class HomeContent extends StatelessWidget {
   Widget _buildMetaRow(IconData icon, String value) {
     return Row(
       children: [
-        Icon(icon, size: 15, color: _onSurfaceVariant),
-        const SizedBox(width: 10),
+        Icon(icon, size: AppSizes.iconSmall, color: _onSurfaceVariant),
+        const SizedBox(width: AppSizes.spacingS),
         Expanded(
           child: Text(
             value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: GoogleFonts.inter(
-              fontSize: 13,
+              fontSize: AppSizes.fontBody,
               fontWeight: FontWeight.w500,
               color: _onSurfaceVariant,
             ),

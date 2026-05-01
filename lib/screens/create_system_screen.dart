@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../services/system_service.dart';
+import '../utils/app_sizes.dart';
 
 class CreateSystemScreen extends StatefulWidget {
   const CreateSystemScreen({super.key});
@@ -13,7 +14,6 @@ class CreateSystemScreen extends StatefulWidget {
 class _CreateSystemScreenState extends State<CreateSystemScreen> {
   static const Color _primary = Color(0xFF8C0011);
   static const Color _primaryContainer = Color(0xFFB01E23);
-  static const Color _secondary = Color(0xFF3B6934);
   static const Color _surface = Color(0xFFFCF9F8);
   static const Color _surfaceContainerLow = Color(0xFFF6F3F2);
   static const Color _surfaceContainerLowest = Color(0xFFFFFFFF);
@@ -85,7 +85,7 @@ class _CreateSystemScreenState extends State<CreateSystemScreen> {
                   return SingleChildScrollView(
                     keyboardDismissBehavior:
                         ScrollViewKeyboardDismissBehavior.onDrag,
-                    padding: const EdgeInsets.fromLTRB(28, 28, 28, 36),
+                    padding: const EdgeInsets.fromLTRB(AppSizes.spacingXXL, AppSizes.spacingXXL, AppSizes.spacingXXL, 30.0),
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
                         minHeight: constraints.maxHeight - 64,
@@ -96,7 +96,7 @@ class _CreateSystemScreenState extends State<CreateSystemScreen> {
                           child: Column(
                             children: [
                               _buildVisualAccent(),
-                              const SizedBox(height: 56),
+                              const SizedBox(height: 46),
                               _buildFormCard(),
                             ],
                           ),
@@ -115,14 +115,14 @@ class _CreateSystemScreenState extends State<CreateSystemScreen> {
 
   Widget _buildTopBar() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingXL, vertical: AppSizes.spacingM),
       child: Row(
         children: [
           IconButton(
             onPressed: _isSubmitting ? null : () => Navigator.pop(context),
             icon: const Icon(Icons.arrow_back_rounded),
             color: _primary,
-            iconSize: 32,
+            iconSize: AppSizes.iconLarge,
             tooltip: 'Quay lại',
           ),
           Expanded(
@@ -130,14 +130,14 @@ class _CreateSystemScreenState extends State<CreateSystemScreen> {
               'Tạo hệ thống',
               textAlign: TextAlign.center,
               style: GoogleFonts.manrope(
-                fontSize: 30,
+                fontSize: AppSizes.fontDisplaySmall,
                 fontWeight: FontWeight.w800,
                 color: _primary,
                 height: 1.05,
               ),
             ),
           ),
-          const SizedBox(width: 48),
+          const SizedBox(width: 38),
         ],
       ),
     );
@@ -146,9 +146,9 @@ class _CreateSystemScreenState extends State<CreateSystemScreen> {
   Widget _buildVisualAccent() {
     return Container(
       width: double.infinity,
-      height: 132,
+      height: 100,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppSizes.radiusM),
         boxShadow: [
           BoxShadow(
             color: _onSurfaceVariant.withValues(alpha: 0.08),
@@ -158,7 +158,7 @@ class _CreateSystemScreenState extends State<CreateSystemScreen> {
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppSizes.radiusM),
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -195,10 +195,10 @@ class _CreateSystemScreenState extends State<CreateSystemScreen> {
   Widget _buildFormCard() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(42, 42, 42, 34),
+      padding: const EdgeInsets.fromLTRB(34.0, 34.0, 34.0, AppSizes.spacingXXL),
       decoration: BoxDecoration(
         color: _surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppSizes.radiusS),
         boxShadow: [
           BoxShadow(
             color: _onSurfaceVariant.withValues(alpha: 0.05),
@@ -214,10 +214,10 @@ class _CreateSystemScreenState extends State<CreateSystemScreen> {
           children: [
             if (_errorMessage != null) ...[
               _buildErrorBanner(_errorMessage!),
-              const SizedBox(height: 28),
+              const SizedBox(height: AppSizes.spacingXXL),
             ],
             _buildLabel('ID hệ thống'),
-            const SizedBox(height: 10),
+            const SizedBox(height: AppSizes.spacingS),
             TextFormField(
               controller: _systemIdController,
               textInputAction: TextInputAction.next,
@@ -230,21 +230,21 @@ class _CreateSystemScreenState extends State<CreateSystemScreen> {
                 return null;
               },
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSizes.spacingXS),
             Padding(
-              padding: const EdgeInsets.only(left: 8),
+              padding: const EdgeInsets.only(left: AppSizes.spacingS),
               child: Text(
                 'Nhập ID hệ thống đã được thiết bị đăng ký trước đó',
                 style: GoogleFonts.inter(
-                  fontSize: 13,
+                  fontSize: AppSizes.fontBody,
                   fontStyle: FontStyle.italic,
                   color: _onSurfaceVariant.withValues(alpha: 0.72),
                 ),
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 26),
             _buildLabel('Tên hệ thống'),
-            const SizedBox(height: 10),
+            const SizedBox(height: AppSizes.spacingS),
             TextFormField(
               controller: _systemNameController,
               textInputAction: TextInputAction.next,
@@ -259,9 +259,9 @@ class _CreateSystemScreenState extends State<CreateSystemScreen> {
                 return null;
               },
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 26),
             _buildLabel('Địa điểm'),
-            const SizedBox(height: 10),
+            const SizedBox(height: AppSizes.spacingS),
             TextFormField(
               controller: _locationController,
               textInputAction: TextInputAction.next,
@@ -280,9 +280,9 @@ class _CreateSystemScreenState extends State<CreateSystemScreen> {
                 return null;
               },
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 26),
             _buildLabel('Mô tả'),
-            const SizedBox(height: 10),
+            const SizedBox(height: AppSizes.spacingS),
             TextFormField(
               controller: _descriptionController,
               minLines: 4,
@@ -293,14 +293,14 @@ class _CreateSystemScreenState extends State<CreateSystemScreen> {
                 hintText: 'Thông tin chi tiết về hệ thống giám sát...',
               ),
             ),
-            const SizedBox(height: 42),
+            const SizedBox(height: 34),
             _buildSubmitButton(),
-            const SizedBox(height: 28),
+            const SizedBox(height: AppSizes.spacingXXL),
             Text(
               'AGRITECH ATELIER PRECISION TOOLS V2.0',
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(
-                fontSize: 12,
+                fontSize: AppSizes.fontCaption,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 3,
                 color: _outline,
@@ -316,7 +316,7 @@ class _CreateSystemScreenState extends State<CreateSystemScreen> {
     return Text(
       text,
       style: GoogleFonts.inter(
-        fontSize: 18,
+        fontSize: AppSizes.fontHeadlineMedium,
         fontWeight: FontWeight.w800,
         letterSpacing: 1.1,
         color: _onSurfaceVariant,
@@ -325,7 +325,7 @@ class _CreateSystemScreenState extends State<CreateSystemScreen> {
   }
 
   TextStyle _fieldTextStyle() {
-    return GoogleFonts.inter(fontSize: 20, color: const Color(0xFF6B7280));
+    return GoogleFonts.inter(fontSize: AppSizes.fontHeadlineMedium, color: const Color(0xFF6B7280));
   }
 
   InputDecoration _inputDecoration({
@@ -335,53 +335,53 @@ class _CreateSystemScreenState extends State<CreateSystemScreen> {
     return InputDecoration(
       hintText: hintText,
       hintStyle: GoogleFonts.inter(
-        fontSize: 20,
+        fontSize: AppSizes.fontHeadlineMedium,
         color: const Color(0xFF737B8B),
       ),
       prefixIcon: prefixIcon,
       filled: true,
       fillColor: _surfaceContainerLow,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 28, vertical: 22),
+      contentPadding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingXXL, vertical: AppSizes.spacingXL),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppSizes.radiusS),
         borderSide: BorderSide.none,
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppSizes.radiusS),
         borderSide: BorderSide.none,
       ),
       focusedBorder: const UnderlineInputBorder(
         borderSide: BorderSide(color: _surfaceTint, width: 2),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(8)),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(AppSizes.radiusS)),
       ),
       errorBorder: const UnderlineInputBorder(
         borderSide: BorderSide(color: Colors.red, width: 2),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(8)),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(AppSizes.radiusS)),
       ),
       focusedErrorBorder: const UnderlineInputBorder(
         borderSide: BorderSide(color: Colors.red, width: 2),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(8)),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(AppSizes.radiusS)),
       ),
     );
   }
 
   Widget _buildErrorBanner(String message) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(AppSizes.spacingM),
       decoration: BoxDecoration(
         color: const Color(0xFFFFDAD6),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppSizes.radiusS),
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline, color: Color(0xFF93000A), size: 20),
-          const SizedBox(width: 10),
+          const Icon(Icons.error_outline, color: Color(0xFF93000A), size: AppSizes.iconSmall),
+          const SizedBox(width: AppSizes.spacingS),
           Expanded(
             child: Text(
               message,
               style: GoogleFonts.inter(
                 color: const Color(0xFF93000A),
-                fontSize: 13,
+                fontSize: AppSizes.fontBody,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -393,7 +393,7 @@ class _CreateSystemScreenState extends State<CreateSystemScreen> {
 
   Widget _buildSubmitButton() {
     return SizedBox(
-      height: 72,
+      height: 58,
       child: DecoratedBox(
         decoration: BoxDecoration(
           gradient: const LinearGradient(
@@ -401,7 +401,7 @@ class _CreateSystemScreenState extends State<CreateSystemScreen> {
             end: Alignment.bottomCenter,
             colors: [_primary, _primaryContainer],
           ),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(AppSizes.radiusS),
           boxShadow: [
             BoxShadow(
               color: _primary.withValues(alpha: 0.2),
@@ -418,7 +418,7 @@ class _CreateSystemScreenState extends State<CreateSystemScreen> {
             shadowColor: Colors.transparent,
             foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(AppSizes.radiusS),
             ),
           ),
           child: _isSubmitting
@@ -433,7 +433,7 @@ class _CreateSystemScreenState extends State<CreateSystemScreen> {
               : Text(
                   'Tạo hệ thống',
                   style: GoogleFonts.manrope(
-                    fontSize: 22,
+                    fontSize: AppSizes.fontHeadlineLarge,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
