@@ -2,6 +2,7 @@ package com.ice.pbl5.Controller;
 
 import com.ice.pbl5.DTO.Request.SystemControlRequest;
 import com.ice.pbl5.DTO.Response.ApiResponse;
+import com.ice.pbl5.DTO.Response.SystemStatusResponse;
 import com.ice.pbl5.Enum.SystemStatus;
 import com.ice.pbl5.Service.SystemService;
 import jakarta.validation.Valid;
@@ -21,7 +22,7 @@ public class SystemStatusController {
     }
 
     @PostMapping("/control")
-    public ResponseEntity<ApiResponse<SystemStatus>> controlSystem(
+    public ResponseEntity<ApiResponse<SystemStatusResponse>> controlSystem(
             @RequestParam UUID systemId,
             @Valid @RequestBody SystemControlRequest request,
             Authentication authentication
@@ -35,7 +36,7 @@ public class SystemStatusController {
     }
 
     @GetMapping("/control-state")
-    public ResponseEntity<ApiResponse<SystemStatus>> getControlState(
+    public ResponseEntity<ApiResponse<SystemStatusResponse>> getControlState(
             @RequestParam UUID systemId,
             Authentication authentication
     )

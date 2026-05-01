@@ -4,6 +4,7 @@ import com.ice.pbl5.DTO.Request.SystemControlRequest;
 import com.ice.pbl5.DTO.Request.SystemCreateRequest;
 import com.ice.pbl5.DTO.Response.DeviceCommandResponse;
 import com.ice.pbl5.DTO.Response.SystemResponse;
+import com.ice.pbl5.DTO.Response.SystemStatusResponse;
 import com.ice.pbl5.Entity.System;
 import com.ice.pbl5.Entity.User;
 import com.ice.pbl5.Enum.*;
@@ -49,7 +50,7 @@ public class SystemServiceImpl implements SystemService {
     }
 
     @Override
-    public SystemStatus controlSystem(UUID systemId, SystemControlRequest request, String username) {
+    public SystemStatusResponse controlSystem(UUID systemId, SystemControlRequest request, String username) {
         System system = systemAccessService.getOwnedSystem(systemId, username);
 
         SystemAction action = request.getAction();
@@ -91,12 +92,12 @@ public class SystemServiceImpl implements SystemService {
         system.setStatus(targetStatus);
         system.setUpdatedAt(LocalDateTime.now());
         systemRepo.save(system);
-        return system.getStatus();
+        return new SystemStatusResponse(system.getStatus());
     }
 
     @Override
-    public SystemStatus getControlState(UUID systemId, String username) {
-        return systemAccessService.getOwnedSystem(systemId, username).getStatus();
+    public SystemStatusResponse getControlState(UUID systemId, String username) {
+        return new SystemStatusResponse(systemAccessService.getOwnedSystem(systemId, username).getStatus());
     }
 
     @Override
