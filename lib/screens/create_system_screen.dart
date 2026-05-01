@@ -148,12 +148,7 @@ class _CreateSystemScreenState extends State<CreateSystemScreen> {
       width: double.infinity,
       height: 132,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        gradient: const LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: [Color(0xFF082329), Color(0xFF173C45), Color(0xFF28323D)],
-        ),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: _onSurfaceVariant.withValues(alpha: 0.08),
@@ -162,74 +157,37 @@ class _CreateSystemScreenState extends State<CreateSystemScreen> {
           ),
         ],
       ),
-      child: Stack(
-        children: [
-          Positioned(
-            left: 44,
-            right: 36,
-            top: 62,
-            child: Container(
-              height: 18,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.78),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          Positioned(left: 88, top: 42, child: _buildMachinePost(52)),
-          Positioned(right: 128, top: 26, child: _buildMachinePost(76)),
-          Positioned(
-            right: 58,
-            top: 48,
-            child: Container(
-              width: 54,
-              height: 42,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: const Icon(
-                Icons.precision_manufacturing_rounded,
-                color: _primary,
-                size: 24,
-              ),
-            ),
-          ),
-          Positioned(
-            left: 42,
-            right: 42,
-            bottom: 34,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: List.generate(
-                7,
-                (index) => Container(
-                  width: 14,
-                  height: 14,
-                  decoration: BoxDecoration(
-                    color: index.isEven ? _primaryContainer : _secondary,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.85),
-                      width: 2,
-                    ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.network(
+              'https://lh3.googleusercontent.com/aida-public/AB6AXuB8gWATfnfonjd7SxXqyEXmDy6wPrbfPeoFMrpwfznP3xu1SpMct-yCDdK8MdBycs6b_xwf7zNSX3DS53mf_L7b-f925P0n_LH8Usp0Rh06XK1zhqpEHfAzmNPV3EID70OicJvMmDonB5F2IZl5Z-IbT2OSXNk92QkK0r-jueI_LDuFV5a9IwWyOvxgB2edovtr9v_S3KWTDeRNifPZfVKk7CTJdirDZm_CQvaHGtR6jnpQ1U4lGu3U2aCFSi_1mCM0SAR2Ir3KC2KG',
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  color: Colors.grey.shade300,
+                  child: const Center(
+                    child: Icon(Icons.image_not_supported, color: Colors.grey),
                   ),
+                );
+              },
+            ),
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: [
+                    _primary.withValues(alpha: 0.2),
+                    Colors.transparent,
+                  ],
                 ),
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMachinePost(double height) {
-    return Container(
-      width: 12,
-      height: height,
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.72),
-        borderRadius: BorderRadius.circular(2),
+          ],
+        ),
       ),
     );
   }
