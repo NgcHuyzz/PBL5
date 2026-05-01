@@ -1,9 +1,29 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../services/system_service.dart';
-import '../utils/app_theme.dart';
+import 'history_screen.dart';
+import 'notifications_screen.dart';
+import 'profile_screen.dart';
+import 'statistics_screen.dart';
+
+const Color _primary = Color(0xFF8C0011);
+const Color _primaryContainer = Color(0xFFB01E23);
+const Color _secondary = Color(0xFF3B6934);
+const Color _secondaryContainer = Color(0xFFB9EEAB);
+const Color _onSecondaryContainer = Color(0xFF3F6D38);
+const Color _error = Color(0xFFBA1A1A);
+const Color _errorContainer = Color(0xFFFFDAD6);
+const Color _onErrorContainer = Color(0xFF93000A);
+const Color _surface = Color(0xFFFCF9F8);
+const Color _surfaceContainerLowest = Color(0xFFFFFFFF);
+const Color _surfaceContainerLow = Color(0xFFF6F3F2);
+const Color _surfaceVariant = Color(0xFFE5E2E1);
+const Color _onSurface = Color(0xFF1B1C1C);
+const Color _onSurfaceVariant = Color(0xFF5A403E);
+const Color _outlineVariant = Color(0xFFE3BEBB);
 
 class SystemDetailScreen extends StatefulWidget {
   final String systemName;
@@ -104,8 +124,11 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
 
     if (result['success'] == true) {
       setState(() {
-        _controlState = result['data'] ?? {};
-        _currentStatus = _controlState['systemStatus'] ?? 'IDLE';
+        _controlState = _asMap(result['data']);
+        _currentStatus =
+            _controlState['systemStatus']?.toString() ??
+            _controlState['status']?.toString() ??
+            'IDLE';
       });
     } else {
       setState(() {
@@ -158,65 +181,143 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
     }
   }
 
-  String _getStatusText(String status) {
-    switch (status) {
-      case 'RUNNING':
-        return 'RUNNING';
-      case 'PAUSED':
-        return 'PAUSED';
-      case 'STOPPED':
-        return 'STOPPED';
-      default:
-        return 'IDLE';
-    }
+  void _openProfile() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ProfileScreen()),
+    );
   }
 
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'RUNNING':
-        return Colors.green;
-      case 'PAUSED':
-        return Colors.orange;
-      case 'STOPPED':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
+  void _openNotifications() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => NotificationsScreen(systemId: widget.systemId),
+      ),
+    );
+  }
+
+  void _openStatistics() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => StatisticsScreen(
+          systemId: widget.systemId,
+          systemName: widget.systemName,
+        ),
+      ),
+    );
+  }
+
+  void _openHistory() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HistoryScreen(
+          systemId: widget.systemId,
+          systemName: widget.systemName,
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: _surface,
       appBar: AppBar(
-        title: Text(widget.systemName),
-        backgroundColor: Colors.white,
-        foregroundColor: AppTheme.primary,
+        backgroundColor: _surface,
         elevation: 0,
+        scrolledUnderElevation: 0,
+        toolbarHeight: 70,
+        leadingWidth: 52,
+        leading: IconButton(
+          onPressed: () => Navigator.maybePop(context),
+          icon: const Icon(Icons.arrow_back_rounded),
+          color: _primaryContainer,
+          tooltip: 'Quay lại',
+        ),
+        titleSpacing: 0,
+        title: Text(
+          widget.systemName,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: GoogleFonts.manrope(
+            color: _primaryContainer,
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        actions: [
+          IconButton(
+            onPressed: _openNotifications,
+            icon: const Icon(Icons.notifications_rounded),
+            color: _onSurfaceVariant,
+            tooltip: 'Thông báo',
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: InkWell(
+              onTap: _openProfile,
+              borderRadius: BorderRadius.circular(999),
+              child: Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: _surfaceContainerLow,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: _outlineVariant.withValues(alpha: 0.45),
+                  ),
+                ),
+                child: const Icon(
+                  Icons.person_rounded,
+                  color: _primaryContainer,
+                  size: 22,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: _primary))
           : _errorMessage != null
           ? _buildMessageState(_errorMessage!)
           : RefreshIndicator(
               onRefresh: _loadData,
-              color: AppTheme.primary,
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    _buildStatusCard(),
-                    const SizedBox(height: 20),
-                    _buildControls(),
-                    const SizedBox(height: 24),
-                    _buildLiveAnalysis(),
-                    const SizedBox(height: 24),
-                    _buildRecentClassifications(),
-                  ],
-                ),
+              color: _primary,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.fromLTRB(20, 28, 20, 56),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 680),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _buildStatusCard(),
+                            const SizedBox(height: 28),
+                            _buildControls(),
+                            const SizedBox(height: 30),
+                            _buildLatestDetection(constraints.maxWidth),
+                            const SizedBox(height: 34),
+                            _buildRecentClassifications(),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
+      bottomNavigationBar: _SystemBottomNav(
+        onHome: () {},
+        onStatistics: _openStatistics,
+        onHistory: _openHistory,
+      ),
     );
   }
 
@@ -225,44 +326,83 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
       padding: const EdgeInsets.all(24),
       children: [
         const SizedBox(height: 120),
-        Icon(Icons.info_outline, size: 56, color: Colors.grey.shade500),
+        Icon(Icons.info_outline_rounded, size: 56, color: _onSurfaceVariant),
         const SizedBox(height: 16),
-        Text(message, textAlign: TextAlign.center, style: AppTheme.bodyMedium),
+        Text(
+          message,
+          textAlign: TextAlign.center,
+          style: GoogleFonts.inter(fontSize: 14, color: _onSurfaceVariant),
+        ),
       ],
     );
   }
 
   Widget _buildStatusCard() {
+    final status = _statusStyle(_currentStatus);
+
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        gradient: AppTheme.primaryGradient,
-        borderRadius: BorderRadius.circular(20),
+        color: _surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: _softShadow,
       ),
-      child: Column(
+      child: Row(
         children: [
-          const Text(
-            'TRẠNG THÁI HỆ THỐNG',
-            style: TextStyle(
-              color: Colors.white70,
-              fontSize: 12,
-              letterSpacing: 1,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'TRẠNG THÁI HỆ THỐNG',
+                  style: GoogleFonts.inter(
+                    color: _onSurfaceVariant,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Container(
+                      width: 13,
+                      height: 13,
+                      decoration: BoxDecoration(
+                        color: status.color,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Flexible(
+                      child: Text(
+                        status.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.manrope(
+                          color: status.color,
+                          fontSize: 36,
+                          height: 1,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(width: 16),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+            width: 62,
+            height: 62,
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
+              color: status.containerColor,
+              borderRadius: BorderRadius.circular(16),
             ),
-            child: Text(
-              _getStatusText(_currentStatus),
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: _getStatusColor(_currentStatus),
-              ),
+            child: Icon(
+              Icons.precision_manufacturing_rounded,
+              color: status.iconColor,
+              size: 34,
             ),
           ),
         ],
@@ -273,123 +413,157 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
   Widget _buildControls() {
     return Row(
       children: [
-        _buildControlButton(
-          'START',
-          Icons.play_arrow,
-          Colors.green,
-          () => _handleControl('START'),
+        _buildControlTile(
+          label: 'START',
+          icon: Icons.play_arrow_rounded,
+          color: _secondary,
+          isMuted: _currentStatus.toUpperCase() == 'RUNNING',
+          onPressed: () => _handleControl('START'),
         ),
-        const SizedBox(width: 12),
-        _buildControlButton(
-          'PAUSE',
-          Icons.pause,
-          Colors.orange,
-          () => _handleControl('PAUSE'),
+        const SizedBox(width: 14),
+        _buildControlTile(
+          label: 'PAUSE',
+          icon: Icons.pause_rounded,
+          color: _primary,
+          onPressed: () => _handleControl('PAUSE'),
         ),
-        const SizedBox(width: 12),
-        _buildControlButton(
-          'STOP',
-          Icons.stop,
-          Colors.red,
-          () => _handleControl('STOP'),
+        const SizedBox(width: 14),
+        _buildControlTile(
+          label: 'STOP',
+          icon: Icons.stop_rounded,
+          color: _error,
+          onPressed: () => _handleControl('STOP'),
         ),
       ],
     );
   }
 
-  Widget _buildLiveAnalysis() {
-    final fruitType = _latestDetection['fruitType']?.toString() ?? '---';
-    final confidence = _asDouble(_latestDetection['confidence']);
+  Widget _buildControlTile({
+    required String label,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onPressed,
+    bool isMuted = false,
+  }) {
+    return Expanded(
+      child: SizedBox(
+        height: 108,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: isMuted ? _surfaceContainerLow : _surfaceContainerLowest,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: isMuted ? null : _softShadow,
+          ),
+          child: Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              onTap: onPressed,
+              borderRadius: BorderRadius.circular(12),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    icon,
+                    size: 36,
+                    color: isMuted ? _onSurface.withValues(alpha: 0.28) : color,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.inter(
+                      color: isMuted
+                          ? _onSurface.withValues(alpha: 0.34)
+                          : _onSurface,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: AppTheme.cardShadow,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 8,
-                height: 8,
-                decoration: const BoxDecoration(
-                  color: Colors.red,
-                  shape: BoxShape.circle,
+  Widget _buildLatestDetection(double availableWidth) {
+    final fruitType = _detectionFruit(_latestDetection);
+    final confidence = _asDouble(_latestDetection['confidence']);
+    final targetBin = _detectionBin(_latestDetection);
+    final imageUrl = _latestDetection['imageUrl']?.toString();
+    final isWide = availableWidth >= 760;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _SectionTitle('Kết quả mới nhất'),
+        const SizedBox(height: 20),
+        Container(
+          decoration: BoxDecoration(
+            color: _surfaceContainerLowest,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: _softShadow,
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: isWide
+              ? Row(
+                  children: [
+                    Expanded(
+                      child: _DetectionImage(imageUrl: imageUrl, token: _token),
+                    ),
+                    Expanded(
+                      child: _LatestDetectionDetails(
+                        fruitType: fruitType,
+                        confidence: confidence,
+                        targetBin: targetBin,
+                        time: _formatTime(
+                          _latestDetection['classifiedAt']?.toString(),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              : Column(
+                  children: [
+                    _DetectionImage(imageUrl: imageUrl, token: _token),
+                    _LatestDetectionDetails(
+                      fruitType: fruitType,
+                      confidence: confidence,
+                      targetBin: targetBin,
+                      time: _formatTime(
+                        _latestDetection['classifiedAt']?.toString(),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(width: 8),
-              const Text(
-                'LIVE ANALYSIS',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildInfoColumn('LOẠI QUẢ', fruitType, Icons.qr_code_scanner),
-              _buildInfoColumn(
-                'CONFIDENCE',
-                '${(confidence * 100).toInt()}%',
-                Icons.trending_up,
-              ),
-              _buildInfoColumn(
-                'BIN TARGET',
-                _latestDetection['targetBin']?.toString() ?? '---',
-                Icons.inbox,
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Icon(Icons.access_time, size: 14, color: AppTheme.textHint),
-              const SizedBox(width: 4),
-              Text(
-                _formatTime(_latestDetection['classifiedAt']?.toString()),
-                style: AppTheme.caption,
-              ),
-            ],
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget _buildRecentClassifications() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'PHÂN LOẠI GẦN ĐÂY',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1,
-          ),
-        ),
-        const SizedBox(height: 12),
+        _SectionTitle('Phân loại gần đây'),
+        const SizedBox(height: 20),
         if (_recentDetections.isEmpty)
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: AppTheme.cardShadow,
+              color: _surfaceContainerLowest,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: _softShadow,
             ),
             child: Text(
               'Chưa có phân loại gần đây',
               textAlign: TextAlign.center,
-              style: AppTheme.bodySmall,
+              style: GoogleFonts.inter(fontSize: 13, color: _onSurfaceVariant),
             ),
           )
         else
@@ -400,115 +574,435 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
 
   Widget _buildRecentDetectionCard(Map<String, dynamic> item) {
     final confidence = _asDouble(item['confidence']);
-    final fruit =
-        item['fruitType']?.toString() ?? item['fruit']?.toString() ?? '---';
-    final bin =
-        item['targetBin']?.toString() ?? item['bin']?.toString() ?? '---';
-    final color = confidence >= 0.95 ? Colors.green : Colors.orange;
+    final fruit = _detectionFruit(item);
+    final bin = _detectionBin(item);
     final imageUrl = item['imageUrl']?.toString();
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: AppTheme.cardShadow,
+        color: _surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: _softShadow,
       ),
       child: Row(
         children: [
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-              image: imageUrl != null && imageUrl.isNotEmpty
-                  ? DecorationImage(
-                      image: NetworkImage(
-                        imageUrl,
-                        headers: _token != null ? {'Authorization': 'Bearer $_token'} : null,
-                      ),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
-            ),
-            child: imageUrl == null || imageUrl.isEmpty
-                ? Icon(Icons.qr_code_scanner, color: color, size: 28)
-                : null,
-          ),
+          _RecentThumb(imageUrl: imageUrl, token: _token),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(fruit, style: AppTheme.titleMedium),
+                Text(
+                  fruit,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    color: _onSurface,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
                 const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Text('Confidence', style: AppTheme.caption),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${(confidence * 100).toInt()}%',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: color,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(bin, style: AppTheme.caption),
-                    const SizedBox(width: 12),
-                    Text(
-                      _formatTime(item['classifiedAt']?.toString()),
-                      style: AppTheme.caption,
-                    ),
-                  ],
+                Text(
+                  '${_formatTime(item['classifiedAt']?.toString())} • $bin',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    color: _onSurfaceVariant,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ],
             ),
           ),
-          const Icon(Icons.chevron_right, color: AppTheme.textHint),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                _formatConfidence(confidence),
+                style: GoogleFonts.inter(
+                  color: _secondary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              Text(
+                'Confidence',
+                style: GoogleFonts.inter(
+                  color: _onSurfaceVariant,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildControlButton(
-    String label,
-    IconData icon,
-    Color color,
-    VoidCallback onPressed,
-  ) {
+class _SystemBottomNav extends StatelessWidget {
+  final VoidCallback onHome;
+  final VoidCallback onStatistics;
+  final VoidCallback onHistory;
+
+  const _SystemBottomNav({
+    required this.onHome,
+    required this.onStatistics,
+    required this.onHistory,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: Container(
+        height: 80,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+        decoration: BoxDecoration(
+          color: _surfaceContainerLowest,
+          border: Border(
+            top: BorderSide(color: _outlineVariant.withValues(alpha: 0.15)),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: _onSurfaceVariant.withValues(alpha: 0.05),
+              blurRadius: 12,
+              offset: const Offset(0, -4),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _SystemBottomNavItem(
+              icon: Icons.home_rounded,
+              label: 'Trang chủ',
+              isSelected: true,
+              onTap: onHome,
+            ),
+            _SystemBottomNavItem(
+              icon: Icons.analytics_rounded,
+              label: 'Thống kê',
+              onTap: onStatistics,
+            ),
+            _SystemBottomNavItem(
+              icon: Icons.history_rounded,
+              label: 'Lịch sử',
+              onTap: onHistory,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SystemBottomNavItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _SystemBottomNavItem({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.isSelected = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isSelected ? _primaryContainer : _onSurfaceVariant;
+
     return Expanded(
-      child: ElevatedButton.icon(
-        onPressed: onPressed,
-        icon: Icon(icon, size: 18),
-        label: Text(label),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          shape: RoundedRectangleBorder(
+      child: Center(
+        child: Material(
+          color: isSelected
+              ? const Color(0xFFFFDAD6).withValues(alpha: 0.3)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          child: InkWell(
+            onTap: onTap,
             borderRadius: BorderRadius.circular(12),
+            child: Container(
+              constraints: const BoxConstraints(minWidth: 78),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(icon, color: color, size: 24),
+                  const SizedBox(height: 4),
+                  Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.inter(
+                      color: color,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildInfoColumn(String label, String value, IconData icon) {
+class _SectionTitle extends StatelessWidget {
+  final String text;
+
+  const _SectionTitle(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Text(
+        text,
+        style: GoogleFonts.manrope(
+          color: _onSurface,
+          fontSize: 24,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
+}
+
+class _DetectionImage extends StatelessWidget {
+  final String? imageUrl;
+  final String? token;
+
+  const _DetectionImage({required this.imageUrl, required this.token});
+
+  @override
+  Widget build(BuildContext context) {
+    final url = imageUrl;
+
+    return AspectRatio(
+      aspectRatio: 1.15,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (url != null && url.isNotEmpty)
+            Image.network(
+              url,
+              fit: BoxFit.cover,
+              headers: token != null
+                  ? {'Authorization': 'Bearer $token'}
+                  : null,
+            )
+          else
+            Container(
+              color: const Color(0xFF17272C),
+              child: const Icon(
+                Icons.qr_code_scanner_rounded,
+                color: Color(0xFFB9EEAB),
+                size: 90,
+              ),
+            ),
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.transparent, Colors.black54],
+              ),
+            ),
+          ),
+          Positioned(
+            left: 20,
+            bottom: 18,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: _primary,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                'LIVE ANALYSIS',
+                style: GoogleFonts.inter(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LatestDetectionDetails extends StatelessWidget {
+  final String fruitType;
+  final double confidence;
+  final String targetBin;
+  final String time;
+
+  const _LatestDetectionDetails({
+    required this.fruitType,
+    required this.confidence,
+    required this.targetBin,
+    required this.time,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(28),
+      child: GridView.count(
+        crossAxisCount: 2,
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        crossAxisSpacing: 18,
+        mainAxisSpacing: 20,
+        childAspectRatio: 2.5,
+        children: [
+          _DetectionMetric(
+            label: 'LOẠI QUẢ',
+            value: fruitType,
+            valueColor: _primary,
+          ),
+          _DetectionMetric(
+            label: 'CONFIDENCE',
+            value: _formatConfidence(confidence),
+            valueColor: _secondary,
+          ),
+          _DetectionMetric(
+            label: 'BIN TARGET',
+            value: targetBin,
+            icon: Icons.inventory_2_rounded,
+          ),
+          _DetectionMetric(label: 'THỜI GIAN', value: time),
+        ],
+      ),
+    );
+  }
+}
+
+class _DetectionMetric extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color? valueColor;
+  final IconData? icon;
+
+  const _DetectionMetric({
+    required this.label,
+    required this.value,
+    this.valueColor,
+    this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(icon, size: 20, color: AppTheme.primary),
+        Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: GoogleFonts.inter(
+            color: _onSurfaceVariant,
+            fontSize: 10,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
         const SizedBox(height: 8),
-        Text(label, style: AppTheme.caption),
-        const SizedBox(height: 4),
-        Text(value, style: AppTheme.titleMedium),
+        Row(
+          children: [
+            if (icon != null) ...[
+              Icon(icon, size: 18, color: _onSurfaceVariant),
+              const SizedBox(width: 8),
+            ],
+            Expanded(
+              child: Text(
+                value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.manrope(
+                  color: valueColor ?? _onSurface,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
 }
+
+class _RecentThumb extends StatelessWidget {
+  final String? imageUrl;
+  final String? token;
+
+  const _RecentThumb({required this.imageUrl, required this.token});
+
+  @override
+  Widget build(BuildContext context) {
+    final url = imageUrl;
+
+    return Container(
+      width: 56,
+      height: 56,
+      decoration: BoxDecoration(
+        color: _surfaceContainerLow,
+        borderRadius: BorderRadius.circular(12),
+        image: url != null && url.isNotEmpty
+            ? DecorationImage(
+                image: NetworkImage(
+                  url,
+                  headers: token != null
+                      ? {'Authorization': 'Bearer $token'}
+                      : null,
+                ),
+                fit: BoxFit.cover,
+              )
+            : null,
+      ),
+      child: url == null || url.isEmpty
+          ? const Icon(Icons.spa_rounded, color: _primary, size: 28)
+          : null,
+    );
+  }
+}
+
+class _StatusStyle {
+  final String label;
+  final Color color;
+  final Color containerColor;
+  final Color iconColor;
+
+  const _StatusStyle({
+    required this.label,
+    required this.color,
+    required this.containerColor,
+    required this.iconColor,
+  });
+}
+
+List<BoxShadow> get _softShadow => [
+  BoxShadow(
+    color: _onSurfaceVariant.withValues(alpha: 0.06),
+    blurRadius: 10,
+    offset: const Offset(0, 2),
+  ),
+];
 
 Map<String, dynamic> _asMap(Object? value) {
   if (value is Map<String, dynamic>) return value;
@@ -539,4 +1033,57 @@ String _formatTime(String? isoString) {
   final parsed = DateTime.tryParse(isoString);
   if (parsed == null) return isoString;
   return '${parsed.hour.toString().padLeft(2, '0')}:${parsed.minute.toString().padLeft(2, '0')}:${parsed.second.toString().padLeft(2, '0')}';
+}
+
+String _formatConfidence(double confidence) {
+  final percent = confidence > 1 ? confidence : confidence * 100;
+  if (percent == 0) return '---';
+  final hasDecimal = percent % 1 != 0;
+  return '${hasDecimal ? percent.toStringAsFixed(1) : percent.toStringAsFixed(0)}%';
+}
+
+String _detectionFruit(Map<String, dynamic> item) {
+  return item['fruitType']?.toString() ?? item['fruit']?.toString() ?? '---';
+}
+
+String _detectionBin(Map<String, dynamic> item) {
+  return item['targetBin']?.toString() ?? item['bin']?.toString() ?? '---';
+}
+
+_StatusStyle _statusStyle(String status) {
+  switch (status.toUpperCase()) {
+    case 'RUNNING':
+    case 'ACTIVE':
+    case 'ONLINE':
+      return const _StatusStyle(
+        label: 'RUNNING',
+        color: _secondary,
+        containerColor: _secondaryContainer,
+        iconColor: _onSecondaryContainer,
+      );
+    case 'PAUSED':
+    case 'MAINTENANCE':
+      return const _StatusStyle(
+        label: 'PAUSED',
+        color: Color(0xFF9C6500),
+        containerColor: Color(0xFFFFE0B2),
+        iconColor: Color(0xFF7A4B00),
+      );
+    case 'STOPPED':
+    case 'OFFLINE':
+    case 'ERROR':
+      return const _StatusStyle(
+        label: 'STOPPED',
+        color: _error,
+        containerColor: _errorContainer,
+        iconColor: _onErrorContainer,
+      );
+    default:
+      return const _StatusStyle(
+        label: 'IDLE',
+        color: _onSurfaceVariant,
+        containerColor: _surfaceVariant,
+        iconColor: _onSurfaceVariant,
+      );
+  }
 }

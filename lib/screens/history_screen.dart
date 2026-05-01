@@ -1,13 +1,29 @@
-// lib/screens/history_screen.dart
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 import '../services/system_service.dart';
-import '../utils/app_theme.dart';
 import 'notifications_screen.dart';
+import 'profile_screen.dart';
+import 'statistics_screen.dart';
+
+const Color _primary = Color(0xFF8C0011);
+const Color _primaryContainer = Color(0xFFB01E23);
+const Color _secondary = Color(0xFF3B6934);
+const Color _error = Color(0xFFBA1A1A);
+const Color _warning = Color(0xFFFFA000);
+const Color _surface = Color(0xFFFCF9F8);
+const Color _surfaceContainerLowest = Color(0xFFFFFFFF);
+const Color _surfaceContainerLow = Color(0xFFF6F3F2);
+const Color _surfaceContainerHighest = Color(0xFFE5E2E1);
+const Color _onSurface = Color(0xFF1B1C1C);
+const Color _onSurfaceVariant = Color(0xFF5A403E);
+const Color _outlineVariant = Color(0xFFE3BEBB);
 
 class HistoryScreen extends StatefulWidget {
   final String? systemId;
+  final String systemName;
 
-  const HistoryScreen({super.key, this.systemId});
+  const HistoryScreen({super.key, this.systemId, this.systemName = ''});
 
   @override
   State<HistoryScreen> createState() => _HistoryScreenState();
@@ -21,7 +37,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
   int _totalPages = 1;
   String? _token;
 
-  // Filter values
   String? _selectedFruitType;
   String? _selectedStatus;
   DateTime? _startDate;
@@ -29,24 +44,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   final Map<String, String> _fruitTypes = {
     'all': 'Tất cả',
-    'apple': '🍎 Táo',
-    'banana': '🍌 Chuối',
-    'orange': '🍊 Cam',
-    'strawberry': '🍓 Dâu tây',
-    'raspberry': '🍓 Mâm xôi',
+    'CHERRY TOMATO': 'Cà chua bi',
+    'STRAWBERRY': 'Dâu tây',
+    'GRAPE': 'Nho',
+    'BLUEBERRY': 'Việt quất',
   };
 
   final Map<String, String> _statuses = {
     'all': 'Tất cả',
-    'COMPLETED': '✅ Hoàn thành',
-    'FAILED': '❌ Lỗi',
-    'REJECTED': '⚠️ Từ chối',
-  };
-
-  final Map<String, Color> _statusColors = {
-    'COMPLETED': AppTheme.success,
-    'FAILED': AppTheme.error,
-    'REJECTED': AppTheme.warning,
+    'COMPLETED': 'Hoàn thành',
+    'FAILED': 'Lỗi',
+    'REJECTED': 'Từ chối',
   };
 
   @override
@@ -118,12 +126,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
         _totalPages = data['totalPages'] ?? 1;
       });
     } else {
-      // Hiển thị lỗi nếu cần
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(result['message'] ?? 'Lỗi tải lịch sử'),
-            backgroundColor: AppTheme.error,
+            backgroundColor: _error,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -158,6 +165,38 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
   }
 
+  void _openProfile() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ProfileScreen()),
+    );
+  }
+
+  void _openNotifications() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => NotificationsScreen(systemId: widget.systemId),
+      ),
+    );
+  }
+
+  void _openHome() {
+    Navigator.pop(context);
+  }
+
+  void _openStatistics() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => StatisticsScreen(
+          systemId: widget.systemId,
+          systemName: widget.systemName,
+        ),
+      ),
+    );
+  }
+
   String _formatDateTime(String? isoString) {
     if (isoString == null) return '---';
     try {
@@ -171,293 +210,278 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
-      appBar: AppBar(
-        title: const Text('Lịch sử phân loại'),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        foregroundColor: AppTheme.primary,
-        centerTitle: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_none),
-            onPressed: () {
-              if (widget.systemId == null || widget.systemId!.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Chưa chọn hệ thống')),
-                );
-                return;
-              }
-
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      NotificationsScreen(systemId: widget.systemId),
-                ),
-              );
-            },
-          ),
-          CircleAvatar(
-            radius: 16,
-            backgroundColor: AppTheme.primaryLight,
-            child: const Icon(Icons.person, size: 18, color: AppTheme.primary),
-          ),
-        ],
+      backgroundColor: _surface,
+      appBar: _buildTopBar(),
+      bottomNavigationBar: _HistoryBottomNav(
+        onHome: _openHome,
+        onStatistics: _openStatistics,
+        onHistory: () {},
       ),
       body: Column(
         children: [
-          // Filter section
-          _buildFilterSection(),
-          const SizedBox(height: 8),
-          // History list
           Expanded(
-            child: widget.systemId == null || widget.systemId!.isEmpty
-                ? _buildMessageState('Chưa chọn hệ thống')
-                : _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _detections.isEmpty
-                ? _buildEmptyState()
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    itemCount: _detections.length + 1,
-                    itemBuilder: (context, index) {
-                      if (index == _detections.length) {
-                        if (_currentPage + 1 < _totalPages) {
-                          return _buildLoadMoreButton();
-                        } else {
-                          return const SizedBox.shrink();
-                        }
-                      }
-                      return _buildHistoryCard(_detections[index]);
-                    },
-                  ),
+            child: RefreshIndicator(
+              onRefresh: () => _loadHistory(),
+              color: _primary,
+              child: widget.systemId == null || widget.systemId!.isEmpty
+                  ? _buildMessageState('Chưa chọn hệ thống')
+                  : _isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(color: _primary),
+                    )
+                  : _buildHistoryContent(),
+            ),
           ),
         ],
       ),
+    );
+  }
+
+  PreferredSizeWidget _buildTopBar() {
+    return AppBar(
+      backgroundColor: _surface,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      toolbarHeight: 70,
+      leadingWidth: 52,
+      leading: IconButton(
+        onPressed: () {
+          final nav = Navigator.of(context);
+          nav.pop(); // exit History
+          if (nav.canPop()) nav.pop(); // exit SystemDetailScreen → HomeScreen
+        },
+        icon: const Icon(Icons.arrow_back_rounded),
+        color: _primaryContainer,
+        tooltip: 'Quay lại',
+      ),
+      titleSpacing: 0,
+      title: Text(
+        'Lịch sử phân loại',
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: GoogleFonts.manrope(
+          color: _primaryContainer,
+          fontSize: 20,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.notifications_rounded),
+          color: _primaryContainer,
+          tooltip: 'Thông báo',
+          onPressed: _openNotifications,
+        ),
+        Padding(
+          padding: const EdgeInsets.only(right: 16),
+          child: InkWell(
+            onTap: _openProfile,
+            borderRadius: BorderRadius.circular(999),
+            child: Container(
+              width: 34,
+              height: 34,
+              decoration: const BoxDecoration(
+                color: _surfaceContainerHighest,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.person_rounded,
+                color: _primaryContainer,
+                size: 21,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHistoryContent() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(18, 22, 18, 28),
+          children: [
+            Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 900),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildFilterSection(constraints.maxWidth),
+                    const SizedBox(height: 38),
+                    _SectionTitle('Lịch sử phân loại'),
+                    const SizedBox(height: 20),
+                    if (_detections.isEmpty)
+                      _buildEmptyState()
+                    else ...[
+                      ..._detections.map(_buildHistoryCard),
+                      if (_currentPage + 1 < _totalPages)
+                        _buildLoadMoreButton(),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
   Widget _buildMessageState(String message) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Text(
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(24),
+      children: [
+        const SizedBox(height: 120),
+        Icon(Icons.info_outline_rounded, size: 56, color: _onSurfaceVariant),
+        const SizedBox(height: 16),
+        Text(
           message,
           textAlign: TextAlign.center,
-          style: AppTheme.bodyMedium,
+          style: GoogleFonts.inter(fontSize: 14, color: _onSurfaceVariant),
         ),
+      ],
+    );
+  }
+
+  Widget _buildFilterSection(double maxWidth) {
+    final isWide = maxWidth >= 760;
+    final fields = [
+      _FilterSelect(
+        label: 'CHỌN LOẠI QUẢ',
+        value: _selectedFruitType,
+        items: _fruitTypes,
+        onChanged: (value) {
+          setState(() => _selectedFruitType = value);
+        },
+      ),
+      _FilterSelect(
+        label: 'CHỌN TRẠNG THÁI',
+        value: _selectedStatus,
+        items: _statuses,
+        onChanged: (value) {
+          setState(() => _selectedStatus = value);
+        },
+      ),
+      _DateField(
+        label: 'NGÀY BẮT ĐẦU',
+        value: _startDate,
+        onTap: () => _pickDate(isStart: true),
+      ),
+      _DateField(
+        label: 'NGÀY KẾT THÚC',
+        value: _endDate,
+        onTap: () => _pickDate(isStart: false),
+      ),
+    ];
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: _surfaceContainerLow,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _outlineVariant.withValues(alpha: 0.16)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.filter_list_rounded,
+                size: 17,
+                color: _onSurfaceVariant,
+              ),
+              const SizedBox(width: 10),
+              Text(
+                'BỘ LỌC TÌM KIẾM',
+                style: GoogleFonts.inter(
+                  color: _onSurfaceVariant,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 22),
+          if (isWide)
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (final field in fields) ...[
+                  Expanded(child: field),
+                  if (field != fields.last) const SizedBox(width: 16),
+                ],
+              ],
+            )
+          else
+            Column(
+              children: [
+                for (final field in fields) ...[
+                  field,
+                  if (field != fields.last) const SizedBox(height: 20),
+                ],
+              ],
+            ),
+          const SizedBox(height: 28),
+          isWide
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    _FilterActionButton(
+                      label: 'Xóa lọc',
+                      onPressed: _resetFilters,
+                      isPrimary: false,
+                    ),
+                    const SizedBox(width: 12),
+                    _FilterActionButton(
+                      label: 'Lọc kết quả',
+                      onPressed: _applyFilters,
+                      isPrimary: true,
+                    ),
+                  ],
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _FilterActionButton(
+                      label: 'Xóa lọc',
+                      onPressed: _resetFilters,
+                      isPrimary: false,
+                    ),
+                    const SizedBox(height: 14),
+                    _FilterActionButton(
+                      label: 'Lọc kết quả',
+                      onPressed: _applyFilters,
+                      isPrimary: true,
+                    ),
+                  ],
+                ),
+        ],
       ),
     );
   }
 
-  Widget _buildFilterSection() {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: AppTheme.cardShadow,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.filter_list, size: 18, color: AppTheme.textHint),
-              const SizedBox(width: 8),
-              Text(
-                'Bộ lọc tìm kiếm',
-                style: AppTheme.titleMedium.copyWith(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          // Dropdown loại quả
-          DropdownButtonFormField<String>(
-            initialValue: _selectedFruitType,
-            decoration: InputDecoration(
-              labelText: 'Chọn loại quả',
-              labelStyle: AppTheme.caption,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 8,
-              ),
-            ),
-            items: _fruitTypes.entries.map((e) {
-              return DropdownMenuItem(
-                value: e.key == 'all' ? null : e.key,
-                child: Text(e.value),
-              );
-            }).toList(),
-            onChanged: (value) {
-              setState(() {
-                _selectedFruitType = value;
-              });
-            },
-          ),
-          const SizedBox(height: 12),
-          // Dropdown trạng thái
-          DropdownButtonFormField<String>(
-            initialValue: _selectedStatus,
-            decoration: InputDecoration(
-              labelText: 'Chọn trạng thái',
-              labelStyle: AppTheme.caption,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 8,
-              ),
-            ),
-            items: _statuses.entries.map((e) {
-              return DropdownMenuItem(
-                value: e.key == 'all' ? null : e.key,
-                child: Text(e.value),
-              );
-            }).toList(),
-            onChanged: (value) {
-              setState(() {
-                _selectedStatus = value;
-              });
-            },
-          ),
-          const SizedBox(height: 12),
-          // Date range
-          Row(
-            children: [
-              Expanded(
-                child: InkWell(
-                  onTap: () async {
-                    final date = await showDatePicker(
-                      context: context,
-                      initialDate: _startDate ?? DateTime.now(),
-                      firstDate: DateTime(2020),
-                      lastDate: DateTime.now(),
-                    );
-                    if (date != null) {
-                      setState(() => _startDate = date);
-                    }
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: AppTheme.textHint.withValues(alpha: 0.3),
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.calendar_today,
-                          size: 16,
-                          color: AppTheme.textHint,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          _startDate != null
-                              ? '${_startDate!.day}/${_startDate!.month}/${_startDate!.year}'
-                              : 'Ngày bắt đầu',
-                          style: AppTheme.bodyMedium,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: InkWell(
-                  onTap: () async {
-                    final date = await showDatePicker(
-                      context: context,
-                      initialDate: _endDate ?? DateTime.now(),
-                      firstDate: DateTime(2020),
-                      lastDate: DateTime.now(),
-                    );
-                    if (date != null) {
-                      setState(() => _endDate = date);
-                    }
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: AppTheme.textHint.withValues(alpha: 0.3),
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.calendar_today,
-                          size: 16,
-                          color: AppTheme.textHint,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          _endDate != null
-                              ? '${_endDate!.day}/${_endDate!.month}/${_endDate!.year}'
-                              : 'Ngày kết thúc',
-                          style: AppTheme.bodyMedium,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              OutlinedButton(
-                onPressed: _resetFilters,
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: AppTheme.outlineVariant),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text('Xóa lọc'),
-              ),
-              const SizedBox(width: 12),
-              ElevatedButton(
-                onPressed: _applyFilters,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text('Lọc kết quả'),
-              ),
-            ],
-          ),
-        ],
-      ),
+  Future<void> _pickDate({required bool isStart}) async {
+    final current = isStart ? _startDate : _endDate;
+    final date = await showDatePicker(
+      context: context,
+      initialDate: current ?? DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
     );
+    if (date != null) {
+      setState(() {
+        if (isStart) {
+          _startDate = date;
+        } else {
+          _endDate = date;
+        }
+      });
+    }
   }
 
   Widget _buildHistoryCard(Map<String, dynamic> detection) {
@@ -467,161 +491,68 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final classifiedAt = detection['classifiedAt']?.toString();
     final status = detection['status']?.toString() ?? 'COMPLETED';
     final isError = status == 'FAILED' || status == 'REJECTED';
-    final fruitName = _fruitTypes[fruitType] ?? fruitType;
+    final fruitName = _fruitName(fruitType);
+    final imageUrl = detection['imageUrl']?.toString();
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: Colors.white,
-      child: InkWell(
-        onTap: () {
-          // TODO: Navigate to detail screen
-        },
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              // Image placeholder
-              Container(
-                width: 70,
-                height: 70,
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryLight,
-                  borderRadius: BorderRadius.circular(12),
-                  image: detection['imageUrl'] != null && detection['imageUrl'].toString().isNotEmpty
-                      ? DecorationImage(
-                          image: NetworkImage(
-                            detection['imageUrl'],
-                            headers: _token != null ? {'Authorization': 'Bearer $_token'} : null,
-                          ),
-                          fit: BoxFit.cover,
-                          colorFilter: isError
-                              ? const ColorFilter.mode(
-                                  Colors.grey,
-                                  BlendMode.saturation,
-                                )
-                              : null,
-                        )
-                      : null,
-                ),
-                child: detection['imageUrl'] == null || detection['imageUrl'].toString().isEmpty
-                    ? Icon(
-                        Icons.qr_code_scanner,
-                        size: 30,
-                        color: AppTheme.primary.withValues(alpha: 0.5),
-                      )
-                    : null,
-              ),
-              const SizedBox(width: 16),
-              // Details
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 18),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: _surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _outlineVariant.withValues(alpha: 0.22)),
+      ),
+      child: Row(
+        children: [
+          _HistoryThumb(imageUrl: imageUrl, token: _token, isMuted: isError),
+          const SizedBox(width: 20),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    Row(
-                      children: [
-                        Text(
-                          fruitName,
-                          style: AppTheme.titleMedium.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                    Expanded(
+                      child: Text(
+                        fruitName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.manrope(
+                          color: _onSurface,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
                         ),
-                        const Spacer(),
-                        if (status != 'COMPLETED')
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: _statusColors[status]?.withValues(
-                                alpha: 0.1,
-                              ),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              _statuses[status] ?? status,
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: _statusColors[status],
-                              ),
-                            ),
-                          ),
-                      ],
+                      ),
                     ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'ĐỘ TIN CẬY',
-                                style: TextStyle(
-                                  fontSize: 9,
-                                  color: AppTheme.textHint,
-                                ),
-                              ),
-                              Text(
-                                '${(confidence * 100).toInt()}%',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: isError
-                                      ? AppTheme.error
-                                      : AppTheme.primary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'THÙNG CHỨA',
-                                style: TextStyle(
-                                  fontSize: 9,
-                                  color: AppTheme.textHint,
-                                ),
-                              ),
-                              Text(
-                                targetBin,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                    if (status != 'COMPLETED') _StatusChip(status: status),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                Wrap(
+                  spacing: 24,
+                  runSpacing: 10,
+                  children: [
+                    _HistoryMetric(
+                      label: 'ĐỘ TIN CẬY',
+                      value: _formatConfidence(confidence),
+                      valueColor: isError ? _error : _onSurface,
                     ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.access_time,
-                          size: 12,
-                          color: AppTheme.textHint,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          _formatDateTime(classifiedAt),
-                          style: AppTheme.caption,
-                        ),
-                      ],
+                    _HistoryMetric(label: 'THÙNG CHỨA', value: targetBin),
+                    _HistoryMetric(
+                      label: 'THỜI GIAN',
+                      value: _formatDateTime(classifiedAt),
                     ),
                   ],
                 ),
-              ),
-              const Icon(Icons.chevron_right, color: AppTheme.textHint),
-            ],
+              ],
+            ),
           ),
-        ),
+          const SizedBox(width: 8),
+          Icon(
+            Icons.chevron_right_rounded,
+            color: _onSurfaceVariant.withValues(alpha: 0.45),
+          ),
+        ],
       ),
     );
   }
@@ -629,20 +560,39 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Widget _buildLoadMoreButton() {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 20),
+        padding: const EdgeInsets.fromLTRB(0, 28, 0, 12),
         child: _isLoadingMore
-            ? const CircularProgressIndicator()
-            : ElevatedButton.icon(
-                onPressed: _loadMore,
-                icon: const Icon(Icons.expand_more),
-                label: const Text('Tải thêm'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: AppTheme.primary,
-                  side: BorderSide(color: AppTheme.outlineVariant),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
+            ? const CircularProgressIndicator(color: _primary)
+            : InkWell(
+                onTap: _loadMore,
+                borderRadius: BorderRadius.circular(16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 58,
+                      height: 58,
+                      decoration: BoxDecoration(
+                        color: _surface,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: _outlineVariant, width: 2),
+                      ),
+                      child: const Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: _onSurfaceVariant,
+                        size: 30,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'TẢI THÊM',
+                      style: GoogleFonts.inter(
+                        color: _onSurfaceVariant,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
                 ),
               ),
       ),
@@ -650,22 +600,339 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
+    return Container(
+      padding: const EdgeInsets.all(28),
+      decoration: BoxDecoration(
+        color: _surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _outlineVariant.withValues(alpha: 0.22)),
+      ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.history, size: 80, color: Colors.grey.shade300),
+          Icon(
+            Icons.history_rounded,
+            size: 64,
+            color: _onSurfaceVariant.withValues(alpha: 0.35),
+          ),
           const SizedBox(height: 16),
           Text(
             'Chưa có lịch sử phân loại',
-            style: AppTheme.titleMedium.copyWith(color: Colors.grey),
+            textAlign: TextAlign.center,
+            style: GoogleFonts.manrope(
+              color: _onSurface,
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
             'Hãy bắt đầu phân loại trái cây đầu tiên',
-            style: AppTheme.bodySmall,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(color: _onSurfaceVariant, fontSize: 13),
           ),
         ],
+      ),
+    );
+  }
+
+  String _fruitName(String fruitType) {
+    return _fruitTypes[fruitType] ??
+        _fruitTypes[fruitType.toUpperCase()] ??
+        fruitType;
+  }
+}
+
+class _FilterSelect extends StatelessWidget {
+  final String label;
+  final String? value;
+  final Map<String, String> items;
+  final ValueChanged<String?> onChanged;
+
+  const _FilterSelect({
+    required this.label,
+    required this.value,
+    required this.items,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return _FilterFieldFrame(
+      label: label,
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String?>(
+          value: value,
+          isExpanded: true,
+          icon: const Icon(Icons.keyboard_arrow_down_rounded),
+          style: GoogleFonts.inter(color: _onSurface, fontSize: 15),
+          items: items.entries.map((entry) {
+            return DropdownMenuItem<String?>(
+              value: entry.key == 'all' ? null : entry.key,
+              child: Text(entry.value, overflow: TextOverflow.ellipsis),
+            );
+          }).toList(),
+          onChanged: onChanged,
+        ),
+      ),
+    );
+  }
+}
+
+class _DateField extends StatelessWidget {
+  final String label;
+  final DateTime? value;
+  final VoidCallback onTap;
+
+  const _DateField({
+    required this.label,
+    required this.value,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return _FilterFieldFrame(
+      label: label,
+      child: InkWell(
+        onTap: onTap,
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                value != null
+                    ? '${value!.month.toString().padLeft(2, '0')}/${value!.day.toString().padLeft(2, '0')}/${value!.year}'
+                    : 'mm/dd/yyyy',
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.inter(color: _onSurface, fontSize: 15),
+              ),
+            ),
+            const Icon(
+              Icons.calendar_today_rounded,
+              size: 18,
+              color: _onSurface,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FilterFieldFrame extends StatelessWidget {
+  final String label;
+  final Widget child;
+
+  const _FilterFieldFrame({required this.label, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          child: Text(
+            label,
+            style: GoogleFonts.inter(
+              color: _onSurfaceVariant,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+        Container(
+          height: 54,
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          decoration: BoxDecoration(
+            color: _surfaceContainerLowest,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Center(child: child),
+        ),
+      ],
+    );
+  }
+}
+
+class _FilterActionButton extends StatelessWidget {
+  final String label;
+  final VoidCallback onPressed;
+  final bool isPrimary;
+
+  const _FilterActionButton({
+    required this.label,
+    required this.onPressed,
+    required this.isPrimary,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 52,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: isPrimary
+              ? const LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [_primary, _primaryContainer],
+                )
+              : null,
+          borderRadius: BorderRadius.circular(8),
+          border: isPrimary ? null : Border.all(color: _outlineVariant),
+        ),
+        child: TextButton(
+          onPressed: onPressed,
+          style: TextButton.styleFrom(
+            foregroundColor: isPrimary ? Colors.white : _onSurfaceVariant,
+            padding: const EdgeInsets.symmetric(horizontal: 34),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          child: Text(
+            label,
+            style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w800),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  final String text;
+
+  const _SectionTitle(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: GoogleFonts.manrope(
+        color: _onSurface,
+        fontSize: 24,
+        fontWeight: FontWeight.w800,
+      ),
+    );
+  }
+}
+
+class _HistoryThumb extends StatelessWidget {
+  final String? imageUrl;
+  final String? token;
+  final bool isMuted;
+
+  const _HistoryThumb({
+    required this.imageUrl,
+    required this.token,
+    required this.isMuted,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final url = imageUrl;
+
+    return Container(
+      width: 94,
+      height: 94,
+      decoration: BoxDecoration(
+        color: _surfaceContainerLow,
+        borderRadius: BorderRadius.circular(8),
+        image: url != null && url.isNotEmpty
+            ? DecorationImage(
+                image: NetworkImage(
+                  url,
+                  headers: token != null
+                      ? {'Authorization': 'Bearer $token'}
+                      : null,
+                ),
+                fit: BoxFit.cover,
+                colorFilter: isMuted
+                    ? const ColorFilter.mode(Colors.grey, BlendMode.saturation)
+                    : null,
+              )
+            : null,
+      ),
+      child: url == null || url.isEmpty
+          ? const Icon(Icons.qr_code_scanner_rounded, color: _primary, size: 34)
+          : null,
+    );
+  }
+}
+
+class _HistoryMetric extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color? valueColor;
+
+  const _HistoryMetric({
+    required this.label,
+    required this.value,
+    this.valueColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 120,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(
+              color: _onSurfaceVariant.withValues(alpha: 0.58),
+              fontSize: 10,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(
+              color: valueColor ?? _onSurface,
+              fontSize: 14,
+              height: 1.2,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatusChip extends StatelessWidget {
+  final String status;
+
+  const _StatusChip({required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = switch (status) {
+      'FAILED' => _error,
+      'REJECTED' => _warning,
+      _ => _secondary,
+    };
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        status,
+        style: GoogleFonts.inter(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.w800,
+        ),
       ),
     );
   }
@@ -693,4 +960,128 @@ List<Map<String, dynamic>> _extractDetectionList(Object? data) {
 double _asDouble(Object? value) {
   if (value is num) return value.toDouble();
   return double.tryParse(value?.toString() ?? '') ?? 0;
+}
+
+String _formatConfidence(double confidence) {
+  final percent = confidence > 1 ? confidence : confidence * 100;
+  if (percent == 0) return '---';
+  final hasDecimal = percent % 1 != 0;
+  return '${hasDecimal ? percent.toStringAsFixed(1) : percent.toStringAsFixed(0)}%';
+}
+
+// ── Bottom Navigation ────────────────────────────────────────────────────────
+
+class _HistoryBottomNav extends StatelessWidget {
+  final VoidCallback onHome;
+  final VoidCallback onStatistics;
+  final VoidCallback onHistory;
+
+  const _HistoryBottomNav({
+    required this.onHome,
+    required this.onStatistics,
+    required this.onHistory,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: Container(
+        height: 80,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+        decoration: BoxDecoration(
+          color: _surfaceContainerLowest,
+          border: Border(
+            top: BorderSide(color: _outlineVariant.withValues(alpha: 0.15)),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: _onSurfaceVariant.withValues(alpha: 0.05),
+              blurRadius: 12,
+              offset: const Offset(0, -4),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _HistBottomNavItem(
+              icon: Icons.home_rounded,
+              label: 'Trang chủ',
+              isSelected: false,
+              onTap: onHome,
+            ),
+            _HistBottomNavItem(
+              icon: Icons.analytics_rounded,
+              label: 'Thống kê',
+              isSelected: false,
+              onTap: onStatistics,
+            ),
+            _HistBottomNavItem(
+              icon: Icons.history_rounded,
+              label: 'Lịch sử',
+              isSelected: true,
+              onTap: onHistory,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HistBottomNavItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _HistBottomNavItem({
+    required this.icon,
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const activeColor = Color(0xFFB01E23);
+    final color = isSelected ? activeColor : _onSurfaceVariant;
+
+    return Expanded(
+      child: Center(
+        child: Material(
+          color: isSelected
+              ? const Color(0xFFFFDAD6).withValues(alpha: 0.3)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              constraints: const BoxConstraints(minWidth: 78),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(icon, color: color, size: 24),
+                  const SizedBox(height: 4),
+                  Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.inter(
+                      color: color,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
