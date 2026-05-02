@@ -304,19 +304,29 @@ class HomeContent extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= 760;
-        return GridView.builder(
-          padding: const EdgeInsets.fromLTRB(AppSizes.spacingXL, AppSizes.spacingXL, AppSizes.spacingXL, 112),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: isWide ? 2 : 1,
-            crossAxisSpacing: AppSizes.spacingXL,
-            mainAxisSpacing: AppSizes.spacingXL,
-            mainAxisExtent: 320,
+        final cardWidth = isWide
+            ? (constraints.maxWidth - (AppSizes.spacingXL * 3)) / 2
+            : constraints.maxWidth - (AppSizes.spacingXL * 2);
+
+        return SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(
+            AppSizes.spacingXL,
+            AppSizes.spacingXL,
+            AppSizes.spacingXL,
+            112,
           ),
-          itemCount: systems.length,
-          itemBuilder: (context, index) {
-            final system = systems[index];
-            return _buildSystemCard(context, system);
-          },
+          child: Wrap(
+            spacing: AppSizes.spacingXL,
+            runSpacing: AppSizes.spacingL,
+            children: [
+              for (final system in systems)
+                SizedBox(
+                  width: cardWidth,
+                  child: _buildSystemCard(context, system),
+                ),
+            ],
+          ),
         );
       },
     );
@@ -343,7 +353,10 @@ class HomeContent extends StatelessWidget {
           onTap: () => onOpenSystem(system),
           borderRadius: BorderRadius.circular(AppSizes.radiusS),
           child: Padding(
-            padding: const EdgeInsets.all(AppSizes.spacingXXL),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSizes.spacingXXL,
+              vertical: AppSizes.spacingM,
+            ),
             child: Stack(
               children: [
                 Positioned(
@@ -371,13 +384,14 @@ class HomeContent extends StatelessWidget {
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
                       _systemIcon(system),
                       color: isStopped ? Colors.grey.shade400 : _primary,
                       size: AppSizes.iconLarge,
                     ),
-                    const SizedBox(height: AppSizes.spacingXL),
+                    const SizedBox(height: AppSizes.spacingM),
                     Text(
                       _systemName(system),
                       maxLines: 1,
@@ -388,7 +402,7 @@ class HomeContent extends StatelessWidget {
                         color: _onSurface,
                       ),
                     ),
-                    const SizedBox(height: AppSizes.spacingS),
+                    const SizedBox(height: AppSizes.spacingXS),
                     Text(
                       _systemDescription(system),
                       maxLines: 2,
@@ -399,37 +413,45 @@ class HomeContent extends StatelessWidget {
                         color: _onSurfaceVariant,
                       ),
                     ),
-                    const SizedBox(height: AppSizes.spacingXXL),
+                    const SizedBox(height: AppSizes.spacingM),
                     Container(
                       height: 1,
                       color: _surfaceVariant.withValues(alpha: 0.7),
                     ),
-                    const SizedBox(height: AppSizes.spacingL),
+                    const SizedBox(height: AppSizes.spacingS),
                     _buildMetaRow(
                       Icons.location_on_rounded,
                       _systemLocation(system),
                     ),
-                    const SizedBox(height: AppSizes.spacingM),
-                    _buildMetaRow(
-                      Icons.calendar_today_rounded,
-                      'Khởi tạo: ${_systemCreated(system)}',
-                    ),
-                    const Spacer(),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton.icon(
-                        onPressed: () => onOpenSystem(system),
-                        iconAlignment: IconAlignment.end,
-                        icon: const Icon(Icons.arrow_forward_rounded),
-                        label: const Text('Chi tiết'),
-                        style: TextButton.styleFrom(
-                          foregroundColor: _primary,
-                          textStyle: GoogleFonts.inter(
-                            fontSize: AppSizes.fontTitleMedium,
-                            fontWeight: FontWeight.w800,
+                    const SizedBox(height: AppSizes.spacingS),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: _buildMetaRow(
+                            Icons.calendar_today_rounded,
+                            'Khởi tạo: ${_systemCreated(system)}',
                           ),
                         ),
-                      ),
+                        const SizedBox(width: AppSizes.spacingM),
+                        TextButton.icon(
+                          onPressed: () => onOpenSystem(system),
+                          iconAlignment: IconAlignment.end,
+                          icon: const Icon(Icons.arrow_forward_rounded),
+                          label: const Text('Chi tiết'),
+                          style: TextButton.styleFrom(
+                            foregroundColor: _primary,
+                            padding: EdgeInsets.zero,
+                            minimumSize: const Size(0, 32),
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            textStyle: GoogleFonts.inter(
+                              fontSize: AppSizes.fontTitleMedium,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

@@ -135,7 +135,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           : RefreshIndicator(
               onRefresh: _loadNotifications,
               color: _primary,
-              child: _buildContent(unreadCount),
+              child: _buildContent(),
             ),
     );
   }
@@ -186,21 +186,25 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     );
   }
 
-  Widget _buildContent(int unreadCount) {
+  Widget _buildContent() {
     return LayoutBuilder(
-      builder: (context, constraints) {
+      builder: (context, _) {
         return ListView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(AppSizes.spacingXXL, AppSizes.spacingXL, AppSizes.spacingXXL, 38.0),
+          padding: const EdgeInsets.fromLTRB(
+            AppSizes.spacingXXL,
+            AppSizes.spacingM,
+            AppSizes.spacingXXL,
+            AppSizes.spacingXXL,
+          ),
           children: [
             Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 880),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    _buildHeader(unreadCount, constraints.maxWidth),
-                    const SizedBox(height: 46),
                     if (_notifications.isEmpty)
                       _buildEmptyState()
                     else
@@ -212,72 +216,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           ],
         );
       },
-    );
-  }
-
-  Widget _buildHeader(int unreadCount, double width) {
-    final showCountChip = width >= 680;
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'TRẠNG THÁI HỆ THỐNG',
-                style: GoogleFonts.inter(
-                  color: _onSurfaceVariant,
-                  fontSize: AppSizes.fontCaption,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: AppSizes.spacingXS),
-              Text(
-                'Thông báo mới',
-                style: GoogleFonts.manrope(
-                  color: _onSurface,
-                  fontSize: AppSizes.fontDisplayLarge,
-                  height: 1.05,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
-          ),
-        ),
-        if (showCountChip) ...[
-          const SizedBox(width: AppSizes.spacingXL),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingL, vertical: AppSizes.spacingS),
-            decoration: BoxDecoration(
-              color: _surfaceContainerLow,
-              borderRadius: BorderRadius.circular(AppSizes.radiusM),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 6,
-                  height: 6,
-                  decoration: const BoxDecoration(
-                    color: _primary,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: AppSizes.spacingS),
-                Text(
-                  '$unreadCount thông báo chưa đọc',
-                  style: GoogleFonts.inter(
-                    color: _onSurfaceVariant,
-                    fontSize: AppSizes.fontCaption,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ],
     );
   }
 
@@ -296,7 +234,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         Text(
           message,
           textAlign: TextAlign.center,
-          style: GoogleFonts.inter(color: _onSurfaceVariant, fontSize: AppSizes.fontBody),
+          style: GoogleFonts.inter(
+            color: _onSurfaceVariant,
+            fontSize: AppSizes.fontBody,
+          ),
         ),
       ],
     );
@@ -331,7 +272,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           Text(
             'Các cảnh báo và cập nhật hệ thống sẽ xuất hiện tại đây.',
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(color: _onSurfaceVariant, fontSize: AppSizes.fontCaption),
+            style: GoogleFonts.inter(
+              color: _onSurfaceVariant,
+              fontSize: AppSizes.fontCaption,
+            ),
           ),
         ],
       ),
@@ -351,7 +295,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final time = _notificationTime(notification);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: AppSizes.spacingXL),
+      margin: const EdgeInsets.only(bottom: AppSizes.spacingM),
       decoration: BoxDecoration(
         color: isRead
             ? _surfaceContainerLow.withValues(alpha: 0.5)
@@ -371,15 +315,19 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           child: Opacity(
             opacity: isRead ? 0.78 : 1,
             child: Padding(
-              padding: const EdgeInsets.all(AppSizes.spacingXL),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSizes.spacingL,
+                vertical: AppSizes.spacingM,
+              ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _NotificationIcon(style: style),
-                  const SizedBox(width: AppSizes.spacingXL),
+                  const SizedBox(width: AppSizes.spacingM),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -389,18 +337,20 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                 title,
                                 style: GoogleFonts.manrope(
                                   color: _onSurface,
-                                  fontSize: AppSizes.fontHeadlineMedium,
-                                  height: 1.12,
+                                  fontSize: AppSizes.fontTitleLarge,
+                                  height: 1.15,
                                   fontWeight: FontWeight.w800,
                                 ),
                               ),
                             ),
                             if (!isRead) ...[
-                              const SizedBox(width: AppSizes.spacingM),
+                              const SizedBox(width: AppSizes.spacingS),
                               Container(
-                                width: 8,
-                                height: 8,
-                                margin: const EdgeInsets.only(top: AppSizes.spacingS),
+                                width: 7,
+                                height: 7,
+                                margin: const EdgeInsets.only(
+                                  top: AppSizes.spacingXS,
+                                ),
                                 decoration: const BoxDecoration(
                                   color: _primary,
                                   shape: BoxShape.circle,
@@ -410,13 +360,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                           ],
                         ),
                         if (message.isNotEmpty) ...[
-                          const SizedBox(height: AppSizes.spacingM),
+                          const SizedBox(height: AppSizes.spacingXS),
                           Text(
                             message,
                             style: GoogleFonts.inter(
                               color: _onSurfaceVariant,
-                              fontSize: AppSizes.fontTitleLarge,
-                              height: 1.45,
+                              fontSize: AppSizes.fontBody,
+                              height: 1.32,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -429,12 +379,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.inter(
                               color: _onSurfaceVariant.withValues(alpha: 0.7),
-                              fontSize: AppSizes.fontCaption,
+                              fontSize: AppSizes.fontCaption - 1,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
                         ],
-                        const SizedBox(height: AppSizes.spacingXXL),
+                        const SizedBox(height: AppSizes.spacingS),
                         Row(
                           children: [
                             Expanded(
@@ -446,7 +396,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                   color: _onSurfaceVariant.withValues(
                                     alpha: 0.62,
                                   ),
-                                  fontSize: AppSizes.fontCaption,
+                                  fontSize: AppSizes.fontCaption - 1,
                                   fontWeight: FontWeight.w800,
                                 ),
                               ),
@@ -494,13 +444,17 @@ class _NotificationIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 70,
-      height: 70,
+      width: 44,
+      height: 44,
       decoration: BoxDecoration(
         color: style.background,
         borderRadius: BorderRadius.circular(AppSizes.radiusM),
       ),
-      child: Icon(style.icon, color: style.foreground, size: AppSizes.iconLarge),
+      child: Icon(
+        style.icon,
+        color: style.foreground,
+        size: AppSizes.iconMedium,
+      ),
     );
   }
 }
@@ -513,7 +467,10 @@ class _TypePill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingM, vertical: AppSizes.spacingXS),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSizes.spacingS,
+        vertical: AppSizes.spacingXS,
+      ),
       decoration: BoxDecoration(
         color: style.pillBackground,
         borderRadius: BorderRadius.circular(AppSizes.radiusS),
@@ -522,7 +479,7 @@ class _TypePill extends StatelessWidget {
         style.label,
         style: GoogleFonts.inter(
           color: style.pillForeground,
-          fontSize: AppSizes.fontCaption,
+          fontSize: AppSizes.fontCaption - 1,
           fontWeight: FontWeight.w900,
         ),
       ),

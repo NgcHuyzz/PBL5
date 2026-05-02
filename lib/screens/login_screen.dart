@@ -19,7 +19,6 @@ class _LoginScreenState extends State<LoginScreen> {
   static const Color _surfaceTint = Color(0xFFB62326);
   static const Color _onBackground = Color(0xFF1B1C1C);
   static const Color _onSurfaceVariant = Color(0xFF5A403E);
-  static const Color _outline = Color(0xFF8E706D);
   static const Color _outlineVariant = Color(0xFFE3BEBB);
 
   final _formKey = GlobalKey<FormState>();
@@ -109,7 +108,10 @@ class _LoginScreenState extends State<LoginScreen> {
     return Container(
       width: double.infinity,
       color: _surfaceContainerLow,
-      padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingXXL, vertical: AppSizes.spacingL),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSizes.spacingXXL,
+        vertical: AppSizes.spacingL,
+      ),
       child: Row(
         children: [
           const Icon(
@@ -168,14 +170,14 @@ class _LoginScreenState extends State<LoginScreen> {
               _buildErrorBanner(_errorMessage!),
               const SizedBox(height: AppSizes.spacingXL),
             ],
-            _buildLabel('Username or Email'),
+            const SizedBox.shrink(),
             const SizedBox(height: AppSizes.spacingXS),
             TextFormField(
               controller: _identifierController,
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
               style: GoogleFonts.inter(color: _onBackground),
-              decoration: _inputDecoration(hintText: 'operator@agritech.com'),
+              decoration: _inputDecoration(hintText: ''),
               validator: (v) =>
                   v == null || v.isEmpty ? 'Vui lòng nhập thông tin' : null,
             ),
@@ -282,7 +284,10 @@ class _LoginScreenState extends State<LoginScreen> {
       hintStyle: GoogleFonts.inter(color: _outlineVariant),
       filled: true,
       fillColor: _surfaceContainerLow,
-      contentPadding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingL, vertical: AppSizes.spacingM),
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: AppSizes.spacingL,
+        vertical: AppSizes.spacingM,
+      ),
       suffixIcon: suffixIcon,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppSizes.radiusS),
@@ -294,15 +299,21 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       focusedBorder: const UnderlineInputBorder(
         borderSide: BorderSide(color: _surfaceTint, width: 2),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(AppSizes.radiusS)),
+        borderRadius: BorderRadius.vertical(
+          bottom: Radius.circular(AppSizes.radiusS),
+        ),
       ),
       errorBorder: const UnderlineInputBorder(
         borderSide: BorderSide(color: Colors.red, width: 2),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(AppSizes.radiusS)),
+        borderRadius: BorderRadius.vertical(
+          bottom: Radius.circular(AppSizes.radiusS),
+        ),
       ),
       focusedErrorBorder: const UnderlineInputBorder(
         borderSide: BorderSide(color: Colors.red, width: 2),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(AppSizes.radiusS)),
+        borderRadius: BorderRadius.vertical(
+          bottom: Radius.circular(AppSizes.radiusS),
+        ),
       ),
     );
   }
@@ -316,7 +327,11 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline, color: Color(0xFF93000A), size: AppSizes.iconSmall),
+          const Icon(
+            Icons.error_outline,
+            color: Color(0xFF93000A),
+            size: AppSizes.iconSmall,
+          ),
           const SizedBox(width: AppSizes.spacingS),
           Expanded(
             child: Text(
@@ -398,7 +413,10 @@ class _LoginScreenState extends State<LoginScreen> {
       children: [
         Text(
           'Chưa có tài khoản?',
-          style: GoogleFonts.inter(fontSize: AppSizes.fontBody, color: _onSurfaceVariant),
+          style: GoogleFonts.inter(
+            fontSize: AppSizes.fontBody,
+            color: _onSurfaceVariant,
+          ),
         ),
         TextButton(
           onPressed: () => Navigator.pushNamed(context, '/register'),
@@ -475,18 +493,14 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildFooter() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(AppSizes.spacingXXL, AppSizes.spacingS, AppSizes.spacingXXL, AppSizes.spacingXXL),
-      child: Text(
-        '© 2024 AGRITECH ATELIER PRECISION OPTICS',
-        textAlign: TextAlign.center,
-        style: GoogleFonts.inter(
-          fontSize: AppSizes.fontCaption,
-          fontWeight: FontWeight.w800,
-          letterSpacing: 2,
-          color: _outline,
-        ),
+    return const Padding(
+      padding: EdgeInsets.fromLTRB(
+        AppSizes.spacingXXL,
+        AppSizes.spacingS,
+        AppSizes.spacingXXL,
+        AppSizes.spacingXXL,
       ),
+      child: SizedBox(height: AppSizes.fontCaption),
     );
   }
 }

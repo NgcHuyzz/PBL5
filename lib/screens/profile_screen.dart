@@ -13,7 +13,6 @@ const Color _surfaceContainerLow = Color(0xFFF6F3F2);
 const Color _surfaceVariant = Color(0xFFE5E2E1);
 const Color _onSurface = Color(0xFF1B1C1C);
 const Color _onSurfaceVariant = Color(0xFF5A403E);
-const Color _outlineVariant = Color(0xFFE3BEBB);
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -166,7 +165,9 @@ class _ProfileContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final horizontalPadding = constraints.maxWidth >= 720 ? AppSizes.spacingXXL : AppSizes.spacingXL;
+        final horizontalPadding = constraints.maxWidth >= 720
+            ? AppSizes.spacingXXL
+            : AppSizes.spacingXL;
 
         return ListView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -182,15 +183,14 @@ class _ProfileContent extends StatelessWidget {
                 constraints: const BoxConstraints(maxWidth: 620),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    _ProfileHeader(displayName: displayName),
                     if (errorMessage != null) ...[
-                      const SizedBox(height: AppSizes.spacingXL),
                       _ErrorBanner(message: errorMessage!, onRetry: onRetry),
+                      const SizedBox(height: AppSizes.spacingL),
                     ],
-                    const SizedBox(height: 46),
                     _SectionLabel(text: 'CHI TIẾT TÀI KHOẢN'),
-                    const SizedBox(height: AppSizes.spacingXXL),
+                    const SizedBox(height: AppSizes.spacingM),
                     _InfoPanel(
                       children: [
                         _InfoRow(
@@ -216,18 +216,8 @@ class _ProfileContent extends StatelessWidget {
                           ),
                       ],
                     ),
-                    const SizedBox(height: 64),
+                    const SizedBox(height: AppSizes.spacingXL),
                     _LogoutButton(onPressed: onLogout),
-                    const SizedBox(height: 36),
-                    Text(
-                      'AGRITECH ATELIER V2.4.0 • FACTORY CONTROL SYSTEM',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(
-                        color: _onSurfaceVariant.withValues(alpha: 0.42),
-                        fontSize: AppSizes.fontCaption,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -235,113 +225,6 @@ class _ProfileContent extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-}
-
-class _ProfileHeader extends StatelessWidget {
-  final String displayName;
-
-  const _ProfileHeader({required this.displayName});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(AppSizes.spacingXXL, 46.0, AppSizes.spacingXXL, 46.0),
-      decoration: BoxDecoration(
-        color: _surfaceContainerLowest,
-        borderRadius: BorderRadius.circular(AppSizes.radiusM),
-        border: Border.all(color: _outlineVariant.withValues(alpha: 0.16)),
-        boxShadow: [
-          BoxShadow(
-            color: _onSurfaceVariant.withValues(alpha: 0.06),
-            blurRadius: 42,
-            offset: const Offset(0, 22),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          const _Avatar(),
-          const SizedBox(height: 44),
-          Text(
-            displayName,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.manrope(
-              color: _onSurface,
-              fontSize: AppSizes.fontDisplayMedium,
-              height: 1.08,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Avatar extends StatelessWidget {
-  const _Avatar();
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 180,
-      height: 180,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Align(
-            alignment: Alignment.topCenter,
-            child: Container(
-              width: 176,
-              height: 176,
-              padding: const EdgeInsets.all(AppSizes.spacingM),
-              decoration: BoxDecoration(
-                color: _surfaceContainerLow,
-                borderRadius: BorderRadius.circular(AppSizes.radiusM),
-              ),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFF33434E),
-                  borderRadius: BorderRadius.circular(AppSizes.radiusM),
-                ),
-                child: const Icon(
-                  Icons.person_rounded,
-                  color: Color(0xFFF6F3F2),
-                  size: 104,
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            right: -2,
-            bottom: 0,
-            child: Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: _primaryContainer,
-                borderRadius: BorderRadius.circular(AppSizes.radiusL),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.16),
-                    blurRadius: 16,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.edit_rounded,
-                color: Colors.white,
-                size: AppSizes.iconLarge,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -382,12 +265,13 @@ class _InfoPanel extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           for (var index = 0; index < children.length; index++) ...[
             children[index],
             if (index != children.length - 1)
               Container(
-                height: 2,
+                height: 1,
                 color: _surfaceVariant.withValues(alpha: 0.7),
               ),
           ],
@@ -411,20 +295,25 @@ class _InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(AppSizes.spacingXXL, AppSizes.spacingXXL, AppSizes.spacingXL, AppSizes.spacingXXL),
+      padding: const EdgeInsets.fromLTRB(
+        AppSizes.spacingXL,
+        AppSizes.spacingM,
+        AppSizes.spacingL,
+        AppSizes.spacingM,
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            width: 56,
-            height: 56,
+            width: 42,
+            height: 42,
             decoration: BoxDecoration(
               color: _surfaceContainerLow,
               borderRadius: BorderRadius.circular(AppSizes.radiusM),
             ),
-            child: Icon(icon, color: _primary, size: AppSizes.iconLarge),
+            child: Icon(icon, color: _primary, size: AppSizes.iconMedium),
           ),
-          const SizedBox(width: AppSizes.spacingXXL),
+          const SizedBox(width: AppSizes.spacingM),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -436,19 +325,19 @@ class _InfoRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.inter(
                     color: _onSurfaceVariant,
-                    fontSize: AppSizes.fontCaption,
+                    fontSize: AppSizes.fontCaption - 1,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 0,
                   ),
                 ),
-                const SizedBox(height: AppSizes.spacingM),
+                const SizedBox(height: AppSizes.spacingXS),
                 Text(
                   value,
                   softWrap: true,
                   overflow: TextOverflow.visible,
                   style: GoogleFonts.inter(
                     color: _onSurface,
-                    fontSize: AppSizes.fontHeadlineLarge,
+                    fontSize: AppSizes.fontTitleLarge,
                     height: 1.18,
                     fontWeight: FontWeight.w700,
                   ),

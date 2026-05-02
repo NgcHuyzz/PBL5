@@ -156,7 +156,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Container(
       width: double.infinity,
       color: _surface,
-      padding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingL, vertical: AppSizes.spacingM),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSizes.spacingL,
+        vertical: AppSizes.spacingM,
+      ),
       child: Row(
         children: [
           IconButton(
@@ -202,28 +205,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ],
           ),
           child: const Icon(Icons.eco_rounded, color: Colors.white, size: 32),
-        ),
-        const SizedBox(height: AppSizes.spacingL),
-        Text(
-          'Create account',
-          textAlign: TextAlign.center,
-          style: GoogleFonts.manrope(
-            fontSize: AppSizes.fontDisplaySmall,
-            fontWeight: FontWeight.w800,
-            height: 1.12,
-            color: _onBackground,
-          ),
-        ),
-        const SizedBox(height: AppSizes.spacingXS),
-        Text(
-          'Join PBL5 Fruit Sorter to start intelligent classification today.',
-          textAlign: TextAlign.center,
-          style: GoogleFonts.inter(
-            fontSize: AppSizes.fontBody,
-            height: 1.45,
-            fontWeight: FontWeight.w500,
-            color: _onSurfaceVariant,
-          ),
         ),
       ],
     );
@@ -300,14 +281,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
               },
             ),
             const SizedBox(height: AppSizes.spacingXL),
-            _buildLabel('Email'),
+            const SizedBox.shrink(),
             const SizedBox(height: AppSizes.spacingXS),
             TextFormField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
               style: GoogleFonts.inter(color: _onBackground),
-              decoration: _inputDecoration(hintText: 'operator@agritech.com'),
+              decoration: _inputDecoration(hintText: ''),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Vui lòng nhập email';
@@ -418,7 +399,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
       hintStyle: GoogleFonts.inter(color: _outlineVariant),
       filled: true,
       fillColor: _surfaceContainerLow,
-      contentPadding: const EdgeInsets.symmetric(horizontal: AppSizes.spacingL, vertical: AppSizes.spacingM),
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: AppSizes.spacingL,
+        vertical: AppSizes.spacingM,
+      ),
       suffixIcon: suffixIcon,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppSizes.radiusS),
@@ -430,15 +414,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
       focusedBorder: const UnderlineInputBorder(
         borderSide: BorderSide(color: _surfaceTint, width: 2),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(AppSizes.radiusS)),
+        borderRadius: BorderRadius.vertical(
+          bottom: Radius.circular(AppSizes.radiusS),
+        ),
       ),
       errorBorder: const UnderlineInputBorder(
         borderSide: BorderSide(color: Colors.red, width: 2),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(AppSizes.radiusS)),
+        borderRadius: BorderRadius.vertical(
+          bottom: Radius.circular(AppSizes.radiusS),
+        ),
       ),
       focusedErrorBorder: const UnderlineInputBorder(
         borderSide: BorderSide(color: Colors.red, width: 2),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(AppSizes.radiusS)),
+        borderRadius: BorderRadius.vertical(
+          bottom: Radius.circular(AppSizes.radiusS),
+        ),
       ),
     );
   }
@@ -452,7 +442,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline, color: Color(0xFF93000A), size: AppSizes.iconSmall),
+          const Icon(
+            Icons.error_outline,
+            color: Color(0xFF93000A),
+            size: AppSizes.iconSmall,
+          ),
           const SizedBox(width: AppSizes.spacingS),
           Expanded(
             child: Text(
@@ -519,7 +513,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                     ),
                     const SizedBox(width: AppSizes.spacingS),
-                    const Icon(Icons.how_to_reg_rounded, size: AppSizes.iconSmall),
+                    const Icon(
+                      Icons.how_to_reg_rounded,
+                      size: AppSizes.iconSmall,
+                    ),
                   ],
                 ),
         ),
@@ -595,17 +592,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             const SizedBox(width: AppSizes.spacingM),
             Container(width: 42, height: 1, color: _onSurfaceVariant),
             const SizedBox(width: AppSizes.spacingM),
-            Flexible(
-              child: Text(
-                'INDUSTRIAL HORTICULTURAL PRECISION',
-                style: GoogleFonts.inter(
-                  fontSize: AppSizes.fontCaption,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 2,
-                  color: _onSurfaceVariant,
-                ),
-              ),
-            ),
+            const Flexible(child: SizedBox(width: 236, height: 16)),
           ],
         ),
       ),
