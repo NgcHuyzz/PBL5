@@ -155,7 +155,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       ),
       titleSpacing: 0,
       title: Text(
-        'Notifications',
+        'Thông báo',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: GoogleFonts.manrope(
@@ -179,7 +179,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 fontWeight: FontWeight.w800,
               ),
             ),
-            child: const Text('Mark all as read'),
+            child: const Text('Đánh dấu tất cả đã đọc'),
           ),
         ),
       ],

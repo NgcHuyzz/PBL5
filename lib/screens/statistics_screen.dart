@@ -3,8 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../services/system_service.dart';
 import '../utils/app_sizes.dart';
+import '../widgets/notification_bell_button.dart';
 import 'history_screen.dart';
-import 'notifications_screen.dart';
 import 'profile_screen.dart';
 
 const Color _primary = Color(0xFF8C0011);
@@ -210,15 +210,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     );
   }
 
-  void _openNotifications() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => NotificationsScreen(systemId: widget.systemId),
-      ),
-    );
-  }
-
   void _openHome() {
     Navigator.pop(context);
   }
@@ -329,11 +320,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         ),
       ),
       actions: [
-        IconButton(
-          onPressed: _openNotifications,
-          icon: const Icon(Icons.notifications_rounded),
+        NotificationBellButton(
+          systemId: widget.systemId,
           color: _primaryContainer,
-          tooltip: 'Thông báo',
         ),
         Padding(
           padding: const EdgeInsets.only(right: AppSizes.spacingL),

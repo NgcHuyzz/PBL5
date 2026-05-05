@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../services/system_service.dart';
 import '../utils/app_sizes.dart';
-import 'notifications_screen.dart';
+import '../widgets/notification_bell_button.dart';
 import 'profile_screen.dart';
 import 'statistics_screen.dart';
 
@@ -173,15 +173,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  void _openNotifications() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => NotificationsScreen(systemId: widget.systemId),
-      ),
-    );
-  }
-
   void _openHome() {
     Navigator.pop(context);
   }
@@ -267,11 +258,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ),
       ),
       actions: [
-        IconButton(
-          icon: const Icon(Icons.notifications_rounded),
+        NotificationBellButton(
+          systemId: widget.systemId,
           color: _primaryContainer,
-          tooltip: 'Thông báo',
-          onPressed: _openNotifications,
         ),
         Padding(
           padding: const EdgeInsets.only(right: AppSizes.spacingL),
