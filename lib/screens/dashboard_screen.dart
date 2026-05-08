@@ -6,6 +6,8 @@ import '../services/system_service.dart';
 import '../utils/app_sizes.dart';
 import '../utils/theme.dart';
 
+const bool _showHardwareControls = false;
+
 class DashboardScreen extends StatefulWidget {
   final String? systemId;
   const DashboardScreen({super.key, this.systemId});
@@ -219,12 +221,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             .slideY(begin: 0.1),
                         const SizedBox(height: AppSizes.spacingXL),
 
-                        // Control Buttons
-                        _buildControlButtons()
-                            .animate()
-                            .fadeIn(duration: 400.ms)
-                            .slideY(begin: 0.1),
-                        const SizedBox(height: AppSizes.spacingXL),
+                        // Hardware controls are hidden until firmware support is ready.
+                        if (_showHardwareControls) ...[
+                          _buildControlButtons()
+                              .animate()
+                              .fadeIn(duration: 400.ms)
+                              .slideY(begin: 0.1),
+                          const SizedBox(height: AppSizes.spacingXL),
+                        ],
 
                         // Latest Detection Card
                         _buildLatestDetectionCard()

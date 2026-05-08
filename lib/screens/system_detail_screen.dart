@@ -25,6 +25,7 @@ const Color _surfaceVariant = Color(0xFFE5E2E1);
 const Color _onSurface = Color(0xFF1B1C1C);
 const Color _onSurfaceVariant = Color(0xFF5A403E);
 const Color _outlineVariant = Color(0xFFE3BEBB);
+const bool _showHardwareControls = false;
 
 class SystemDetailScreen extends StatefulWidget {
   final String systemName;
@@ -290,8 +291,11 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
                           children: [
                             _buildStatusCard(),
                             const SizedBox(height: AppSizes.spacingXXL),
-                            _buildControls(),
-                            const SizedBox(height: AppSizes.spacingXXL),
+                            // Hardware controls are hidden until firmware support is ready.
+                            if (_showHardwareControls) ...[
+                              _buildControls(),
+                              const SizedBox(height: AppSizes.spacingXXL),
+                            ],
                             _buildLatestDetection(constraints.maxWidth),
                             const SizedBox(height: AppSizes.spacingXXL),
                             _buildRecentClassifications(),
