@@ -13,13 +13,7 @@ import com.ice.pbl5.Repository.FruitCatalogRepo;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URLConnection;
 import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,8 +30,9 @@ public class DetectionAsyncService {
     private final FruitCatalogRepo fruitCatalogRepo;
     private final SSEService sseService;
     private final ImgUrlService imgUrlService;
+    private final ImageStorageService imageStorageService;
 
-    public DetectionAsyncService(DetectionRepo detectionRepo, AiTCPClientService aiTCPClientService, CommandService commandService, NotificationService notificationService, FruitCatalogRepo fruitCatalogRepo, SSEService sseService, ImgUrlService imgUrlService) {
+    public DetectionAsyncService(DetectionRepo detectionRepo, AiTCPClientService aiTCPClientService, CommandService commandService, NotificationService notificationService, FruitCatalogRepo fruitCatalogRepo, SSEService sseService, ImgUrlService imgUrlService, ImageStorageService imageStorageService) {
         this.detectionRepo = detectionRepo;
         this.aiTCPClientService = aiTCPClientService;
         this.commandService = commandService;
@@ -45,6 +40,7 @@ public class DetectionAsyncService {
         this.fruitCatalogRepo = fruitCatalogRepo;
         this.sseService = sseService;
         this.imgUrlService = imgUrlService;
+        this.imageStorageService = imageStorageService;
     }
 
     @Async("ai-worker")
@@ -56,7 +52,7 @@ public class DetectionAsyncService {
             detection.setStatus(DetectionStatus.PROCESSING);
             detectionRepo.save(detection);
 
-            byte[] imgBytes = loadImageBytes(detection.getImageUrl());
+            byte[] imgBytes = imageStorageService.readImage(detection.getImageUrl());
             AiTCPResponse aiTCPResponse = aiTCPClientService.classify(imgBytes);
 
             int processingTime = (int) Duration.between(startTime, LocalDateTime.now()).toMillis();
@@ -153,23 +149,6 @@ public class DetectionAsyncService {
                 detection.getClassifiedAt(),
                 imgUrlService.buildImgUrl(detection.getImageUrl())
         );
-    }
-
-    private byte[] loadImageBytes(String imageUrl) throws IOException {
-        if (imageUrl == null || imageUrl.isBlank()) {
-            throw new IOException("imageUrl is empty");
-        }
-
-        if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
-            URLConnection connection = URI.create(imageUrl).toURL().openConnection();
-            connection.setConnectTimeout(5000);
-            connection.setReadTimeout(10000);
-            try (InputStream inputStream = connection.getInputStream()) {
-                return inputStream.readAllBytes();
-            }
-        }
-
-        return Files.readAllBytes(Path.of(imageUrl));
     }
 
     private String mapTargetBin(String fruitType, BigDecimal confidence) {
