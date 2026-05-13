@@ -1,5 +1,6 @@
 package com.ice.pbl5.DTO.Response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ice.pbl5.Enum.NotificationLevel;
 
 import java.time.LocalDateTime;
@@ -69,6 +70,7 @@ public class NotificationResponse {
         this.message = message;
     }
 
+    @JsonProperty("isRead")
     public Boolean getRead() {
         return isRead;
     }
