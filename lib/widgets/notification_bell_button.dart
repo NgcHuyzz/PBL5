@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../screens/notifications_screen.dart';
@@ -6,8 +8,15 @@ import '../services/system_service.dart';
 class NotificationBellButton extends StatefulWidget {
   final String? systemId;
   final Color? color;
+  /// Emit any value on this stream to trigger an unread-count refresh.
+  final Stream<void>? notificationStream;
 
-  const NotificationBellButton({super.key, required this.systemId, this.color});
+  const NotificationBellButton({
+    super.key,
+    required this.systemId,
+    this.color,
+    this.notificationStream,
+  });
 
   @override
   State<NotificationBellButton> createState() => _NotificationBellButtonState();
@@ -15,11 +24,13 @@ class NotificationBellButton extends StatefulWidget {
 
 class _NotificationBellButtonState extends State<NotificationBellButton> {
   int _unreadCount = 0;
+  StreamSubscription<void>? _notifSub;
 
   @override
   void initState() {
     super.initState();
     _loadUnreadCount();
+    _subscribeToStream(widget.notificationStream);
   }
 
   @override
@@ -28,6 +39,20 @@ class _NotificationBellButtonState extends State<NotificationBellButton> {
     if (oldWidget.systemId != widget.systemId) {
       _loadUnreadCount();
     }
+    if (oldWidget.notificationStream != widget.notificationStream) {
+      _notifSub?.cancel();
+      _subscribeToStream(widget.notificationStream);
+    }
+  }
+
+  void _subscribeToStream(Stream<void>? stream) {
+    _notifSub = stream?.listen((_) => _loadUnreadCount());
+  }
+
+  @override
+  void dispose() {
+    _notifSub?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadUnreadCount() async {

@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shimmer/shimmer.dart';
-import 'dart:async';
+
+import '../services/sse_service.dart';
 import '../services/system_service.dart';
 import '../utils/app_sizes.dart';
 import '../utils/theme.dart';
@@ -17,7 +20,7 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  Timer? _timer;
+  StreamSubscription<SseEvent>? _sseSub;
   String? _systemId;
 
   bool _isLoading = true;
@@ -37,15 +40,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
 
     _loadDashboardData();
-    _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
-      _refreshData();
-    });
+    _connectSse();
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
+    _sseSub?.cancel();
     super.dispose();
+  }
+
+  Future<void> _connectSse() async {
+    final systemId = _systemId;
+    if (systemId == null) return;
+
+    final token = await SystemService.getToken();
+    if (token == null || !mounted) return;
+
+    _sseSub = SseService.subscribe(
+      baseUrl: SystemService.baseUrl,
+      systemId: systemId,
+      token: token,
+    ).listen((event) {
+      if (!mounted) return;
+      if (event.event == 'new-detection') {
+        setState(() {
+          _latestDetection = event.data;
+        });
+      }
+    });
   }
 
   Future<void> _loadDashboardData() async {
@@ -69,12 +91,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     setState(() {
       _isLoading = false;
     });
-  }
-
-  Future<void> _refreshData() async {
-    await Future.wait([_fetchControlState(), _fetchLatestDetection()]);
-    if (!mounted) return;
-    setState(() {});
   }
 
   Future<void> _fetchControlState() async {
@@ -118,8 +134,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (!mounted) return;
 
     if (result['success'] == true) {
-      await _fetchControlState();
-      if (!mounted) return;
+      setState(() {
+        _currentSystemStatus = switch (action) {
+          'START' => 'RUNNING',
+          'PAUSE' => 'PAUSED',
+          'STOP'  => 'STOPPED',
+          _       => _currentSystemStatus,
+        };
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(

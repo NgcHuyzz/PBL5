@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../services/sse_service.dart';
 import '../services/system_service.dart';
 import '../utils/app_sizes.dart';
 import '../widgets/notification_bell_button.dart';
@@ -42,7 +43,10 @@ class SystemDetailScreen extends StatefulWidget {
 }
 
 class _SystemDetailScreenState extends State<SystemDetailScreen> {
-  Timer? _timer;
+  StreamSubscription<SseEvent>? _sseSub;
+  final StreamController<void> _notificationStreamController =
+      StreamController<void>.broadcast();
+
   bool _isLoading = true;
   String? _errorMessage;
   Map<String, dynamic> _controlState = {};
@@ -63,15 +67,41 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
     }
 
     _loadData();
-    _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
-      _refreshData();
-    });
+    _connectSse();
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
+    _sseSub?.cancel();
+    _notificationStreamController.close();
     super.dispose();
+  }
+
+  Future<void> _connectSse() async {
+    final systemId = widget.systemId;
+    if (systemId == null) return;
+
+    final token = await SystemService.getToken();
+    if (token == null || !mounted) return;
+
+    _sseSub = SseService.subscribe(
+      baseUrl: SystemService.baseUrl,
+      systemId: systemId,
+      token: token,
+    ).listen((event) {
+      if (!mounted) return;
+      if (event.event == 'new-detection') {
+        setState(() {
+          _latestDetection = event.data;
+          _recentDetections = [
+            event.data,
+            ..._recentDetections.take(9),
+          ];
+        });
+      } else if (event.event == 'notification') {
+        _notificationStreamController.add(null);
+      }
+    });
   }
 
   Future<void> _loadToken() async {
@@ -105,16 +135,6 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
 
     if (!mounted) return;
     setState(() => _isLoading = false);
-  }
-
-  Future<void> _refreshData() async {
-    await Future.wait([
-      _fetchControlState(),
-      _fetchLatestDetection(),
-      _fetchRecentDetections(),
-    ]);
-    if (!mounted) return;
-    setState(() {});
   }
 
   Future<void> _fetchControlState() async {
@@ -175,7 +195,14 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
     if (!mounted) return;
 
     if (result['success'] == true) {
-      await _fetchControlState();
+      setState(() {
+        _currentStatus = switch (action) {
+          'START' => 'RUNNING',
+          'PAUSE' => 'PAUSED',
+          'STOP'  => 'STOPPED',
+          _       => _currentStatus,
+        };
+      });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(result['message'] ?? 'Điều khiển thất bại')),
@@ -245,6 +272,7 @@ class _SystemDetailScreenState extends State<SystemDetailScreen> {
           NotificationBellButton(
             systemId: widget.systemId,
             color: _onSurfaceVariant,
+            notificationStream: _notificationStreamController.stream,
           ),
           Padding(
             padding: const EdgeInsets.only(right: AppSizes.spacingL),
