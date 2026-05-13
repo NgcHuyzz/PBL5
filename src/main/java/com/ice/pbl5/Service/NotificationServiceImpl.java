@@ -23,10 +23,12 @@ public class NotificationServiceImpl implements NotificationService{
 
     private final NotificationRepo notificationRepo;
     private final SystemAccessService systemAccessService;
+    private final SSEService sseService;
 
-    public NotificationServiceImpl(NotificationRepo notificationRepo, SystemAccessService systemAccessService) {
+    public NotificationServiceImpl(NotificationRepo notificationRepo, SystemAccessService systemAccessService, SSEService sseService) {
         this.notificationRepo = notificationRepo;
         this.systemAccessService = systemAccessService;
+        this.sseService = sseService;
     }
 
     @Override
@@ -117,5 +119,16 @@ public class NotificationServiceImpl implements NotificationService{
         notification.setCreatedAt(LocalDateTime.now());
 
         notificationRepo.save(notification);
+
+        sseService.boardcast(notification.getSystem().getId(), "notification", new NotificationResponse(
+                notification.getId(),
+                notification.getDetection().getId(),
+                notification.getLevel(),
+                notification.getTitle(),
+                notification.getMessage(),
+                notification.getRead(),
+                notification.getCreatedAt(),
+                notification.getReadAt()
+        ));
     }
 }

@@ -61,7 +61,7 @@ public class UserServiceImpl implements UserService{
     // nên thêm là username hay email đều được
     @Override
     public LoginResponse verity(UserLoginRequest userLoginRequest) {
-        authenticationManager
+         authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(userLoginRequest.getIdentifier(), userLoginRequest.getPassword()));
 
         User user = userRepo.findByUsernameOrEmail(userLoginRequest.getIdentifier(), userLoginRequest.getIdentifier()).orElseThrow(() -> new UsernameNotFoundException("User not found"));

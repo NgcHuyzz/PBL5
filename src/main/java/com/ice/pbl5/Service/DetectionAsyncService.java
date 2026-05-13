@@ -1,6 +1,7 @@
 package com.ice.pbl5.Service;
 
 import com.ice.pbl5.DTO.Response.AiTCPResponse;
+import com.ice.pbl5.DTO.Response.DetectionResponse;
 import com.ice.pbl5.DTO.Response.DeviceCommandResponse;
 import com.ice.pbl5.Entity.Detection;
 import com.ice.pbl5.Entity.FruitCatalog;
@@ -22,20 +23,24 @@ import java.util.UUID;
 
 @Service
 public class DetectionAsyncService {
-    private static final BigDecimal CONFIDENCE_THRESHOLD = new BigDecimal("0.7");
+    private static final BigDecimal CONFIDENCE_THRESHOLD = new BigDecimal("0.5");
 
     private final DetectionRepo detectionRepo;
     private final AiTCPClientService aiTCPClientService;
     private final CommandService commandService;
     private final NotificationService notificationService;
     private final FruitCatalogRepo fruitCatalogRepo;
+    private final SSEService sseService;
+    private final ImgUrlService imgUrlService;
 
-    public DetectionAsyncService(DetectionRepo detectionRepo, AiTCPClientService aiTCPClientService, CommandService commandService, NotificationService notificationService, FruitCatalogRepo fruitCatalogRepo) {
+    public DetectionAsyncService(DetectionRepo detectionRepo, AiTCPClientService aiTCPClientService, CommandService commandService, NotificationService notificationService, FruitCatalogRepo fruitCatalogRepo, SSEService sseService, ImgUrlService imgUrlService) {
         this.detectionRepo = detectionRepo;
         this.aiTCPClientService = aiTCPClientService;
         this.commandService = commandService;
         this.notificationService = notificationService;
         this.fruitCatalogRepo = fruitCatalogRepo;
+        this.sseService = sseService;
+        this.imgUrlService = imgUrlService;
     }
 
     @Async("ai-worker")
@@ -80,6 +85,8 @@ public class DetectionAsyncService {
                 detection.setCompletedAt(LocalDateTime.now());
                 detectionRepo.save(detection);
 
+                sseService.boardcast(detection.getSystem().getId(), "new-detection", toDetectionResponse(detection));
+
                 notificationService.createNotification(
                         detection,
                         NotificationLevel.ERROR,
@@ -99,8 +106,8 @@ public class DetectionAsyncService {
                 notificationService.createNotification(
                         detection,
                         NotificationLevel.WARNING,
-                        "Low confidence detection",
-                        "Fruit classified with low confidence: " + confidence
+                        "Độ tin cậy thấp",
+                        "Phân loại trái cây có độ tin cậy thấp: " + confidence
                 );
             }
 
@@ -129,12 +136,22 @@ public class DetectionAsyncService {
             detection.setCompletedAt(LocalDateTime.now());
             detectionRepo.save(detection);
         }
+
+        sseService.boardcast(detection.getSystem().getId(), "new-detection", toDetectionResponse(detection));
+    }
+
+    private DetectionResponse toDetectionResponse(Detection detection) {
+        return new DetectionResponse(
+                detection.getId(),
+                detection.getFruitType(),
+                detection.getConfidence(),
+                detection.getTargetBin(),
+                detection.getClassifiedAt(),
+                imgUrlService.buildImgUrl(detection.getImageUrl())
+        );
     }
 
     private String mapTargetBin(String fruitType, BigDecimal confidence) {
-        if (confidence == null || confidence.compareTo(CONFIDENCE_THRESHOLD) < 0) {
-            return "REJECT_BIN";
-        }
         if (fruitType == null || fruitType.isBlank()) {
             return "REJECT_BIN";
         }
