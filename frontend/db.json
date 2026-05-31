@@ -1,0 +1,131 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "username": "test",
+      "email": "test@example.com",
+      "password": "123456",
+      "fullName": "Test User",
+      "status": "ACTIVE"
+    }
+  ],
+  "control_state": {
+    "systemStatus": "RUNNING"
+  },
+  "system_status": {
+    "systemStatus": "RUNNING",
+    "conveyorStatus": "RUNNING",
+    "cameraStatus": "ONLINE",
+    "aiWorkerStatus": "ONLINE",
+    "backendStatus": "ONLINE",
+    "lastUpdated": "2026-03-13T10:30:00"
+  },
+  "devices": [
+    {
+      "deviceName": "Conveyor",
+      "status": "RUNNING",
+      "lastSeen": "2026-03-13T10:30:00"
+    },
+    {
+      "deviceName": "Camera",
+      "status": "ONLINE",
+      "lastSeen": "2026-03-13T10:30:00"
+    },
+    {
+      "deviceName": "AI Worker",
+      "status": "ONLINE",
+      "lastSeen": "2026-03-13T10:30:00"
+    }
+  ],
+  "latest_detection": {
+    "id": "DET_001",
+    "fruitType": "apple",
+    "confidence": 0.95,
+    "targetBin": "BIN_1",
+    "classifiedAt": "2026-03-13T10:29:30",
+    "imageUrl": "/images/DET_001.jpg"
+  },
+
+  "statistics_summary": {
+    "totalClassified": 1247,
+    "totalSuccess": 1189,
+    "totalRejected": 45,
+    "totalFailed": 13,
+    "averageProcessingTimeMs": 156
+  },
+  
+  "statistics_by_fruit": [
+    { "fruitType": "apple", "count": 450 },
+    { "fruitType": "banana", "count": 380 },
+    { "fruitType": "orange", "count": 295 },
+    { "fruitType": "strawberry", "count": 122 }
+  ],
+  
+  "statistics_daily": [
+    { "date": "2026-03-07", "totalClassified": 145 },
+    { "date": "2026-03-08", "totalClassified": 168 },
+    { "date": "2026-03-09", "totalClassified": 210 },
+    { "date": "2026-03-10", "totalClassified": 198 },
+    { "date": "2026-03-11", "totalClassified": 225 },
+    { "date": "2026-03-12", "totalClassified": 187 },
+    { "date": "2026-03-13", "totalClassified": 114 }
+  ],
+
+  "detections_history": {
+  "content": [
+    {
+      "id": "DET_001",
+      "fruitType": "apple",
+      "status": "COMPLETED",
+      "classifiedAt": "2026-03-13T10:30:00",
+      "confidence": 0.95,
+      "targetBin": "BIN_1"
+    },
+    {
+      "id": "DET_002",
+      "fruitType": "banana",
+      "status": "COMPLETED",
+      "classifiedAt": "2026-03-13T10:31:00",
+      "confidence": 0.92,
+      "targetBin": "BIN_2"
+    },
+    {
+      "id": "DET_003",
+      "fruitType": "orange",
+      "status": "REJECTED",
+      "classifiedAt": "2026-03-13T10:32:00",
+      "confidence": 0.45,
+      "targetBin": "REJECT"
+    },
+    {
+      "id": "DET_004",
+      "fruitType": "strawberry",
+      "status": "COMPLETED",
+      "classifiedAt": "2026-03-13T10:33:00",
+      "confidence": 0.98,
+      "targetBin": "BIN_4"
+    },
+    {
+      "id": "DET_005",
+      "fruitType": "apple",
+      "status": "COMPLETED",
+      "classifiedAt": "2026-03-13T10:34:00",
+      "confidence": 0.91,
+      "targetBin": "BIN_1"
+    },
+    {
+      "id": "DET_006",
+      "fruitType": "banana",
+      "status": "FAILED",
+      "classifiedAt": "2026-03-13T10:35:00",
+      "confidence": 0.0,
+      "targetBin": "ERROR"
+    }
+
+  ],
+  "page": 0,
+  "size": 10,
+  "totalElements": 25,
+  "totalPages": 3
+}
+}
