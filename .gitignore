@@ -1,0 +1,21 @@
+# Python
+.venv/
+venv/
+
+__pycache__/
+*.pyc
+
+# Model
+*.h5
+*.pt
+*.pth
+
+# VS Code
+.vscode/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Dataset
+dataset/
+data/
