@@ -1,0 +1,12 @@
+{
+  "/api/system/status": "/system_status",
+  "/api/system/devices": "/devices",
+  "/api/detections/latest": "/latest_detection",
+  "/api/system/control": "/control",
+  "/api/statistics/summary": "/statistics_summary",
+  "/api/statistics/by-fruit": "/statistics_by_fruit",
+  "/api/statistics/daily": "/statistics_daily",
+  "/api/detections": "/detections_history",
+    "/api/system/control-state": "/control_state",
+"/api/detections/*": "/detections_history/content/$1"
+}
