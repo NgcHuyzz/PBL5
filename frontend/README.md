@@ -1,6 +1,6 @@
 # PBL5 Fruit Sorter App
 
-Flutter frontend for the PBL5 fruit sorting/classification system.
+Flutter frontend for the PBL5 fruit sorting/classification system....
 
 ## Run
 
